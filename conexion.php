@@ -1,22 +1,14 @@
 <?php
+$server = 'Tomy_PC\SQLEXPRESS';
+$database = 'SistemaCitasMedicas';
+$username = 'user_tomy';
+$password = '19022005';
 
-class Conexion{
-
-    public function ConexionBD(){
-    $host='Diany\SQLEXPRESS';//aquí pone nombre que sale en SQL Server Management Studio
-    $user='Diany';
-    $password='Diany2004'; //contraseña con la que se mete a sql
-    $db='SistemaCitasMedicas';
-
-    try{
-        $conexion = new PDO("sqlsrv:Server=$host;Database=$db",$user,$password);
-        echo "Conexión exitosa";
-        return $conexion;
-    }
-    catch(PDOException $e){
-        echo "Error: ".$e->getMessage();
-        echo "Error en la conexión";
-    }
-    }
+try {
+    $conn = new PDO("sqlsrv:server=$server;Database=$database", $username, $password);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    //echo "Conexión establecida";
+} catch (PDOException $e) {
+    echo "Error de conexion: " . $e->getMessage();
 }
 ?>
