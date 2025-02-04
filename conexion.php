@@ -1,8 +1,8 @@
 <?php
-$server = 'Tomy_PC\SQLEXPRESS';
+$server = 'Diany\SQLEXPRESS';
 $database = 'SistemaCitasMedicas';
-$username = 'user_tomy';
-$password = '19022005';
+$username = 'Diany';
+$password = 'Diany2004';
 
 try {
     $conn = new PDO("sqlsrv:server=$server;Database=$database", $username, $password);

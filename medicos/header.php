@@ -18,10 +18,7 @@
          <i class="fas fa-bars"></i>
          </label>
          <ul>
-            <li><a href="nosotros.php">Nosotros</a></li>
-            <li><a href="especialidades.php">Especialidades</a></li>
-            <li><a href="contacto.php">Contacto</a></li>
-            <li><a class="active" href="../login/login.php">Iniciar sesión</a></li>
+            <li><a class="active" href="../principal/header.php">Salir</a></li>
          </ul>
       </nav>
    </body>
@@ -29,12 +26,12 @@
 
     <div class="container">
         <div class="box" onclick="alert('Has hecho clic en Médicos')">
-            <h2>Médicos</h2>
-            <p>>Todo lo relacionado con los medicos</p>
+            <h2>Citas Médicas</h2>
+            <p>Citas asignadas</p>
         </div>
         <div class="box">
             <h2>Pacientes </h2>
-            <p>Todo el modúlo de pacientes</p>
+            <p>Listado de Pacientes</p>
         </div>
         <div class="box" onclick="mostrarMensaje()">
             <h2>Horarios Médicos</h2>
@@ -43,10 +40,6 @@
         <div class="box">
             <h2>Documentos Médicos</h2>
             <p>Historiales Medicos</p>
-        </div>
-        <div class="box" onclick="cambiarColor(this)">
-            <h2>Pagos 🔵</h2>
-            <p>Registro de Pagos</p>
         </div>
         <div class="box" onclick="window.location.href='#rostro'">
             <h2>Expedientes Medicos</h2>

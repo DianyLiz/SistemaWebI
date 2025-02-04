@@ -5,7 +5,7 @@
     $password = $_POST['password'];
 
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        $consulta = "SELECT 1 FROM Usuarios WHERE nombre = ? AND contrasenia = ?";
+        $consulta = "SELECT 1 FROM Usuarios WHERE nombre = ? AND contraseña = ?";
         $stmt = $conn->prepare($consulta);
         $stmt->execute([$usuario, $password]);
         $user = $stmt->fetch();
