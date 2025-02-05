@@ -1,0 +1,234 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Roboto', sans-serif;
+}
+
+section {
+    min-height: 50vh; 
+    padding: 40px;
+    color: #fff;
+    position: relative;
+    transition: background-image 1s ease;
+}
+section::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); 
+    z-index: 1; 
+}
+
+
+section > * {
+    position: relative;
+    z-index: 2; 
+}
+
+#sobre-nosotros {
+    background-image: url('../img/medical.avif');
+    background-size: cover;
+    background-position: center;
+}
+
+#servicios {
+    background-image: url('../img/paciente.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+#horarios {
+    background-image: url('../img/horarios.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+#contacto {
+    background-image: url('../img/contacto.png');
+    background-size: cover;
+    background-position: center;
+}
+body {
+    background-color: #f4f4f9;
+    color: #333;
+    text-align: center;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.container {
+    width: 80%;
+    margin: 50px auto;
+    padding: 40px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 0.8s ease-in-out;
+    text-align: left;
+}
+
+h2 {
+    font-size: 32px;
+    color: #15d6dd;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+h2::after {
+    content: "";
+    display: block;
+    width: 60px;
+    height: 3px;
+    background: #15d6dd;
+    margin: 12px auto;
+    border-radius: 3px;
+}
+
+h3 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: #15d6dd;
+}
+
+p {
+    font-size: 18px;
+    line-height: 1.8;
+    margin-bottom: 15px;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+ul li {
+    font-size: 18px;
+    padding: 10px 15px;
+    background: #007bff;
+    color: white;
+    display: inline-block;
+    border-radius: 5px;
+    margin: 8px;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+ul li:hover {
+    transform: scale(1.05);
+    background: #0056b3;
+}
+
+.btn-reservar {
+    display: inline-flex;
+    align-items: center;
+    background: linear-gradient(45deg, #007bff, #0056b3);
+    color: white;
+    padding: 14px 30px;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-reservar i {
+    margin-right: 12px;
+}
+
+.btn-reservar:hover {
+    transform: translateY(-3px);
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.btn-reservar:active {
+    transform: translateY(1px);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+.btn-whatsapp {
+    display: inline-flex;
+    align-items: center;
+    background: #25d366; 
+    color: white;
+    padding: 12px 30px;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    text-decoration: none;
+    cursor: pointer;
+    margin-top: 10px;
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.btn-whatsapp i {
+    margin-right: 10px;
+}
+
+
+.btn-whatsapp:hover {
+    transform: translateY(-3px);
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.btn-whatsapp:active {
+    transform: translateY(1px);
+}
+
+
+.btn-email {
+    display: inline-flex;
+    align-items: center;
+    background: #007bff; 
+    color: white;
+    padding: 12px 30px;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    text-decoration: none;
+    cursor: pointer;
+    margin-top: 10px;
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.btn-email i {
+    margin-right: 10px;
+}
+
+
+.btn-email:hover {
+    transform: translateY(-3px);
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.btn-email:active {
+    transform: translateY(1px);
+}
+
+.footer {
+    background: #007bff;
+    color: white;
+    padding: 20px;
+    margin-top: 30px;
+    font-size: 16px;
+    text-align: center;
+}

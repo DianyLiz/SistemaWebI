@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
-   <body>
+<body>
     <?php include 'header.php'; ?>
-      <div class="content">
-         <div>
+    <div class="content">
+        <div>
             ESPECIALIDADES
-         </div>
-      </div>
-   </body>
+        </div>
+    </div>
+</body>
 </html>
