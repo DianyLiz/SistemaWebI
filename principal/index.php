@@ -50,7 +50,7 @@
     <h2>Contáctanos</h2>
     <p>Ubicación: Santa Bárbara, Honduras</p>
     <p>Contáctanos Por WhatsApp:</p>
-    <a href="https://wa.me/1234567890" target="_blank" class="btn-whatsapp">
+    <a href="https://wa.me/+50495629127" target="_blank" class="btn-whatsapp">
         <i class="fab fa-whatsapp"></i> Contactar por WhatsApp
     </a>
 </section>

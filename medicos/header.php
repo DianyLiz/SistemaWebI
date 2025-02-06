@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
-   <head>
-      <meta charset="utf-8">
-      <title>Citas Médicas</title>
-      <link rel="stylesheet" href="../css/estilo.css">
-      <link rel="stylesheet" href="../css/cuadros.css">
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   </head>
-   <body>
-      <nav>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediCitas - Citas Médicas</title>
+    <link rel="stylesheet" href="../css/estilo.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/medicos.css"> 
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body>
+<nav>
          <div class="logo">
             MediCitas
          </div>
@@ -18,44 +20,38 @@
          <i class="fas fa-bars"></i>
          </label>
          <ul>
-            <li><a class="active" href="../principal/header.php">Salir</a></li>
+            <li><a class="active" href="../principal/index.php">Salir</a></li>
          </ul>
       </nav>
-   </body>
-   <body>
+    
+    <section id="citas-medicas" class="container">
+        <h2>Citas Médicas</h2>
+        <p>Citas Asignadas</p>
+        
+    </section>
 
-    <div class="container">
-        <div class="box" onclick="alert('Has hecho clic en Médicos')">
-            <h2>Citas Médicas</h2>
-            <p>Citas asignadas</p>
-        </div>
-        <div class="box">
-            <h2>Pacientes </h2>
-            <p>Listado de Pacientes</p>
-        </div>
-        <div class="box" onclick="mostrarMensaje()">
-            <h2>Horarios Médicos</h2>
-            <p>Horarios disponibles y de atención</p>
-        </div>
-        <div class="box">
-            <h2>Documentos Médicos</h2>
-            <p>Historiales Medicos</p>
-        </div>
-        <div class="box" onclick="window.location.href='#rostro'">
-            <h2>Expedientes Medicos</h2>
-            <p>Historiales de Pacientes</p>
-        </div>
-    </div>
+    <section id="pacientes" class="container">
+        <h2>Pacientes</h2>
+        <p>Citas Asignadas</p>
+    </section>
 
-    <script>
-        function mostrarMensaje() {
-            alert('Has hecho clic en uno de los módulos');
-        }
+    <section id="horarios" class="container">
+        <h2>Horarios de Medicos</h2>
+        <p>Horarios disponibles</p>
+    </section>
 
-        function cambiarColor(elemento) {
-            elemento.style.backgroundColor = '#aaffaa';
-        }
-    </script>
+    <section id="Documentos-Medicos" class="container">
+    <h2>Documentos Medicos</h2>
+    <p>Historiales Médicos</p>
+    </section>
 
+    <section id="Expedientes-Medicos" class="container">
+    <h2>Expedientes Medicos</h2>
+    <p>Historiales de Pacientes</p>
+    </section>
+
+    <footer class="footer">
+        <p>&copy; 2025 MediCitas - Todos los derechos reservados</p>
+    </footer>
 </body>
 </html>

@@ -29,14 +29,14 @@ section > * {
     z-index: 2; 
 }
 
-#sobre-nosotros {
-    background-image: url('../img/medical.avif');
+#citas-medicas {
+    background-image: url('../img/citas.png');
     background-size: cover;
     background-position: center;
 }
 
-#servicios {
-    background-image: url('../img/paciente.jpg');
+#pacientes {
+    background-image: url('../img/hospital.png');
     background-size: cover;
     background-position: center;
 }
@@ -49,11 +49,17 @@ section > * {
 
 
 
-#contacto {
+#Documentos-Medicos{
     background-image: url('../img/contacto.png');
     background-size: cover;
     background-position: center;
 }
+
+#Expedientes-Medicos{
+    background-image: url('../img/contacto.png');
+    background-size: cover;
+    background-position: center;
+} 
 body {
     background-color: #f4f4f9;
     color: #333;
