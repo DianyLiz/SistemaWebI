@@ -1,3 +1,6 @@
+<?php 
+    session_start();
+?>
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
@@ -20,6 +23,9 @@
          <i class="fas fa-bars"></i>
          </label>
          <ul>
+            <li><?php echo $_SESSION['usuario']['nombre'] . " " . $_SESSION['usuario']['apellido']; ?></li>
+         </ul>
+         <ul>
             <li><a class="active" href="../principal/index.php">Salir</a></li>
          </ul>
       </nav>
@@ -27,6 +33,9 @@
     <section id="citas-medicas" class="container">
         <h2>Citas Médicas</h2>
         <p>Citas Asignadas</p>
+        <button type="button" class="btn-reservar">
+        Lista de Citas
+        </button>
         
     </section>
 
@@ -40,12 +49,13 @@
         <p>Horarios disponibles</p>
     </section>
 
-    <section id="Documentos-Medicos" class="container">
-    <h2>Documentos Medicos</h2>
-    <p>Historiales Médicos</p>
+    <section id="documentos" class="container">
+        <h2>Documentos Medicos</h2>
+        <p>Historiales Médicos</p>
     </section>
 
-    <section id="Expedientes-Medicos" class="container">
+
+    <section id="expedientes" class="container">
     <h2>Expedientes Medicos</h2>
     <p>Historiales de Pacientes</p>
     </section>

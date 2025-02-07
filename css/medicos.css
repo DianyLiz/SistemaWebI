@@ -47,16 +47,16 @@ section > * {
     background-position: center;
 }
 
-
-
-#Documentos-Medicos{
-    background-image: url('../img/contacto.png');
+#documentos {
+    background-image: url('../img/checklist-9030329_1280.png');
     background-size: cover;
     background-position: center;
 }
 
-#Expedientes-Medicos{
-    background-image: url('../img/contacto.png');
+
+
+#expedientes {
+    background-image: url('../img/pills-8656650_1280.jpg');
     background-size: cover;
     background-position: center;
 } 
@@ -129,6 +129,23 @@ ul li:hover {
     background: #0056b3;
 }
 
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    background: linear-gradient(45deg, #007bff, #0056b3);
+    color: white;
+    padding: 14px 30px;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
 .btn-reservar {
     display: inline-flex;
     align-items: center;
@@ -146,10 +163,6 @@ ul li:hover {
     overflow: hidden;
 }
 
-.btn-reservar i {
-    margin-right: 12px;
-}
-
 .btn-reservar:hover {
     transform: translateY(-3px);
     box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
@@ -157,17 +170,6 @@ ul li:hover {
 
 .btn-reservar:active {
     transform: translateY(1px);
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
 
 

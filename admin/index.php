@@ -10,8 +10,6 @@
     <title>Document</title>
 </head>
 <body>
-    <div>
-        Hola, <?php echo $_SESSION['usuario']; unset($_SESSION['usuario']); ?>    
-    </div>
+    <?php include 'header.php'; ?>
 </body>
 </html>
