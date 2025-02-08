@@ -22,9 +22,10 @@
          <label for="click" class="menu-btn">
          <i class="fas fa-bars"></i>
          </label>
-         <ul>
-            <li><?php echo $_SESSION['usuario']['nombre'] . " " . $_SESSION['usuario']['apellido']; ?></li>
-         </ul>
+         <ul class="menu">
+        <li class="btn"><?php echo $_SESSION['usuario']['nombre'] . " " . $_SESSION['usuario']['apellido']; ?></li>
+        </ul>
+
          <ul>
             <li><a class="active" href="../principal/index.php">Salir</a></li>
          </ul>
@@ -42,22 +43,49 @@
     <section id="pacientes" class="container">
         <h2>Pacientes</h2>
         <p>Citas Asignadas</p>
+        <button type="button" class="btn-reservar">
+        Lista de Pacientes
+        </button>
     </section>
 
     <section id="horarios" class="container">
         <h2>Horarios de Medicos</h2>
         <p>Horarios disponibles</p>
+        <button type="button" class="btn-reservar">
+        Crear Horario
+        </button>
+        <button type="button" class="btn-reservar">
+        Eliminar Horario
+        </button>
     </section>
 
     <section id="documentos" class="container">
         <h2>Documentos Medicos</h2>
         <p>Historiales Médicos</p>
+        <button type="button" class="btn-reservar">
+        Crear Documento
+        </button>
+        <button type="button" class="btn-reservar">
+        Eliminar Documento
+        </button>
+        <button type="button" class="btn-reservar">
+        Modificar Documento
+        </button>
     </section>
 
 
     <section id="expedientes" class="container">
     <h2>Expedientes Medicos</h2>
     <p>Historiales de Pacientes</p>
+    <button type="button" class="btn-reservar">
+        Crear Historial
+        </button>
+        <button type="button" class="btn-reservar">
+        Eliminar Historial
+        </button>
+        <button type="button" class="btn-reservar">
+        Modificar Historial
+        </button>
     </section>
 
     <footer class="footer">

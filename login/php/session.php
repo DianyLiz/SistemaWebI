@@ -10,20 +10,22 @@
         $stmt->execute([$usuario, $password]);
         $user = $stmt->fetch();
 
-        session_start();
-    if ($user) {
-        $_SESSION['usuario'] = [
-            'usuario' => $usuario,
-            'nombre' => $user['nombre'],
-            'apellido' => $user['apellido']
-        ];
-        header('Location: ../../medicos/header.php');
-        exit();
-    } else {
-        $_SESSION['error'] = "Usuario o contraseña incorrectos.";
-        header('Location: ../login.php');
-        exit();
-    }
+
+    session_start();
+if ($user) {
+    $_SESSION['usuario'] = [
+        'usuario' => $usuario,
+        'nombre' => $user['nombre'],
+        'apellido' => $user['apellido']
+    ];
+    header('Location: ../../medicos/header.php');
+    exit();
+} else {
+    $_SESSION['error'] = "Usuario o contraseña incorrectos.";
+    header('Location: ../login.php');
+    exit();
+}
+
 
     }
 ?>
