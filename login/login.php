@@ -14,16 +14,16 @@
         <br><img src="../img/logo-medicitas.png" alt="logo" class="imagen"></br>
         <label>
             <i class="fa-solid fa-user"></i>
-            <input placeholder="usuario" type="text" name="usuario">
+            <input placeholder="usuario" type="text" name="usuario" autocomplete="off">
         </label>
         <label>
             <i class="fa-solid fa-lock"></i>
-            <input placeholder="contraseña" type="password" name="password">
+            <input placeholder="contraseña" type="password" name="password" autocomplete="off">
         </label>
         <a href="#" class="link">¿Olvidó su contraseña?</a>
-
-        <button id="session">Iniciar sesión</button>
-        <br><button id="register">Registrarse</button></br>
+        <br><button>Iniciar sesión</button></br>
+        <a href="registrarse.php" class="link">¿No tienes cuenta? Regístrate aquí</a>
+        <a href="../principal/" class="link">Volver a inicio</a>
     </form>
 </body>
 </html>

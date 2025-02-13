@@ -16,8 +16,6 @@ nav {
   justify-content: space-between;
   padding: 0 50px 0 100px;
   flex-wrap: wrap;
-  position: relative; 
-  z-index: 10;
 }
 
 nav .logo {
@@ -89,7 +87,6 @@ input[type="checkbox"] {
     text-align: center;
     display: block;
     transition: all 0.3s ease;
-    z-index: 100;
   }
 
   #click:checked ~ ul {
@@ -121,8 +118,7 @@ input[type="checkbox"] {
 }
 
 .content {
-  position: relative;  
-  z-index: 1; 
+  position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);

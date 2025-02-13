@@ -1,0 +1,106 @@
+@import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: #EAEAEA;
+}
+
+form {
+    width: 600px; /* Ajustar el ancho del formulario */
+    background: #fff;
+    padding: 20px 25px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+}
+
+form .title {
+    color: #252525;
+    font-size: 24px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.form-group, .form-doctor, .form-paciente {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.form-group label, .form-doctor label, .form-paciente label {
+    font-size: 14px;
+    color: #252525;
+    margin-bottom: 5px;
+}
+
+.form-group input, .form-doctor input, .form-paciente input {
+    width: 100%;
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    outline: none;
+}
+
+form button {
+    width: 100%;
+    padding: 10px;
+    font-size: 18px;
+    color: #fff;
+    background-color: #16a8e2;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+form button:hover {
+    background-color: #0d81c1;
+}
+
+form .link {
+    display: block;
+    text-align: center;
+    margin-top: 15px;
+    color: #252525;
+    text-decoration: none;
+}
+
+form .link:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 500px) {
+    form {
+        width: 100%;
+        border-radius: none;
+        box-shadow: none;
+    }
+
+    body {
+        background: #fff;
+    }
+
+    .form-group, .form-doctor, .form-paciente {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group label, .form-doctor label, .form-paciente label {
+        text-align: left;
+    }
+
+    form .title {
+        font-size: 20px;
+    }
+}

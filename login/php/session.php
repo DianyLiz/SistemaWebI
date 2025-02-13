@@ -1,31 +1,42 @@
-<?php 
-    include '../../conexion.php';
+<?php
+include '../../conexion.php';
+session_start();
 
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $usuario = $_POST['usuario'];
     $password = $_POST['password'];
 
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        $consulta = "SELECT nombre, apellido FROM Usuarios WHERE usuario = ? AND contraseña = ?";
-        $stmt = $conn->prepare($consulta);
-        $stmt->execute([$usuario, $password]);
-        $user = $stmt->fetch();
-
-
-    session_start();
-if ($user) {
-    $_SESSION['usuario'] = [
-        'usuario' => $usuario,
-        'nombre' => $user['nombre'],
-        'apellido' => $user['apellido']
-    ];
-    header('Location: ../../medicos/header.php');
-    exit();
-} else {
-    $_SESSION['error'] = "Usuario o contraseña incorrectos.";
-    header('Location: ../login.php');
-    exit();
-}
-
-
+    if (empty($usuario) || empty($password)) {
+        $_SESSION['error'] = "Complete los campos obligatorios";
+        header('Location: ../login.php');
+        exit();
     }
-?>
+
+    try {
+        $consulta = "SELECT * FROM Usuarios WHERE usuario = ?";
+        $statement = $conn->prepare($consulta);
+        $statement->execute([$usuario]);
+        $resultset = $statement->fetch(PDO::FETCH_ASSOC);
+
+        if ($resultset) {
+            if (password_verify($password, $resultset['contrasenia'])) {
+                $_SESSION['usuario'] = [
+                    'usuario' => $usuario,
+                    'nombre' => $resultset['nombre'],
+                    'apellido' => $resultset['apellido']
+                ];
+                
+                header('Location: ../../medicos/header.php');
+            } else {
+                $_SESSION['error'] = "Usuario o contraseña incorrectos.";
+                header('Location: ../login.php');
+            }
+        } else {
+            $_SESSION['error'] = "Usuario o contraseña incorrectos.";
+            header('Location: ../login.php');
+        }
+    } catch (PDOException $e) {
+        $_SESSION['error'] = "Error al iniciar sesión.";
+        header('Location: ../login.php');
+    }
+}
