@@ -7,16 +7,13 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpWord\PhpWord;
 
-include '../conexion.php'; // Asegúrate de que la ruta es correcta
-
-// Variables de filtro
+include '../conexion.php'; 
 $medico_filter = $_GET['medico'] ?? '';
 $paciente_filter = $_GET['paciente'] ?? '';
 $fecha_filter = $_GET['fecha'] ?? '';
 $hora_filter = $_GET['hora'] ?? '';
 $estado_filter = $_GET['estado'] ?? '';
 
-// Consulta SQL con filtros
 $sql = "SELECT U1.nombre + ' ' + U1.apellido AS paciente, 
                U2.nombre + ' ' + U2.apellido AS medico, 
                Citas.fecha, 
@@ -53,7 +50,6 @@ try {
     die("Error al ejecutar la consulta: " . $e->getMessage());
 }
 
-// Generar PDF
 if (isset($_GET['export_pdf'])) {
     $html = "<h1>Lista de Citas Médicas</h1>";
     $html .= "<table border='1' cellpadding='10' cellspacing='0'>";
@@ -90,7 +86,6 @@ if (isset($_GET['export_pdf'])) {
     exit;
 }
 
-// Exportar a Excel
 if (isset($_GET['export_excel'])) {
     $spreadsheet = new Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
@@ -118,7 +113,6 @@ if (isset($_GET['export_excel'])) {
     exit;
 }
 
-// Exportar a Word
 if (isset($_GET['export_word'])) {
     $phpWord = new PhpWord();
     $section = $phpWord->addSection();
@@ -157,6 +151,71 @@ if (isset($_GET['export_word'])) {
     <link rel="stylesheet" href="../css/estilo.css">
     <link rel="stylesheet" href="../css/tabla.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+    <style>
+        .filter-container {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 1200px;
+            margin: 20px auto;
+        }
+
+        .filter-container form {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-container input, 
+        .filter-container select {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            flex: 1;
+            min-width: 150px;
+            transition: border-color 0.3s ease;
+        }
+
+        .filter-container input:focus, 
+        .filter-container select:focus {
+            border-color: #0099ff;
+            outline: none;
+        }
+
+        .filter-container button {
+            background-color: #0099ff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        .filter-container button:hover {
+            background-color: #0077cc;
+        }
+
+        @media (max-width: 768px) {
+            .filter-container form {
+                flex-direction: column;
+            }
+
+            .filter-container input, 
+            .filter-container select, 
+            .filter-container button {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
 </head>
 <body>
 <nav>
@@ -188,6 +247,7 @@ if (isset($_GET['export_word'])) {
             <button type="submit">Filtrar</button>
         </form>
     </div>
+    
 
     <div class="table-container">
         <h2>Tabla de Citas Médicas</h2>
@@ -208,7 +268,6 @@ if (isset($_GET['export_word'])) {
             </thead>
             <tbody>
                 <?php
-                // Mapeo de estados a clases CSS
                 $estadoClases = [
                     'Confirmada' => 'confirmed',
                     'Pendiente' => 'pending',
@@ -238,7 +297,6 @@ if (isset($_GET['export_word'])) {
 </main>
 
 <?php
-// Cerrar conexión
 $conn = null;
 ?>
 

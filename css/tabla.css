@@ -1,4 +1,4 @@
-/* General */
+
 body {
     font-family: 'Poppins', sans-serif;
     background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
@@ -11,7 +11,6 @@ body {
     min-height: 100vh;
 }
 
-/* Barra de navegación */
 nav {
     width: 100%;
     background-color: #0099ff;
@@ -53,7 +52,6 @@ nav {
     color: white;
 }
 
-/* Contenedor de la tabla */
 .table-container {
     background: white;
     padding: 25px;
@@ -65,7 +63,6 @@ nav {
     text-align: center;
 }
 
-/* Título */
 h2 {
     color: #333;
     font-size: 24px;
@@ -74,7 +71,6 @@ h2 {
     text-transform: uppercase;
 }
 
-/* Tabla */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -127,7 +123,7 @@ table tr:hover {
     color: #dc3545;
 }
 
-/* Barra de búsqueda */
+
 .filter-container {
     display: flex;
     justify-content: center;
@@ -182,9 +178,35 @@ table tr:hover {
     font-size: 14px;
 }
 
+
 .btn-pdf:hover, .btn-excel:hover, .btn-word:hover {
-    background-color: #218838;
+    background-color: #9bbdf0;
 }
+
+.pagination {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.pagination a {
+    display: inline-block;
+    padding: 10px 15px;
+    margin: 5px;
+    background: #0099ff;
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+.pagination a.active {
+    background: #0077cc;
+    font-weight: bold;
+}
+
+.pagination a:hover {
+    background: #005fa3;
+}
+
 
 @media (max-width: 768px) {
     .table-container {
@@ -224,4 +246,67 @@ table tr:hover {
         width: 100%;
         margin-right: 0;
     }
+.filter-container {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 20px auto;
+}
+
+.filter-container form {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.filter-container input, 
+.filter-container select {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    flex: 1;
+    min-width: 150px;
+    transition: border-color 0.3s ease;
+}
+
+.filter-container input:focus, 
+.filter-container select:focus {
+    border-color: #0099ff;
+    outline: none;
+}
+
+.filter-container button {
+    background-color: #0099ff;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.filter-container button:hover {
+    background-color: #0077cc;
+}
+
+@media (max-width: 768px) {
+    .filter-container form {
+        flex-direction: column;
+    }
+
+    .filter-container input, 
+    .filter-container select, 
+    .filter-container button {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+}
 }

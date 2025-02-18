@@ -4,3 +4,4 @@ Herramientas:
   Visual Studio Code
   SQL Server
   Xampp
+  Composer
