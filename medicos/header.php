@@ -43,7 +43,7 @@
     <section id="pacientes" class="container">
         <h2>Pacientes</h2>
         <p>Citas Asignadas</p>
-        <button type="button" class="btn-reservar">
+        <button type="button" class="btn-reservar" onclick="location.href='listadePacientes.php'">
         Lista de Pacientes
         </button>
     </section>
