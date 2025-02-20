@@ -12,8 +12,9 @@
     <div class="contenedor">
         <?php include 'menu.php'; ?>
         <main class="contenido">
-            <h1>INICIO</h1>
+            <h1>USUARIOS</h1>
         </main>
     </div>
 </body>
+
 </html>

@@ -11,15 +11,6 @@ body {
     min-height: 100vh;
 }
 
-nav {
-    width: 100%;
-    background-color: #0099ff;
-    padding: 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
 .logo {
     color: white;
     font-size: 24px;
@@ -178,35 +169,9 @@ table tr:hover {
     font-size: 14px;
 }
 
-
 .btn-pdf:hover, .btn-excel:hover, .btn-word:hover {
     background-color: #9bbdf0;
 }
-
-.pagination {
-    margin-top: 20px;
-    text-align: center;
-}
-
-.pagination a {
-    display: inline-block;
-    padding: 10px 15px;
-    margin: 5px;
-    background: #0099ff;
-    color: white;
-    border-radius: 5px;
-    text-decoration: none;
-}
-
-.pagination a.active {
-    background: #0077cc;
-    font-weight: bold;
-}
-
-.pagination a:hover {
-    background: #005fa3;
-}
-
 
 @media (max-width: 768px) {
     .table-container {
@@ -309,5 +274,4 @@ table tr:hover {
         margin-bottom: 10px;
     }
 }
-
 }

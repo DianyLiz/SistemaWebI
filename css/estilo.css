@@ -1,10 +1,10 @@
-@import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap');
+@import url("https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap");
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
 }
 
 nav {
@@ -16,6 +16,19 @@ nav {
   justify-content: space-between;
   padding: 0 50px 0 100px;
   flex-wrap: wrap;
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  left: 0;
+}
+
+main {
+  margin-top: 80px;
+}
+
+body {
+  margin: 0;
+  padding: 0;
 }
 
 nav .logo {
@@ -32,6 +45,7 @@ nav ul {
 
 nav ul li {
   margin: 0 5px;
+  color: #fff;
 }
 
 nav ul li a {
@@ -87,6 +101,7 @@ input[type="checkbox"] {
     text-align: center;
     display: block;
     transition: all 0.3s ease;
+    z-index: 1000;
   }
 
   #click:checked ~ ul {
