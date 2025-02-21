@@ -1,5 +1,5 @@
 <?php
-include 'session-control.php';
+session_start();
 ?>
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -25,7 +25,7 @@ include 'session-control.php';
             <i class="fas fa-bars"></i>
         </label>
         <ul class="menu">
-            <li class="btn"><?php echo "(DOCTOR) " . $_SESSION['usuario']['nombre'] . " " . $_SESSION['usuario']['apellido']; ?></li>
+            <li class="btn"><?php echo "(PACIENTE) " . $_SESSION['usuario']['nombre'] . " " . $_SESSION['usuario']['apellido']; ?></li>
             <li><a href="../principal/index.php">Salir</a></li>
         </ul>
     </nav>

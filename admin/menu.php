@@ -2,8 +2,8 @@
     <ul>
         <li><a href="index.php">Inicio</a></li>
         <li><a href="usuarios.php">Usuarios</a></li>
-        <li><a href="#">Médicos</a></li>
-        <li><a href="#">Pacientes</a></li>
+        <li><a href="medicos.php">Médicos</a></li>
+        <li><a href="pacientes.php">Pacientes</a></li>
         <li><a href="#">Especialidades</a></li>
         <li><a href="#">Horarios</a></li>
         <li><a href="#">Citas</a></li>

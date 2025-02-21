@@ -23,10 +23,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $_SESSION['usuario'] = [
                     'usuario' => $usuario,
                     'nombre' => $resultset['nombre'],
-                    'apellido' => $resultset['apellido']
+                    'apellido' => $resultset['apellido'],
+                    'rol' => $resultset['rol']
                 ];
-                
-                header('Location: ../../medicos/header.php');
+
+                if($resultset['rol'] == 'Administrador') {
+                    header('Location: ../../admin/');
+                } else if($resultset['rol'] == 'Médico') {       
+                    header('Location: ../../medicos/');
+                } else if($resultset['rol'] == 'Paciente') {
+                    header('Location: ../../pacientes/');
+                }
             } else {
                 $_SESSION['error'] = "Usuario o contraseña incorrectos.";
                 header('Location: ../login.php');
@@ -36,6 +43,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             header('Location: ../login.php');
         }
     } catch (PDOException $e) {
+        
         $_SESSION['error'] = "Error al iniciar sesión.";
         header('Location: ../login.php');
     }
