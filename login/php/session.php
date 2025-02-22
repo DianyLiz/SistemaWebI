@@ -30,7 +30,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 if($resultset['rol'] == 'Administrador') {
                     header('Location: ../../admin/');
                 } else if($resultset['rol'] == 'Médico') {       
-                    header('Location: ../../medicos/index.php');
+                    header('Location: ../../medicos/');
                 } else if($resultset['rol'] == 'Paciente') {
                     header('Location: ../../pacientes/');
                 }

@@ -8,9 +8,9 @@
 </head>
 
 <body>
-    <?php include 'header.php'; ?>
+    <?php include '../medicos/header.php'; ?>
     <div class="contenedor">
-        <?php include 'menu.php'; ?>
+        <?php include '../medicos/menu.php'; ?>
         <main class="contenido">
             <h1>INICIO</h1>
         </main>

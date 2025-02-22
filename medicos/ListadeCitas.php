@@ -287,8 +287,9 @@ if (isset($_GET['export_word'])) {
 
 <body>
     <?php include 'header.php'; ?>
-
-    <main>
+<div class="contenedor">
+    <?php include 'menu.php'; ?>
+    <main class="contenido">
         <div class="filter-container">
             <form method="GET" action="">
                 <input type="text" name="medico" placeholder="Buscar por Médico" value="<?= $medico_filter ?>">
@@ -364,7 +365,7 @@ if (isset($_GET['export_word'])) {
             </div>
         </div>
     </main>
-
+</div>
     <?php
     $conn = null;
     ?>
