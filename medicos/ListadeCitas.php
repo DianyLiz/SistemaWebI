@@ -14,11 +14,12 @@ $fecha_filter = $_GET['fecha'] ?? '';
 $hora_filter = $_GET['hora'] ?? '';
 $estado_filter = $_GET['estado'] ?? '';
 
-$sql = "SELECT U1.nombre + ' ' + U1.apellido AS paciente, 
-               U2.nombre + ' ' + U2.apellido AS medico, 
-               Citas.fecha, 
-               Citas.hora, 
-               Citas.estado 
+$sql = "SELECT Citas.idCita, 
+       U1.nombre + ' ' + U1.apellido AS paciente, 
+       U2.nombre + ' ' + U2.apellido AS medico, 
+       Citas.fecha, 
+       Citas.hora, 
+       Citas.estado
         FROM Citas 
         INNER JOIN Pacientes ON Citas.idPaciente = Pacientes.idPaciente
         INNER JOIN Usuarios U1 ON Pacientes.idUsuario = U1.idUsuario
@@ -150,6 +151,7 @@ if (isset($_GET['export_word'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MediCitas - Citas Médicas</title>
     <link rel="stylesheet" href="../css/tabla.css">
+    <link rel="stylesheet" href="../css/botones.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
     <style>
         .filter-container {
@@ -319,6 +321,7 @@ if (isset($_GET['export_word'])) {
                             <th>Fecha</th>
                             <th>Hora</th>
                             <th>Estado</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -340,6 +343,16 @@ if (isset($_GET['export_word'])) {
                                 <td>{$fila['fecha']}</td>
                                 <td>{$hora_formateada}</td>
                                 <td><span class='status $claseEstado'>" . ucfirst($fila['estado']) . "</span></td>
+                               <td>
+                                <a href='editar_cita.php?id={$fila['idCita']}' class='btn-action edit'>
+                                    <img src='../img/edit.png' alt='Editar'>
+                                </a>
+                                <a href='eliminar_cita.php?id={$fila['idCita']}' class='btn-action delete'>
+                                    <img src='../img/delete.png' alt='Eliminar'> 
+                                </a>
+                            </td>
+
+
                               </tr>";
                             }
                         } else {
