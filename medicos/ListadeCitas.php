@@ -151,7 +151,6 @@ if (isset($_GET['export_word'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MediCitas - Citas Médicas</title>
     <link rel="stylesheet" href="../css/tabla.css">
-    <link rel="stylesheet" href="../css/botones.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
     <style>
         .filter-container {
@@ -345,12 +344,10 @@ if (isset($_GET['export_word'])) {
                                 <td>{$hora_formateada}</td>
                                 <td><span class='status $claseEstado'>" . ucfirst($fila['estado']) . "</span></td>
                                <td>
-                                <a href='editar_cita.php?id={$fila['idCita']}' class='btn-action edit'>
-                                    <img src='../img/edit.png' alt='Editar'>
-                                </a>
+                                <a href='editarCita.php?id={$fila['idCita']}' class='btn-action edit'>
+                                    <img src='../img/edit.png' width='35' height='35' alt='Editar'></a>
                                 <a href='eliminar_cita.php?id={$fila['idCita']}' class='btn-action delete'>
-                                    <img src='../img/delete.png' alt='Eliminar'> 
-                                </a>
+                                    <img src='../img/delete.png' alt='Eliminar' width='35' height='35'></a>
                             </td>
 
 
