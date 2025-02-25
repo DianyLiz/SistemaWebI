@@ -16,7 +16,7 @@ body {
 }
 
 form {
-    width: 600px; /* Ajustar el ancho del formulario */
+    width: 600px; 
     background: #fff;
     padding: 20px 25px;
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
