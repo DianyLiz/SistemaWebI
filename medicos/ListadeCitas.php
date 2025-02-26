@@ -308,6 +308,7 @@ if (isset($_GET['export_word'])) {
         <div class="table-container">
             <h2>Tabla de Citas Médicas</h2>
             <div class="export-buttons">
+                
                 <a href="?export_pdf=true" class="btn-pdf">Exportar a PDF</a>
                 <a href="?export_excel=true" class="btn-excel">Exportar a Excel</a>
                 <a href="?export_word=true" class="btn-word">Exportar a Word</a>

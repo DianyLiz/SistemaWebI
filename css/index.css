@@ -66,14 +66,14 @@ body {
     text-align: left;
 }
 
-h2 {
+section h2 {
     font-size: 32px;
     color: #15d6dd;
     margin-bottom: 20px;
     position: relative;
 }
 
-h2::after {
+section h2::after {
     content: "";
     display: block;
     width: 60px;
@@ -83,7 +83,7 @@ h2::after {
     border-radius: 3px;
 }
 
-h3 {
+section h3 {
     font-size: 24px;
     margin-bottom: 10px;
     color: #15d6dd;

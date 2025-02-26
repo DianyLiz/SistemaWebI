@@ -5,13 +5,13 @@ $nombre_apellido_filter = $_GET['nombre_apellido'] ?? '';
 $rol_filter = $_GET['rol'] ?? '';
 $sql = "SELECT idusuario, dni, nombre, apellido, usuario, correo, rol FROM usuarios WHERE 1=1";
 
-if($dni_filter) {
+if ($dni_filter) {
     $sql .= " AND dni LIKE '%$dni_filter%'";
 }
-if($nombre_apellido_filter) {
+if ($nombre_apellido_filter) {
     $sql .= " AND nombre LIKE '%$nombre_apellido_filter%' OR apellido LIKE '%$nombre_apellido_filter%'";
 }
-if($rol_filter) {
+if ($rol_filter) {
     $sql .= " AND rol LIKE '%$rol_filter%'";
 }
 
@@ -31,71 +31,8 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" href="../css/tabla.css">
-    <style>
-        .filter-container {
-            background: #ffffff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-            width: 100%;
-            max-width: 1200px;
-            margin: 20px auto;
-        }
-
-        .filter-container form {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .filter-container input,
-        .filter-container select {
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            flex: 1;
-            min-width: 150px;
-            transition: border-color 0.3s ease;
-        }
-
-        .filter-container input:focus,
-        .filter-container select:focus {
-            border-color: #0099ff;
-            outline: none;
-        }
-
-        .filter-container button {
-            background-color: #0099ff;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background-color 0.3s ease;
-        }
-
-        .filter-container button:hover {
-            background-color: #0077cc;
-        }
-
-        @media (max-width: 768px) {
-            .filter-container form {
-                flex-direction: column;
-            }
-
-            .filter-container input,
-            .filter-container select,
-            .filter-container button {
-                width: 100%;
-                margin-bottom: 10px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="../css/filter.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
@@ -103,6 +40,8 @@ try {
     <div class="contenedor">
         <?php include 'menu.php'; ?>
         <main class="contenido">
+            <?php include 'modals/editar-usuario.php'; ?>
+            <?php include 'modals/agregar-usuario.php'; ?>
             <div class="filter-container">
                 <form method="GET" action="">
                     <input type="text" name="dni" placeholder="Buscar por DNI" value="<?= $dni_filter ?>" autocomplete="off">
@@ -118,6 +57,9 @@ try {
             </div>
             <div class="table-container">
                 <h2>TABLA DE USUARIOS</h2>
+                <div class="encabezado">
+                    <a href="#" class="add-btn">Agregar Usuario</a>
+                </div>
                 <div class="table-responsive">
                     <table>
                         <thead>
@@ -145,8 +87,15 @@ try {
                                 <td>{$fila['correo']}</td>
                                 <td>{$fila['rol']}</td>
                                 <td>
-                                    <a href='editar_usuario.php?id={$fila['idusuario']}'><img src=\"../img/edit.png\" width=\"35\" height=\"35\"></a>
-                                    <a href='eliminar_usuario.php?id={$fila['idusuario']}'><img src=\"../img/delete.png\" width=\"35\" height=\"35\"></a>
+                                    <a href='#' class='edit-btn' 
+                                        data-idusuario='{$fila['idusuario']}'
+                                        data-dni='{$fila['dni']}'
+                                        data-nombre='{$fila['nombre']}' 
+                                        data-apellido='{$fila['apellido']}' 
+                                        data-usuario='{$fila['usuario']}' 
+                                        data-correo='{$fila['correo']}'>
+                                        <img src=\"../img/edit.png\" width=\"35\" height=\"35\"></a>
+                                    <a href='#' class='delete-btn' data-idusuario='{$fila['idusuario']}'><img src=\"../img/delete.png\" width=\"35\" height=\"35\"></a>
                                 </td>
                               </tr>";
                                 }
@@ -158,9 +107,116 @@ try {
                     </table>
                 </div>
             </div>
-
         </main>
     </div>
+    <script>
+        const modals = document.querySelectorAll(".modalAgregarUsuario, .modalEditarUsuario");
+        const closeButtons = document.querySelectorAll(".close");
+        const editButtons = document.querySelectorAll(".edit-btn");
+        const addButtons = document.querySelectorAll(".add-btn");
+        const deleteButtons = document.querySelectorAll(".delete-btn");
+
+        addButtons.forEach(btn => {
+            btn.addEventListener("click", function() {
+                event.preventDefault();
+                modalAgregarUsuario.style.display = "block";
+            });
+        });
+
+        editButtons.forEach(btn => {
+            btn.addEventListener("click", function(event) {
+                event.preventDefault();
+                document.getElementById("edit-idusuario").value = this.dataset.idusuario;
+                document.getElementById("edit-dni").value = this.dataset.dni;
+                document.getElementById("edit-nombre").value = this.dataset.nombre;
+                document.getElementById("edit-apellido").value = this.dataset.apellido;
+                document.getElementById("edit-correo").value = this.dataset.correo;
+                document.getElementById("edit-usuario").value = this.dataset.usuario;
+
+                modalEditarUsuario.style.display = "block";
+            });
+        });
+
+        closeButtons.forEach(button => {
+            button.addEventListener("click", function() {
+                modals.forEach(modal => modal.style.display = "none");
+            });
+        });
+
+        window.onclick = function(event) {
+            modals.forEach(modal => {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            });
+        };
+
+        deleteButtons.forEach(btn => {
+            btn.addEventListener("click", async event => {
+                event.preventDefault();
+                const idusuario = btn.dataset.idusuario;
+                const confirmacion = await Swal.fire({
+                    title: `¿Realmente quieres eliminar el Usuario Nº ${idusuario}?`,
+                    text: "Esta acción no se puede deshacer.",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: "Eliminar",
+                    cancelButtonText: "Cancelar"
+                });
+                if (!confirmacion.isConfirmed) return;
+                try {
+                    const response = await fetch("php/delete-user.php", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        },
+                        body: `idusuario=${idusuario}`
+                    });
+                    const data = await response.json();
+                    await Swal.fire({
+                        title: data.status === "success" ? "Éxito" : "Error",
+                        text: data.message,
+                        icon: data.status === "success" ? "success" : "error"
+                    });
+                    if (data.status === "success") location.reload();
+                } catch (error) {
+                    Swal.fire({
+                        title: "Error",
+                        text: "Hubo un problema al eliminar el usuario.",
+                        icon: "error"
+                    });
+                    console.error("Error:", error);
+                }
+            });
+        });
+    </script>
 </body>
+<?php
+if (isset($_SESSION['error'])) {
+    echo '<script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    Swal.fire({
+                        title: "Error",
+                        text: "' . $_SESSION['error'] . '",
+                        icon: "error"
+                    });
+                });
+            </script>';
+    unset($_SESSION['error']);
+} else if (isset($_SESSION['success'])) {
+    echo '<script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    Swal.fire({
+                        title: "Éxito",
+                        text: "' . $_SESSION['success'] . '",
+                        icon: "success"
+                    });
+                });
+            </script>';
+    unset($_SESSION['success']);
+}
+?>
 
 </html>

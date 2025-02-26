@@ -24,7 +24,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     'usuario' => $usuario,
                     'nombre' => $resultset['nombre'],
                     'apellido' => $resultset['apellido'],
-                    'rol' => $resultset['rol']
+                    'rol' => $resultset['rol'],
+                    'idusuario' => $resultset['idUsuario']
                 ];
 
                 if($resultset['rol'] == 'Administrador') {

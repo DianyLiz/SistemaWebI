@@ -27,7 +27,7 @@ table th, table td {
 }
 
 table th {
-    background: #2575fc;
+    background: #0b5471;
     color: white;
     font-weight: 600;
     text-transform: uppercase;
@@ -53,41 +53,4 @@ table tr:hover {
     h2 {
         font-size: 20px;
     }
-    .btn-action {
-    display: inline-flex;
-    align-items: center;
-    text-decoration: none;
-    padding: 5px 10px;
-    border-radius: 5px;
-    font-size: 14px;
-    font-weight: bold;
-    transition: background 0.3s ease, transform 0.2s ease;
-}
-
-.btn-action img {
-    width: 16px;
-    height: 16px;
-    margin-right: 5px;
-}
-
-.edit {
-    background-color: #4CAF50; /* Verde */
-    color: white;
-}
-
-.edit:hover {
-    background-color: #45a049;
-    transform: scale(1.05);
-}
-
-.delete {
-    background-color: #f44336; /* Rojo */
-    color: white;
-}
-
-.delete:hover {
-    background-color: #d32f2f;
-    transform: scale(1.05);
-}
-
 }
