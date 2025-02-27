@@ -313,6 +313,7 @@ if (isset($_GET['export_word'])) {
                 <a href="?export_excel=true" class="btn-excel">Exportar a Excel</a>
                 <a href="?export_word=true" class="btn-word">Exportar a Word</a>
             </div>
+            
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -345,8 +346,8 @@ if (isset($_GET['export_word'])) {
                                 <td>{$hora_formateada}</td>
                                 <td><span class='status $claseEstado'>" . ucfirst($fila['estado']) . "</span></td>
                                <td>
-                                <a href='editarCita.php?id={$fila['idCita']}' class='btn-action edit'>
-                                    <img src='../img/edit.png' width='35' height='35' alt='Editar'></a>
+                                <a href='editar-cita.php?id={$fila['idCita']}' class='btn-action
+                                    edit'><img src='../img/edit.png' alt='Editar' width='35' height='35'></a>
                                 <a href='eliminar_cita.php?id={$fila['idCita']}' class='btn-action delete'>
                                     <img src='../img/delete.png' alt='Eliminar' width='35' height='35'></a>
                             </td>
@@ -360,6 +361,7 @@ if (isset($_GET['export_word'])) {
                         ?>
                     </tbody>
                 </table>
+                
             </div>
         </div>
     </main>
