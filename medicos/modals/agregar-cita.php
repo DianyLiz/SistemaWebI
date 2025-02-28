@@ -1,23 +1,51 @@
-<link rel="stylesheet" href="../css/modal-usuario.css">
-<link rel="stylesheet" href="../css/modal-usuario.css">
+<link rel="stylesheet" href="../css/modal-cita.css">
+<link rel="stylesheet" href="../css/modal-cita.css">
 
-<div id="modalAgregarCita" class="modalAgregarUsuario">
+<div id="modalAgregarCita" class="modalAgregarCita" >
     <div class="modal-content">
         <span class="close">&times;</span>
         <form action="php/add-cita.php" method="POST">
             <div class="title">Nueva Cita</div>
             <div class="form-group">
                 <label for="add-paciente">Paciente</label>
-                <input id="add-paciente" type="text" name="paciente" autocomplete="off" required>
+                <select id="add-paciente" name="paciente" required>
+                    <option value="">Seleccionar</option>
+                    <?php
+                    $sql = "SELECT * FROM Usuarios WHERE rol = 'Paciente'";
+                    $query = $conn->prepare($sql);
+                    $query->execute();
+                    $pacientes = $query->fetchAll(PDO::FETCH_ASSOC);
+
+                    foreach ($pacientes as $paciente) {
+                        echo "<option value='{$paciente['idUsuario']}'>{$paciente['idPaciente']}{$paciente['nombre']} {$paciente['apellido']}</option>";
+                    }
+                    ?>
+                </select>
+                
 
                 <label for="add-medico">Médico</label>
-                <input id="add-medico" type="text" name="medico" autocomplete="off" required>
+                <select id="add-medico" name="medico" required>
+                    <option value="">Seleccionar</option>
+                    <?php
+                    $sql = "SELECT * FROM Usuarios WHERE rol = 'Médico'";
+                    $query = $conn->prepare($sql);
+                    $query->execute();
+                    $medicos = $query->fetchAll(PDO::FETCH_ASSOC);
+
+                    foreach ($medicos as $medico) {
+                        echo "<option value='{$medico['idUsuario']}'>{$medico['nombre']} {$medico['apellido']}</option>";
+                    }
+                    ?>
+                </select>
 
                 <label for="add-fecha">Fecha</label>
                 <input id="add-fecha" type="date" name="fecha" autocomplete="off" required>
 
                 <label for="add-hora">Hora</label>
                 <input id="add-hora" type="time" name="hora" autocomplete="off" required>
+
+                <label for="add-motivo">Motivo</label>
+                <input id="add-motivo" type="text" name="motivo" autocomplete="off" required>
 
                 <label for="add-estado">Estado</label>
                 <select id="add-estado" name="estado" required>
@@ -32,26 +60,20 @@
     </div>
 </div>
 <script>
-    // Obtener el modal
     var modal = document.getElementById("modalAgregarCita");
 
-    // Obtener el botón que abre el modal
     var btn = document.getElementById("abrirModal");
 
-    // Obtener el elemento <span> que cierra el modal
     var span = document.getElementsByClassName("close")[0];
 
-    // Cuando el usuario hace clic en el botón, abre el modal
     btn.onclick = function() {
         modal.style.display = "block";
     }
 
-    // Cuando el usuario hace clic en <span> (x), cierra el modal
     span.onclick = function() {
         modal.style.display = "none";
     }
 
-    // Cuando el usuario hace clic fuera del modal, ciérralo
     window.onclick = function(event) {
         if (event.target == modal) {
             modal.style.display = "none";

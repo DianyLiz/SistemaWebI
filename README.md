@@ -12,3 +12,7 @@ Herramientas:
   Modificaciones 25-02-2025:
     Modificacion en la interfaz principal de el modulo de pacientes, creando modals para editar pacientes y eliminar los mismos.
     Solucion de error presentado al momento de eliminar un usuario.
+
+  Modificaciones 26-27-02-2025:
+    Creando modals funcionales para eliminar citas.
+    Modals de agregar cita en proceso de que sea funcional.
