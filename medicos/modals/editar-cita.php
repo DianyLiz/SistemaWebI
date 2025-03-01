@@ -2,7 +2,7 @@
 <div id="modalEditarCita" class="modalEditarCita">
     <div class="modal-content">
         <span class="close">&times;</span>
-        <form action="/php/edit-cita.php" method="POST">
+        <form action="../php/edit-cita.php" method="POST">
             <div class="title">Actualizar datos de la Cita</div>
             <div class="form-group">
                 <label for="edit-idCita">ID Cita</label>
@@ -28,7 +28,6 @@
                     <option value="Pendiente">Pendiente</option>
                     <option value="Confirmada">Confirmada</option>
                     <option value="Cancelada">Cancelada</option>
-                    <option value="Completada">Completada</option>
                 </select>
             </div>
             <button type="submit" class="modificar">Modificar Cita</button>

@@ -9,16 +9,20 @@
             <div class="form-group">
                 <label for="add-paciente">Paciente</label>
                 <select id="add-paciente" name="paciente" required>
-                    <option value="">Seleccionar</option>
+                <option value="">Seleccionar</option>
                     <?php
-                    $sql = "SELECT * FROM Usuarios WHERE rol = 'Paciente'";
-                    $query = $conn->prepare($sql);
-                    $query->execute();
-                    $pacientes = $query->fetchAll(PDO::FETCH_ASSOC);
-
-                    foreach ($pacientes as $paciente) {
-                        echo "<option value='{$paciente['idUsuario']}'>{$paciente['idPaciente']}{$paciente['nombre']} {$paciente['apellido']}</option>";
-                    }
+                    $sql = "SELECT Pacientes.idPaciente, Usuarios.nombre, Usuarios.apellido 
+                    FROM Pacientes 
+                    INNER JOIN Usuarios ON Pacientes.idUsuario = Usuarios.idUsuario";
+            
+            
+                        $query = $conn->prepare($sql);
+                        $query->execute();
+                        $pacientes = $query->fetchAll(PDO::FETCH_ASSOC);
+            
+                        foreach ($pacientes as $paciente) {
+                            echo "<option value='{$paciente['idPaciente']}'>{$paciente['nombre']} {$paciente['apellido']}</option>";
+                        }
                     ?>
                 </select>
                 
@@ -27,13 +31,16 @@
                 <select id="add-medico" name="medico" required>
                     <option value="">Seleccionar</option>
                     <?php
-                    $sql = "SELECT * FROM Usuarios WHERE rol = 'Médico'";
+                    $sql = "SELECT Medicos.idMedico, Usuarios.nombre, Usuarios.apellido 
+                    FROM Medicos 
+                    INNER JOIN Usuarios ON Medicos.idUsuario = Usuarios.idUsuario";
+            
                     $query = $conn->prepare($sql);
                     $query->execute();
                     $medicos = $query->fetchAll(PDO::FETCH_ASSOC);
-
+                    
                     foreach ($medicos as $medico) {
-                        echo "<option value='{$medico['idUsuario']}'>{$medico['nombre']} {$medico['apellido']}</option>";
+                        echo "<option value='{$medico['idMedico']}'>{$medico['nombre']} {$medico['apellido']}</option>";
                     }
                     ?>
                 </select>

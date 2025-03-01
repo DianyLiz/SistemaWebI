@@ -16,3 +16,9 @@ Herramientas:
   Modificaciones 26-27-02-2025:
     Creando modals funcionales para eliminar citas.
     Modals de agregar cita en proceso de que sea funcional.
+
+  
+  Modificaciones 28-02-2025:
+    Modals de agregar cita funcional.
+    Creando modals para editar citas.
+

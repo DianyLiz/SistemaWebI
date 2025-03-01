@@ -151,6 +151,7 @@ if (isset($_GET['export_word'])) {
     $phpWord->save('php://output');
     exit;
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
