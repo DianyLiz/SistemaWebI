@@ -41,6 +41,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         ]);
 
         if ($statement->rowCount() > 0) {
+            //$consulta = "UPDATE Usuarios SET nombre = :nombre, apellido = :apellido WHERE idUsuario = :idUsuario";
             $_SESSION['success'] = "Cita Nº {$idCita} actualizada correctamente.";
             header('Location: ../ListadeCitas.php');
             exit();

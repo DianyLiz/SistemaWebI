@@ -22,3 +22,12 @@ Herramientas:
     Modals de agregar cita funcional.
     Creando modals para editar citas.
 
+  Modificaciones 01-03-2025:
+    Modals de agregar pacientes funcional.
+    Finalizado el formulario de citas.
+    Finalizado el formulario de Pacientes.
+    Cada uno que sus funciones especificas, y realizando modificaciones en los modals y en las acciones
+    de los medicos donde ya no pueden editar las citas.
+
+
+

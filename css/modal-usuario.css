@@ -57,20 +57,20 @@ form .title {
     margin-bottom: 20px;
 }
 
-.form-group {
+.form-group, .form-paciente {
     display: grid;
     grid-template-columns: 1fr 1.5fr;
     gap: 15px;
     margin-bottom: 20px;
 }
 
-.form-group label {
+.form-group label, .form-paciente label {
     font-size: 14px;
     color: #252525;
     margin-bottom: 5px;
 }
 
-.form-group input {
+.form-group input, .form-paciente input {
     width: 100%;
     padding: 8px;
     font-size: 16px;
@@ -100,11 +100,11 @@ form button:hover {
         width: 80%;
     }
 
-    .form-group {
+    .form-group, .form-paciente {
         grid-template-columns: 1fr;
     }
 
-    .form-group label {
+    .form-group label, .form-paciente label {
         text-align: left;
     }
 

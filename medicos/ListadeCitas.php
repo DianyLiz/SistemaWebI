@@ -16,10 +16,10 @@ $motivo_filter = $_GET['motivo'] ?? '';
 $estado_filter = $_GET['estado'] ?? '';
 
 $sql = "SELECT Citas.idCita, 
-       U1.nombre + ' ' + U1.apellido AS paciente, 
-       U2.nombre + ' ' + U2.apellido AS medico, 
+       Citas.idPaciente, U1.nombre + ' ' + U1.apellido AS paciente, 
+       Citas.idMedico, U2.nombre + ' ' + U2.apellido AS medico, 
        Citas.fecha, 
-       Citas.hora, 
+       Convert (varchar(5), Citas.hora, 108) AS hora,
        Citas.motivo,
        Citas.estado
         FROM Citas 
@@ -155,14 +155,15 @@ if (isset($_GET['export_word'])) {
 ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Citas</title>
     <link rel="stylesheet" href="../css/tabla.css">
     <link rel="stylesheet" href="../css/filter.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
+
 <body>
     <?php include 'header.php'; ?>
     <div class="contenedor">
@@ -182,11 +183,11 @@ if (isset($_GET['export_word'])) {
 
             <div class="table-container">
                 <h2>Lista de Citas Médicas</h2>
-                <div class="encabezado">
+                <div class="export-buttons">
                     <a href="#" class="add-btn">Agregar Cita</a>
-                    <a href="?export_pdf" class="export-btn">Exportar a PDF</a>
-                    <a href="?export_excel" class="export-btn">Exportar a Excel</a>
-                    <a href="?export_word" class="export-btn">Exportar a Word</a>
+                    <a href="?export_pdf" class="btn-pdf">Exportar a PDF</a>
+                    <a href="?export_excel" class="btn-excel">Exportar a Excel</a>
+                    <a href="?export_word" class="btn-word">Exportar a Word</a>
                 </div>
                 <div class="table-responsive">
                     <table>
@@ -209,7 +210,7 @@ if (isset($_GET['export_word'])) {
                                 'Pendiente' => 'pending',
                                 'Cancelada' => 'cancelled',
                             ];
-    
+
                             if (count($citas) > 0) {
                                 foreach ($citas as $fila) {
                                     $hora_formateada = date("H:i", strtotime($fila['hora']));
@@ -225,7 +226,9 @@ if (isset($_GET['export_word'])) {
                                         <td>
                                             <a href='#' class='edit-btn' 
                                                 data-idcita='{$fila['idCita']}'
+                                                data-idpaciente='{$fila['idPaciente']}'
                                                 data-paciente='{$fila['paciente']}'
+                                                data-idmedico='{$fila['idMedico']}'
                                                 data-medico='{$fila['medico']}'
                                                 data-fecha='{$fila['fecha']}'
                                                 data-hora='{$fila['hora']}'
@@ -239,12 +242,8 @@ if (isset($_GET['export_word'])) {
 
                                         </td>
                                       </tr>";
-                                
-                                
-                            } 
-                            }
-                            else 
-                            {
+                                }
+                            } else {
                                 echo "<tr><td colspan='7'>No hay citas registradas</td></tr>";
                             }
                             ?>
@@ -254,6 +253,45 @@ if (isset($_GET['export_word'])) {
             </div>
         </main>
     </div>
+    <style>
+        .add-btn,
+        .btn-pdf,
+        .btn-excel,
+        .btn-word {
+            display: inline-block;
+            background-color:#0b5471;
+            color: white;
+            padding: 10px 20px;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .add-btn:hover,
+        .btn-pdf:hover,
+        .btn-excel:hover,
+        .btn-word:hover {
+            background-color: #9bbdf0;
+        }
+
+        @media (max-width: 768px) {
+
+
+            .export-buttons {
+                flex-direction: column;
+            }
+
+            .add-btn,
+            .btn-pdf,
+            .btn-excel,
+            .btn-word {
+                width: 100%;
+                margin-right: 0;
+            }
+        }
+    </style>
 
     <script>
         const modals = document.querySelectorAll(".modalAgregarCita, .modalEditarCita");
@@ -268,18 +306,20 @@ if (isset($_GET['export_word'])) {
                 modalAgregarCita.style.display = "block";
             });
         });
-        
+
         editButtons.forEach(btn => {
             btn.addEventListener("click", function(event) {
                 event.preventDefault();
                 document.getElementById("edit-idCita").value = this.dataset.idcita;
-                document.getElementById("edit-idPaciente").value = this.dataset.paciente;
-                document.getElementById("edit-idMedico").value = this.dataset.medico;
+                document.getElementById("edit-idpaciente").value = this.dataset.idpaciente;
+                document.getElementById("edit-nombrePaciente").value = this.dataset.paciente;
+                document.getElementById("edit-idmedico").value = this.dataset.idmedico;
+                document.getElementById("edit-nombreMedico").value = this.dataset.medico;
                 document.getElementById("edit-fecha").value = this.dataset.fecha;
                 document.getElementById("edit-hora").value = this.dataset.hora;
                 document.getElementById("edit-motivo").value = this.dataset.motivo;
                 document.getElementById("edit-estado").value = this.dataset.estado;
-
+                console.log(this.dataset);
                 modalEditarCita.style.display = "block";
             });
         });
@@ -340,4 +380,8 @@ if (isset($_GET['export_word'])) {
         });
     </script>
 </body>
+<?php
+include 'alert.php';
+?>
+
 </html>
