@@ -29,5 +29,9 @@ Herramientas:
     Cada uno que sus funciones especificas, y realizando modificaciones en los modals y en las acciones
     de los medicos donde ya no pueden editar las citas.
 
+    Modificaciones 03-03-2025:
+      Modificacion en la base de datos en la tabla de citas y horarios medicos, agregando los campos de cupos disponibles.
+      Comenzando a crear la interfaz del formulario de horarios medicos.
+      
 
 
