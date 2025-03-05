@@ -33,5 +33,8 @@ Herramientas:
       Modificacion en la base de datos en la tabla de citas y horarios medicos, agregando los campos de cupos disponibles.
       Comenzando a crear la interfaz del formulario de horarios medicos.
       
+    Modificaciones 04-03-2025:
+      Modificacion en el inicio del modulo de médicos.
+      Arreglos en los horarios médicos.
 
 
