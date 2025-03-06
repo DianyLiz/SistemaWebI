@@ -20,8 +20,6 @@
                 <label for="edit-nombreMedico">Médico</label>
                 <input id="edit-nombreMedico" type="text" name="nombreMedico" autocomplete="off">
 
-                <label for="edit-fecha">Fecha</label>
-                <input id="edit-fecha" type="date" name="fecha" autocomplete="off">
 
                 <label for="edit-hora">Hora</label>
                 <input id="edit-hora" type="time" name="hora" autocomplete="off">
@@ -35,6 +33,9 @@
                     <option value="Confirmada">Confirmada</option>
                     <option value="Cancelada">Cancelada</option>
                 </select>
+
+                <label for="edit-fecha">Fecha</label>
+                <input id="edit-fecha" type="date" name="fecha" autocomplete="off">
             </div>
             <button type="submit" class="modificar">Modificar Cita</button>
         </form>

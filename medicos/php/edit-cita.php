@@ -3,19 +3,20 @@ include '../../conexion.php';
 session_start();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $idCita = $_POST['idCita'];
-    $idPaciente = $_POST['idPaciente'];
-    $idMedico = $_POST['idMedico'];
-    $fecha = $_POST['fecha'];
-    $hora = $_POST['hora'];
-    $motivo = $_POST['motivo'];
-    $estado = $_POST['estado'];
+    $idCita = filter_input(INPUT_POST, 'idCita', FILTER_SANITIZE_NUMBER_INT);
+    $idPaciente = filter_input(INPUT_POST, 'idPaciente', FILTER_SANITIZE_NUMBER_INT);
+    $idMedico = filter_input(INPUT_POST, 'idMedico', FILTER_SANITIZE_NUMBER_INT);
+    $fecha = filter_input(INPUT_POST, 'fecha', FILTER_SANITIZE_STRING);
+    $hora = filter_input(INPUT_POST, 'hora', FILTER_SANITIZE_STRING);
+    $motivo = filter_input(INPUT_POST, 'motivo', FILTER_SANITIZE_STRING);
+    $estado = filter_input(INPUT_POST, 'estado', FILTER_SANITIZE_STRING);
 
     if (empty($idPaciente) || empty($idMedico) || empty($fecha) || empty($hora) || empty($motivo) || empty($estado)) {
         $_SESSION['error'] = "Complete los campos obligatorios.";
         header('Location: ../ListadeCitas.php');
         exit();
     }
+}
 
     try {
         $consulta = "SELECT * FROM Citas WHERE idPaciente = ? AND idMedico = ? AND fecha = ? AND hora = ? AND idCita != ?";
@@ -55,5 +56,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         header('Location: ../ListadeCitas.php');
         exit();
     }
-}
+
 ?>

@@ -2,7 +2,6 @@
 include 'header.php';
 include '../conexion.php';
 
-// Verificar si se recibe el parámetro 'id'
 if (!isset($_GET['id']) || empty($_GET['id'])) {
     echo "<p>Error: No se recibió la ID de la cita.</p>";
     exit;
@@ -10,14 +9,12 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
 
 $idCita = $_GET['id'];
 
-// Obtener la cita de la base de datos
 $sql = "SELECT * FROM Citas WHERE idCita = :idCita";
 $query = $conn->prepare($sql);
 $query->bindParam(':idCita', $idCita, PDO::PARAM_INT);
 $query->execute();
 $cita = $query->fetch(PDO::FETCH_ASSOC);
 
-// Verificar si la cita existe
 if (!$cita) {
     echo "<p>Error: La cita no existe.</p>";
     exit;
@@ -42,10 +39,7 @@ if (!$cita) {
                 <form id="formEditarCita">
                     <input type="hidden" name="idCita" id="idCita" value="<?php echo htmlspecialchars($cita['idCita']); ?>">
                     
-                    <div class="campo-formulario">
-                        <label for="fecha">Fecha</label>
-                        <input type="date" name="fecha" id="fecha" value="<?php echo htmlspecialchars($cita['fecha']); ?>">
-                    </div>
+                    
                     
                     <div class="campo-formulario">
                         <label for="hora">Hora</label>
@@ -59,6 +53,11 @@ if (!$cita) {
                             <option value="Confirmada" <?php if ($cita['estado'] === 'Confirmada') echo 'selected'; ?>>Confirmada</option>
                             <option value="Cancelada" <?php if ($cita['estado'] === 'Cancelada') echo 'selected'; ?>>Cancelada</option>
                         </select>
+                    </div>
+
+                    <div class="campo-formulario">
+                        <label for="fecha">Fecha</label>
+                        <input type="date" name="fecha" id="fecha" value="<?php echo htmlspecialchars($cita['fecha']); ?>">
                     </div>
                     
                     <div class="campo-formulario">

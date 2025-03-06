@@ -1,10 +1,9 @@
-<link rel="stylesheet" href="../css/modal-cita.css">
-<link rel="stylesheet" href="../css/modal-cita.css">
+<link rel="stylesheet" href="../css/modal-horario.css">
 
-<div id="modalAgregarCita" class="modalAgregarCita" >
+<div id="modalAgregarHorario" class="modalAgregarHorario">
     <div class="modal-content">
         <span class="close">&times;</span>
-        <form action="php/add-cita.php" method="POST">
+        <form action="php/add-horario.php" method="POST">
             <div class="title">Nuevo Horario</div>
             <div class="form-group"> 
                 <label for="add-medico">Médico</label>
@@ -36,16 +35,18 @@
 
                 <label for="add-Cupos">Cupos</label>
                 <input id="add-cupos" type="text" name="cupos" autocomplete="off" required>
+
+                <label for="add-Cupos">Fecha</label>
+                <input id="add-fecha" type="text" name="fecha" autocomplete="off" required>
             </div>
             <button type="submit" class="modificar">Agregar Horario</button>
         </form>
     </div>
 </div>
+
 <script>
     var modal = document.getElementById("modalAgregarHorario");
-
     var btn = document.getElementById("abrirModal");
-
     var span = document.getElementsByClassName("close")[0];
 
     btn.onclick = function() {

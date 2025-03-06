@@ -1,4 +1,4 @@
-/* Estilos generales */
+
 @import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap');
 
 * {
@@ -8,9 +8,8 @@
     font-family: 'Poppins', sans-serif;
 }
 
-/* Modal */
 .modalEditarHorario, .modalAgregarHorario {
-    display: none; /* Oculto por defecto */
+    display: none; 
     position: fixed;
     z-index: 1000;
     left: 0;
@@ -19,15 +18,19 @@
     height: 100%;
     overflow-y: auto;
     background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-/* Contenido del Modal */
 .modal-content {
     background-color: #fff;
-    margin: 10% auto;
     padding: 20px;
     border-radius: 8px;
-    width: 40%;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh; 
+    overflow-y: auto;
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
     position: relative;
 }
@@ -43,10 +46,13 @@
     right: 20px;
     font-size: 24px;
     cursor: pointer;
+    padding: 5px;
+    transition: color 0.3s ease;
 }
 
 .close:hover {
     color: red;
+    transform: scale(1.2);
 }
 
 form .title {
@@ -91,21 +97,18 @@ form .modificar {
     margin-top: 20px;
 }
 
-form button:hover {
+form .modificar:hover {
     background-color: #0d81c1;
 }
 
+/* Responsividad */
 @media (max-width: 768px) {
-    .modal-content {
-        width: 80%;
-    }
-
     .form-group {
         grid-template-columns: 1fr;
     }
 
     .form-group label {
-        text-align: left;
+        font-size: 16px;
     }
 
     form .title {

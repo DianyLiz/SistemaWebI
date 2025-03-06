@@ -14,42 +14,60 @@ $fecha_filter = $_GET['fecha'] ?? '';
 $hora_filter = $_GET['hora'] ?? '';
 $motivo_filter = $_GET['motivo'] ?? '';
 $estado_filter = $_GET['estado'] ?? '';
+$idHorario = $_GET['idHorario'] ?? '';
+$fecha = $_GET['fecha'] ?? '';
 
 $sql = "SELECT Citas.idCita, 
-       Citas.idPaciente, U1.nombre + ' ' + U1.apellido AS paciente, 
-       Citas.idMedico, U2.nombre + ' ' + U2.apellido AS medico, 
-       Citas.fecha, 
-       Convert (varchar(5), Citas.hora, 108) AS hora,
+       Citas.idPaciente, CONCAT(U1.nombre, ' ', U1.apellido) AS paciente, 
+       Citas.idMedico, CONCAT(U2.nombre, ' ', U2.apellido) AS medico, 
+       HorariosMedicos.fecha, 
+       CONVERT(VARCHAR(5), Citas.hora, 108) AS hora,
        Citas.motivo,
-       Citas.estado
+       Citas.estado,
+       Citas.idHorario
         FROM Citas 
         INNER JOIN Pacientes ON Citas.idPaciente = Pacientes.idPaciente
         INNER JOIN Usuarios U1 ON Pacientes.idUsuario = U1.idUsuario
         INNER JOIN Medicos ON Citas.idMedico = Medicos.idMedico
         INNER JOIN Usuarios U2 ON Medicos.idUsuario = U2.idUsuario
-        WHERE 1=1";
+        INNER JOIN HorariosMedicos ON Citas.idHorario = HorariosMedicos.idHorario
+        WHERE 1 = 1";
 
 if ($medico_filter) {
-    $sql .= " AND U2.nombre LIKE '%$medico_filter%'";
+    $sql .= " AND U2.nombre LIKE :medico_filter";
 }
 if ($paciente_filter) {
-    $sql .= " AND U1.nombre LIKE '%$paciente_filter%'";
+    $sql .= " AND U1.nombre LIKE :paciente_filter";
 }
 if ($fecha_filter) {
-    $sql .= " AND Citas.fecha = '$fecha_filter'";
+    $sql .= " AND Citas.fecha = :fecha_filter";
 }
 if ($hora_filter) {
-    $sql .= " AND Citas.hora = '$hora_filter'";
+    $sql .= " AND Citas.hora = :hora_filter";
 }
 if ($motivo_filter) {
-    $sql .= " AND Citas.hora = '$motivo_filter'";
+    $sql .= " AND Citas.motivo = :motivo_filter";
 }
 if ($estado_filter) {
-    $sql .= " AND Citas.estado = '$estado_filter'";
+    $sql .= " AND Citas.estado = :estado_filter";
+}
+if ($idHorario) {
+    $sql .= " AND Citas.idHorario = :idHorario";
+}
+if ($fecha) {
+    $sql .= " AND HorariosMedicos.fecha = :fecha";
 }
 
 try {
     $query = $conn->prepare($sql);
+    if ($medico_filter) $query->bindValue(':medico_filter', "%$medico_filter%");
+    if ($paciente_filter) $query->bindValue(':paciente_filter', "%$paciente_filter%");
+    if ($fecha_filter) $query->bindValue(':fecha_filter', $fecha_filter);
+    if ($hora_filter) $query->bindValue(':hora_filter', $hora_filter);
+    if ($motivo_filter) $query->bindValue(':motivo_filter', $motivo_filter);
+    if ($estado_filter) $query->bindValue(':estado_filter', $estado_filter);
+    if ($idHorario) $query->bindValue(':idHorario', $idHorario);
+    if ($fecha) $query->bindValue(':fecha', $fecha);
     $query->execute();
     $citas = $query->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
@@ -63,9 +81,9 @@ if (isset($_GET['export_pdf'])) {
                 <tr>
                     <th>Paciente</th>
                     <th>Médico</th>
-                    <th>Fecha</th>
                     <th>Hora</th>
                     <th>Estado</th>
+                    <th>Fecha</th>
                 </tr>
               </thead><tbody>";
 
@@ -74,9 +92,9 @@ if (isset($_GET['export_pdf'])) {
         $html .= "<tr>
                     <td>{$fila['paciente']}</td>
                     <td>{$fila['medico']}</td>
-                    <td>{$fila['fecha']}</td>
                     <td>{$hora_formateada}</td>
                     <td>{$fila['estado']}</td>
+                    <td>{$fila['fecha']}</td>
                   </tr>";
     }
     $html .= "</tbody></table>";
@@ -97,19 +115,19 @@ if (isset($_GET['export_excel'])) {
     $sheet = $spreadsheet->getActiveSheet();
     $sheet->setCellValue('A1', 'Paciente');
     $sheet->setCellValue('B1', 'Médico');
-    $sheet->setCellValue('C1', 'Fecha');
-    $sheet->setCellValue('D1', 'Hora');
-    $sheet->setCellValue('E1', 'Motivo');
-    $sheet->setCellValue('F1', 'Estado');
+    $sheet->setCellValue('C1', 'Hora');
+    $sheet->setCellValue('D1', 'Motivo');
+    $sheet->setCellValue('E1', 'Estado');
+    $sheet->setCellValue('F1', 'Fecha');
 
     $row = 2;
     foreach ($citas as $fila) {
         $sheet->setCellValue("A$row", $fila['paciente']);
         $sheet->setCellValue("B$row", $fila['medico']);
-        $sheet->setCellValue("C$row", $fila['fecha']);
-        $sheet->setCellValue("D$row", $fila['hora']);
-        $sheet->setCellValue("E$row", $fila['motivo']);
+        $sheet->setCellValue("C$row", $fila['hora']);
+        $sheet->setCellValue("D$row", $fila['motivo']);
         $sheet->setCellValue("E$row", $fila['estado']);
+        $sheet->setCellValue("F$row", $fila['fecha']);
         $row++;
     }
 
@@ -131,19 +149,19 @@ if (isset($_GET['export_word'])) {
     $table->addRow();
     $table->addCell(2000)->addText("Paciente");
     $table->addCell(2000)->addText("Médico");
-    $table->addCell(2000)->addText("Fecha");
     $table->addCell(2000)->addText("Hora");
     $table->addCell(2000)->addText("Motivo");
     $table->addCell(2000)->addText("Estado");
+    $table->addCell(2000)->addText("Fecha");
 
     foreach ($citas as $fila) {
         $table->addRow();
         $table->addCell(2000)->addText($fila['paciente']);
         $table->addCell(2000)->addText($fila['medico']);
-        $table->addCell(2000)->addText($fila['fecha']);
         $table->addCell(2000)->addText($fila['hora']);
         $table->addCell(2000)->addText($fila['motivo']);
         $table->addCell(2000)->addText($fila['estado']);
+        $table->addCell(2000)->addText($fila['fecha']);
     }
 
     header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
@@ -196,10 +214,10 @@ if (isset($_GET['export_word'])) {
                                 <th>ID</th>
                                 <th>Paciente</th>
                                 <th>Médico</th>
-                                <th>Fecha</th>
                                 <th>Hora</th>
                                 <th>Motivo</th>
                                 <th>Estado</th>
+                                <th>Fecha</th>
                                 <th>Acción</th>
                             </tr>
                         </thead>
@@ -219,10 +237,10 @@ if (isset($_GET['export_word'])) {
                                         <td>{$fila['idCita']}</td>
                                         <td>{$fila['paciente']}</td>
                                         <td>{$fila['medico']}</td>
-                                        <td>{$fila['fecha']}</td>
                                         <td>{$hora_formateada}</td>
                                         <td>{$fila['motivo']}</td>
                                         <td class='$claseEstado'>{$fila['estado']}</td>
+                                        <td>{$fila['fecha']}</td>
                                         <td>
                                             <a href='#' class='edit-btn' 
                                                 data-idcita='{$fila['idCita']}'
@@ -241,6 +259,7 @@ if (isset($_GET['export_word'])) {
                                             </a>
 
                                         </td>
+                                        
                                       </tr>";
                                 }
                             } else {
@@ -308,21 +327,20 @@ if (isset($_GET['export_word'])) {
         });
 
         editButtons.forEach(btn => {
-            btn.addEventListener("click", function(event) {
-                event.preventDefault();
-                document.getElementById("edit-idCita").value = this.dataset.idcita;
-                document.getElementById("edit-idpaciente").value = this.dataset.idpaciente;
-                document.getElementById("edit-nombrePaciente").value = this.dataset.paciente;
-                document.getElementById("edit-idmedico").value = this.dataset.idmedico;
-                document.getElementById("edit-nombreMedico").value = this.dataset.medico;
-                document.getElementById("edit-fecha").value = this.dataset.fecha;
-                document.getElementById("edit-hora").value = this.dataset.hora;
-                document.getElementById("edit-motivo").value = this.dataset.motivo;
-                document.getElementById("edit-estado").value = this.dataset.estado;
-                console.log(this.dataset);
-                modalEditarCita.style.display = "block";
-            });
-        });
+    btn.addEventListener("click", function(event) {
+        event.preventDefault();
+        document.getElementById("edit-idCita").value = this.dataset.idcita;
+        document.getElementById("edit-idpaciente").value = this.dataset.idpaciente;
+        document.getElementById("edit-nombrePaciente").value = this.dataset.paciente;
+        document.getElementById("edit-idmedico").value = this.dataset.idmedico;
+        document.getElementById("edit-nombreMedico").value = this.dataset.medico;
+        document.getElementById("edit-hora").value = this.dataset.hora;
+        document.getElementById("edit-motivo").value = this.dataset.motivo;
+        document.getElementById("edit-estado").value = this.dataset.estado;
+        document.getElementById("edit-fecha").value = this.dataset.fecha;
+        modalEditarCita.style.display = "block";
+    });
+});
 
         closeButtons.forEach(button => {
             button.addEventListener("click", function() {

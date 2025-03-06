@@ -6,20 +6,20 @@ require '../php/vendor/autoload.php';
 include '../conexion.php';
 $paginaActual = 'horarios';
 
-// Obtener mes y año de la URL o usar actuales
+
 $mesActual = isset($_GET['mes']) ? $_GET['mes'] : date('m');
 $anioActual = isset($_GET['anio']) ? $_GET['anio'] : date('Y');
 $diasEnMes = cal_days_in_month(CAL_GREGORIAN, $mesActual, $anioActual);
 
 $sqlCupos = "SELECT H.fecha, 
-                (H.cupos - COALESCE(COUNT(C.idCita), 0)) AS cuposDisponibles
-         FROM HorariosMedicos H
-         LEFT JOIN Citas C 
-            ON H.idHorario = C.idHorario 
-            AND H.fecha = C.fecha
-         WHERE MONTH(H.fecha) = :mesActual 
-         AND YEAR(H.fecha) = :anioActual
-         GROUP BY H.fecha, H.cupos";
+       (H.cupos - COALESCE(COUNT(C.idCita), 0)) AS cuposDisponibles
+FROM HorariosMedicos H
+LEFT JOIN Citas C 
+    ON H.idHorario = C.idHorario 
+WHERE MONTH(H.fecha) = :mesActual 
+AND YEAR(H.fecha) = :anioActual
+GROUP BY H.fecha, H.cupos;
+";
 
 $queryCupos = $conn->prepare($sqlCupos);
 $queryCupos->bindParam(':mesActual', $mesActual, PDO::PARAM_INT);
@@ -142,6 +142,8 @@ foreach ($cuposPorFecha as $row) {
     <?php include 'header.php'; ?>
     <div class="contenedor">
         <?php include 'menu.php'; ?>
+        <?php include 'modals/editar-cita.php'; ?>
+        <?php include 'modals/agregar-cita.php'; ?>
         <style>
         .filter-container {
             background: #ffffff;
@@ -248,8 +250,8 @@ foreach ($cuposPorFecha as $row) {
                 <h2>Horarios Médicos</h2>
                 <div class="export-buttons">
                     <a href="#" class="add-btn">Agregar Horario</a>
-                    <a href="#" class="add-btn">Eliminar Horario</a>
                     <a href="#" class="add-btn">Editar Horario</a>
+                    <a href="#" class="add-btn">Eliminar Horario</a>
                     
                 </div>
                 <div class="month-selector">
@@ -302,5 +304,93 @@ foreach ($cuposPorFecha as $row) {
             window.location.href = `horarios.php?mes=${mes}&anio=${anio}`;
         }
     </script>
+    <script>
+        const modals = document.querySelectorAll(".modalAgregarHorario, .modalEditarHorario");
+        const closeButtons = document.querySelectorAll(".close");
+        const editButtons = document.querySelectorAll(".edit-btn");
+        const addButtons = document.querySelectorAll(".add-btn");
+        const deleteButtons = document.querySelectorAll(".delete-btn");
+
+        addButtons.forEach(btn => {
+            btn.addEventListener("click", function(event) {
+                event.preventDefault();
+                modalAgregarHorario.style.display = "block";
+            });
+        });
+
+        editButtons.forEach(btn => {
+    btn.addEventListener("click", function(event) {
+        event.preventDefault();
+        document.getElementById("edit-idHorario").value = this.dataset.idHorario;
+        document.getElementById("edit-idmedico").value = this.dataset.idmedico;
+        document.getElementById("edit-nombreMedico").value = this.dataset.medico;
+        document.getElementById("edit-dia").value = this.dataset.dia;
+        document.getElementById("edit-horaInicio").value = this.dataset.horaInicio;
+        document.getElementById("edit-horaFin").value = this.dataset.horaFin;
+        document.getElementById("edit-cupos").value = this.dataset.cupos;
+        document.getElementById("edit-fecha").value = this.dataset.fecha;
+        modalEditarHorario.style.display = "block";
+    });
+});
+        
+
+        closeButtons.forEach(button => {
+            button.addEventListener("click", function() {
+                modals.forEach(modal => modal.style.display = "none");
+            });
+        });
+
+        window.onclick = function(event) {
+            modals.forEach(modal => {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            });
+        };
+
+        deleteButtons.forEach(btn => {
+            btn.addEventListener("click", async event => {
+                event.preventDefault();
+                const idHorario = btn.dataset.idhorario;
+                const confirmacion = await Swal.fire({
+                    title: `¿Eliminar el Horario Nº ${idHorario}?`,
+                    text: "Esta acción no se puede deshacer.",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: "Eliminar",
+                    cancelButtonText: "Cancelar"
+                });
+                if (!confirmacion.isConfirmed) return;
+                try {
+                    const response = await fetch("php/delete-horario.php", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        },
+                        body: `idHorario=${idHorario}`
+                    });
+                    const data = await response.json();
+                    await Swal.fire({
+                        title: data.status === "success" ? "Éxito" : "Error",
+                        text: data.message,
+                        icon: data.status === "success" ? "success" : "error"
+                    });
+                    if (data.status === "success") location.reload();
+                } catch (error) {
+                    Swal.fire({
+                        title: "Error",
+                        text: "Hubo un problema al eliminar el horario.",
+                        icon: "error"
+                    });
+                    console.error("Error:", error);
+                }
+            });
+        });
+    </script>
 </body>
+<?php
+include 'alert.php';
+?>
 </html>
