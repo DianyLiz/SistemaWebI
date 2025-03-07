@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (empty($medico) || empty($diaSemana) || empty($horaInicio) || empty($estado) || empty($horaFin) || empty($cupos) || empty($fecha)) {
         $_SESSION['mensaje'] = "Todos los campos son obligatorios.";
         $_SESSION['tipo_mensaje'] = "error";
-        header("Location: ../ListadeCitas.php");
+        header("Location: ../horarios.php");
         exit;
     }
 
@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $conn = null;
 
-    header("Location: ../ListadeCitas.php");
+    header("Location: ../horarios.php");
     exit;
 }
 ?>

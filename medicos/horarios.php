@@ -142,8 +142,8 @@ foreach ($cuposPorFecha as $row) {
     <?php include 'header.php'; ?>
     <div class="contenedor">
         <?php include 'menu.php'; ?>
-        <?php include 'modals/editar-cita.php'; ?>
-        <?php include 'modals/agregar-cita.php'; ?>
+        <?php include 'modals/editar-horario.php'; ?>
+        <?php include 'modals/agregar-horario.php'; ?>
         <style>
         .filter-container {
             background: #ffffff;
@@ -249,7 +249,7 @@ foreach ($cuposPorFecha as $row) {
             <div class="schedule-container">
                 <h2>Horarios Médicos</h2>
                 <div class="export-buttons">
-                    <a href="#" class="add-btn">Agregar Horario</a>
+                <a href="#" class="add-btn">Agregar Horario</a>
                     <a href="#" class="add-btn">Editar Horario</a>
                     <a href="#" class="add-btn">Eliminar Horario</a>
                     

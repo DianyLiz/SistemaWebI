@@ -14,8 +14,8 @@ $fecha_filter = $_GET['fecha'] ?? '';
 $hora_filter = $_GET['hora'] ?? '';
 $motivo_filter = $_GET['motivo'] ?? '';
 $estado_filter = $_GET['estado'] ?? '';
-$idHorario = $_GET['idHorario'] ?? '';
-$fecha = $_GET['fecha'] ?? '';
+$idHorario_filter = $_GET['idHorario'] ?? '';
+$fecha_filter = $_GET['fecha'] ?? '';
 
 $sql = "SELECT Citas.idCita, 
        Citas.idPaciente, CONCAT(U1.nombre, ' ', U1.apellido) AS paciente, 
@@ -39,9 +39,7 @@ if ($medico_filter) {
 if ($paciente_filter) {
     $sql .= " AND U1.nombre LIKE :paciente_filter";
 }
-if ($fecha_filter) {
-    $sql .= " AND Citas.fecha = :fecha_filter";
-}
+
 if ($hora_filter) {
     $sql .= " AND Citas.hora = :hora_filter";
 }
@@ -51,23 +49,22 @@ if ($motivo_filter) {
 if ($estado_filter) {
     $sql .= " AND Citas.estado = :estado_filter";
 }
-if ($idHorario) {
-    $sql .= " AND Citas.idHorario = :idHorario";
+if ($idHorario_filter) {
+    $sql .= " AND Citas.idHorario = :idHorario_filter";
 }
-if ($fecha) {
-    $sql .= " AND HorariosMedicos.fecha = :fecha";
+if ($fecha_filter) {
+    $sql .= " AND HorariosMedicos.fecha = :fecha_filter";
 }
 
 try {
     $query = $conn->prepare($sql);
     if ($medico_filter) $query->bindValue(':medico_filter', "%$medico_filter%");
     if ($paciente_filter) $query->bindValue(':paciente_filter', "%$paciente_filter%");
-    if ($fecha_filter) $query->bindValue(':fecha_filter', $fecha_filter);
     if ($hora_filter) $query->bindValue(':hora_filter', $hora_filter);
     if ($motivo_filter) $query->bindValue(':motivo_filter', $motivo_filter);
     if ($estado_filter) $query->bindValue(':estado_filter', $estado_filter);
-    if ($idHorario) $query->bindValue(':idHorario', $idHorario);
-    if ($fecha) $query->bindValue(':fecha', $fecha);
+    if ($idHorario_filter) $query->bindValue(':idHorario_filter', $idHorario_filter);
+    if ($fecha_filter) $query->bindValue(':fecha_filter', $fecha_filter);
     $query->execute();
     $citas = $query->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {

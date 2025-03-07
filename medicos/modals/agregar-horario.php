@@ -25,19 +25,19 @@
                 </select>
 
                 <label for="add-dia">Dia</label>
-                <input id="add-dia" type="date" name="dia" autocomplete="off" required>
+                <input id="add-dia" type="text" name="dia" autocomplete="off" required>
 
                 <label for="add-hora">Hora Inicio</label>
                 <input id="add-hora" type="time" name="hora" autocomplete="off" required>
 
                 <label for="add-fin">Hora Fin</label>
-                <input id="add-fin" type="text" name="fin" autocomplete="off" required>
+                <input id="add-fin" type="time" name="fin" autocomplete="off" required>
 
                 <label for="add-Cupos">Cupos</label>
                 <input id="add-cupos" type="text" name="cupos" autocomplete="off" required>
 
-                <label for="add-Cupos">Fecha</label>
-                <input id="add-fecha" type="text" name="fecha" autocomplete="off" required>
+                <label for="add-fecha">Fecha</label>
+                <input id="add-fecha" type="date" name="fecha" autocomplete="off" required>
             </div>
             <button type="submit" class="modificar">Agregar Horario</button>
         </form>
@@ -48,6 +48,8 @@
     var modal = document.getElementById("modalAgregarHorario");
     var btn = document.getElementById("abrirModal");
     var span = document.getElementsByClassName("close")[0];
+
+    
 
     btn.onclick = function() {
         modal.style.display = "block";
