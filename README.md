@@ -1,5 +1,5 @@
 # Diany Lizbeth Enamorado Fernández 
-Sistema Web de citas médicas
+# Sistema Web de citas médicas
 Herramientas:
   Visual Studio Code
   SQL Server
@@ -45,5 +45,8 @@ Herramientas:
 
   Modificaciones 07-03-2025:
     Creación de modals para agregar horarios en proceso de que sea funcional.
+
+  Modificaciones 08-03-2025:
+    Creación interfaz de formulario de Documentos Medicos.
 
 
