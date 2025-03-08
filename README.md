@@ -1,4 +1,4 @@
-#Diany Lizbeth Enamorado Fernández
+# Diany Lizbeth Enamorado Fernández 
 Sistema Web de citas médicas
 Herramientas:
   Visual Studio Code
@@ -43,5 +43,7 @@ Herramientas:
     Modificacion en la interfaz de Lista de Citas.
     Modificacion en la interfaz de horarios medicos.
 
+  Modificaciones 07-03-2025:
+    Creación de modals para agregar horarios en proceso de que sea funcional.
 
 
