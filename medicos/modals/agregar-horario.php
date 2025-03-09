@@ -1,5 +1,4 @@
 <link rel="stylesheet" href="../css/modal-horario.css">
-
 <div id="modalAgregarHorario" class="modalAgregarHorario">
     <div class="modal-content">
         <span class="close">&times;</span>
@@ -33,7 +32,7 @@
                 <label for="add-fin">Hora Fin</label>
                 <input id="add-fin" type="time" name="fin" autocomplete="off" required>
 
-                <label for="add-Cupos">Cupos</label>
+                <label for="add-cupos">Cupos</label>
                 <input id="add-cupos" type="text" name="cupos" autocomplete="off" required>
 
                 <label for="add-fecha">Fecha</label>
@@ -43,25 +42,3 @@
         </form>
     </div>
 </div>
-
-<script>
-    var modal = document.getElementById("modalAgregarHorario");
-    var btn = document.getElementById("abrirModal");
-    var span = document.getElementsByClassName("close")[0];
-
-    
-
-    btn.onclick = function() {
-        modal.style.display = "block";
-    }
-
-    span.onclick = function() {
-        modal.style.display = "none";
-    }
-
-    window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
-    }
-</script>

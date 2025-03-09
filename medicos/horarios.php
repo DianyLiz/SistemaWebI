@@ -36,14 +36,14 @@ foreach ($cuposPorFecha as $row) {
 
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Horarios Médicos</title>
-    
+
     <link rel="stylesheet" href="../css/tabla.css">
     <style>
-        
         .schedule-container {
             background: #ffffff;
             border-radius: 15px;
@@ -67,7 +67,7 @@ foreach ($cuposPorFecha as $row) {
             text-align: center;
             border-radius: 10px;
             background-color: #ffffff;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             cursor: pointer;
             transition: all 0.3s ease;
             min-height: 100px;
@@ -79,7 +79,7 @@ foreach ($cuposPorFecha as $row) {
 
         .day:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
         }
 
         .available {
@@ -138,122 +138,118 @@ foreach ($cuposPorFecha as $row) {
         }
     </style>
 </head>
+
 <body>
     <?php include 'header.php'; ?>
     <div class="contenedor">
         <?php include 'menu.php'; ?>
-        <?php include 'modals/editar-horario.php'; ?>
-        <?php include 'modals/agregar-horario.php'; ?>
+
         <style>
-        .filter-container {
-            background: #ffffff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-            width: 100%;
-            max-width: 1200px;
-            margin: 20px auto;
-        }
+            .filter-container {
+                background: #ffffff;
+                padding: 20px;
+                border-radius: 10px;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+                margin-bottom: 20px;
+                width: 100%;
+                max-width: 1200px;
+                margin: 20px auto;
+            }
 
-        .filter-container form {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .filter-container input,
-        .filter-container select {
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            flex: 1;
-            min-width: 150px;
-            transition: border-color 0.3s ease;
-        }
-
-        .filter-container input:focus,
-        .filter-container select:focus {
-            border-color: #0099ff;
-            outline: none;
-        }
-
-        .filter-container button {
-            background-color: #0099ff;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background-color 0.3s ease;
-        }
-
-        .filter-container button:hover {
-            background-color: #0077cc;
-        }
-
-        @media (max-width: 768px) {
             .filter-container form {
-                flex-direction: column;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 10px;
+                flex-wrap: wrap;
             }
 
             .filter-container input,
-            .filter-container select,
-            .filter-container button {
-                width: 100%;
-                margin-bottom: 10px;
+            .filter-container select {
+                padding: 12px;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                font-size: 14px;
+                flex: 1;
+                min-width: 150px;
+                transition: border-color 0.3s ease;
             }
-        }
 
-        .add-btn,
-        .btn-pdf,
-        .btn-excel,
-        .btn-word {
-            display: inline-block;
-            background-color: #0b5471;
-            color: white;
-            padding: 10px 20px;
-            margin-right: 10px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            text-decoration: none;
-            font-size: 14px;
-        }
+            .filter-container input:focus,
+            .filter-container select:focus {
+                border-color: #0099ff;
+                outline: none;
+            }
 
-        .add-btn:hover,
-        .btn-pdf:hover,
-        .btn-excel:hover,
-        .btn-word:hover {
-            background-color: #9bbdf0;
-        }
+            .filter-container button {
+                background-color: #0099ff;
+                color: white;
+                padding: 12px 24px;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 14px;
+                transition: background-color 0.3s ease;
+            }
 
-        @media (max-width: 768px) {
-            .export-buttons {
-                flex-direction: column;
+            .filter-container button:hover {
+                background-color: #0077cc;
+            }
+
+            @media (max-width: 768px) {
+                .filter-container form {
+                    flex-direction: column;
+                }
+
+                .filter-container input,
+                .filter-container select,
+                .filter-container button {
+                    width: 100%;
+                    margin-bottom: 10px;
+                }
             }
 
             .add-btn,
             .btn-pdf,
             .btn-excel,
             .btn-word {
-                width: 100%;
-                margin-right: 0;
+                display: inline-block;
+                background-color: #0b5471;
+                color: white;
+                padding: 10px 20px;
+                margin-right: 10px;
+                margin-bottom: 10px;
+                border-radius: 5px;
+                text-decoration: none;
+                font-size: 14px;
             }
-        }
-    </style>
+
+            .add-btn:hover,
+            .btn-pdf:hover,
+            .btn-excel:hover,
+            .btn-word:hover {
+                background-color: #9bbdf0;
+            }
+
+            @media (max-width: 768px) {
+                .export-buttons {
+                    flex-direction: column;
+                }
+
+                .add-btn,
+                .btn-pdf,
+                .btn-excel,
+                .btn-word {
+                    width: 100%;
+                    margin-right: 0;
+                }
+            }
+        </style>
         <main class="contenido">
+            <?php include 'modals/editar-horario.php'; ?>
+            <?php include 'modals/agregar-horario.php'; ?>
             <div class="schedule-container">
                 <h2>Horarios Médicos</h2>
-                <div class="export-buttons">
-                <a href="#" class="add-btn">Agregar Horario</a>
-                    <a href="#" class="add-btn">Editar Horario</a>
-                    <a href="#" class="add-btn">Eliminar Horario</a>
-                    
-                </div>
                 <div class="month-selector">
                     <select id="selectMes" onchange="cargarMes()">
                         <?php for ($m = 1; $m <= 12; $m++) { ?>
@@ -282,7 +278,7 @@ foreach ($cuposPorFecha as $row) {
                             $clase = "unavailable";
                         }
 
-                        echo "<div class='day $clase' onclick='verHorarios(\"$fecha\")'>
+                        echo "<div id='btnverhorarios' class='day $clase' onclick='verHorarios(\"$fecha\")'>
                                 <h3>$dia</h3>
                                 <small>$cupos cupos</small>
                               </div>";
@@ -295,7 +291,7 @@ foreach ($cuposPorFecha as $row) {
 
     <script>
         function verHorarios(fecha) {
-            window.location.href = "horarios.php?fecha=" + fecha;
+            //window.location.href = "horarios.php?fecha=" + fecha;
         }
 
         function cargarMes() {
@@ -306,33 +302,42 @@ foreach ($cuposPorFecha as $row) {
     </script>
     <script>
         const modals = document.querySelectorAll(".modalAgregarHorario, .modalEditarHorario");
+        const estadocupo = <?php echo $cuposDisponibles[0]; ?>;
         const closeButtons = document.querySelectorAll(".close");
         const editButtons = document.querySelectorAll(".edit-btn");
-        const addButtons = document.querySelectorAll(".add-btn");
+        const addButtons = document.querySelectorAll("#btnverhorarios");
         const deleteButtons = document.querySelectorAll(".delete-btn");
 
         addButtons.forEach(btn => {
             btn.addEventListener("click", function(event) {
                 event.preventDefault();
-                modalAgregarHorario.style.display = "block";
+
+                if(estadocupo > 1){
+                    modalEditarHorario.style.display = "block";
+                }
+                else
+                {
+                    modalAgregarHorario.style.display = "block";
+                }
+                console.log(estadocupo);
             });
         });
 
         editButtons.forEach(btn => {
-    btn.addEventListener("click", function(event) {
-        event.preventDefault();
-        document.getElementById("edit-idHorario").value = this.dataset.idHorario;
-        document.getElementById("edit-idmedico").value = this.dataset.idmedico;
-        document.getElementById("edit-nombreMedico").value = this.dataset.medico;
-        document.getElementById("edit-dia").value = this.dataset.dia;
-        document.getElementById("edit-horaInicio").value = this.dataset.horaInicio;
-        document.getElementById("edit-horaFin").value = this.dataset.horaFin;
-        document.getElementById("edit-cupos").value = this.dataset.cupos;
-        document.getElementById("edit-fecha").value = this.dataset.fecha;
-        modalEditarHorario.style.display = "block";
-    });
-});
-        
+            btn.addEventListener("click", function(event) {
+                event.preventDefault();
+                document.getElementById("edit-idHorario").value = this.dataset.idHorario;
+                document.getElementById("edit-idmedico").value = this.dataset.idmedico;
+                document.getElementById("edit-nombreMedico").value = this.dataset.medico;
+                document.getElementById("edit-dia").value = this.dataset.dia;
+                document.getElementById("edit-horaInicio").value = this.dataset.horaInicio;
+                document.getElementById("edit-horaFin").value = this.dataset.horaFin;
+                document.getElementById("edit-cupos").value = this.dataset.cupos;
+                document.getElementById("edit-fecha").value = this.dataset.fecha;
+                modalEditarHorario.style.display = "block";
+            });
+        });
+
 
         closeButtons.forEach(button => {
             button.addEventListener("click", function() {
@@ -393,4 +398,5 @@ foreach ($cuposPorFecha as $row) {
 <?php
 include 'alert.php';
 ?>
+
 </html>
