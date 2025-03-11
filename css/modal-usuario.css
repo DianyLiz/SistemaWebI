@@ -9,7 +9,7 @@
 }
 
 /* Modal */
-.modalEditarUsuario, .modalAgregarUsuario {
+.modalEditarUsuario, .modalAgregarUsuario, .modalEditarMedico, .modalEditarPaciente, .modalAgregarEspecialidad, .modalEditarEspecialidad {
     display: none; /* Oculto por defecto */
     position: fixed;
     z-index: 1000;
@@ -17,7 +17,7 @@
     top: 0;
     width: 100%;
     height: 100%;
-    overflow-y: auto;
+    overflow-y: auto; /* Agrega desplazamiento vertical si el contenido es largo */
     background-color: rgba(0, 0, 0, 0.5);
 }
 
@@ -57,20 +57,30 @@ form .title {
     margin-bottom: 20px;
 }
 
-.form-group, .form-paciente {
+.form-group, .form-doctor, .form-paciente {
     display: grid;
     grid-template-columns: 1fr 1.5fr;
     gap: 15px;
     margin-bottom: 20px;
 }
 
-.form-group label, .form-paciente label {
+.form-group, .form-doctor, .form-paciente label {
     font-size: 14px;
     color: #252525;
     margin-bottom: 5px;
 }
 
-.form-group input, .form-paciente input {
+.form-group input, .form-doctor input, .form-paciente input, 
+.form-group select, .form-doctor select, .form-paciente select {
+    width: 100%;
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    outline: none;
+}
+
+.form-group textarea {
     width: 100%;
     padding: 8px;
     font-size: 16px;
@@ -95,16 +105,16 @@ form button:hover {
     background-color: #0d81c1;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
     .modal-content {
-        width: 80%;
+        width: 90%;
     }
 
-    .form-group, .form-paciente {
+    .form-group, .form-doctor, .form-paciente {
         grid-template-columns: 1fr;
     }
 
-    .form-group label, .form-paciente label {
+    .form-group, .form-doctor, .form-paciente label {
         text-align: left;
     }
 

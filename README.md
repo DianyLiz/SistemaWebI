@@ -49,4 +49,12 @@ Herramientas:
   Modificaciones 08-03-2025:
     Creación interfaz de formulario de Documentos Medicos.
 
+  Modificaciones 09-03-2025:
+    Modificaciones en la carpeta de admin.
+
+  Modificaciones 11-03-2025:
+    Modificaciones en la base de datos normalizando hasta la segunda forma normal.
+
+
+
 

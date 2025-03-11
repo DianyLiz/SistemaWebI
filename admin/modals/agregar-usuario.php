@@ -1,4 +1,11 @@
 <link rel="stylesheet" href="../css/modal-usuario.css">
+<style>
+    .form-doctor,
+    .form-paciente {
+        display: none;
+        margin-top: 15px;
+    }
+</style>
 <div id="modalAgregarUsuario" class="modalAgregarUsuario">
     <div class="modal-content">
         <span class="close">&times;</span>
@@ -28,13 +35,110 @@
 
                 <label for="add-tipoUsuario">Tipo de Usuario</label>
                 <select id="add-tipoUsuario" name="tipoUsuario">
-                <option value="" <?= empty($_SESSION['form_data']['tipoUsuario']) ? 'selected' : '' ?>>Seleccionar</option>
-                <option value="1" <?= (isset($_SESSION['form_data']['tipoUsuario']) && $_SESSION['form_data']['tipoUsuario'] == '1') ? 'selected' : '' ?>>Paciente</option>
-                <option value="2" <?= (isset($_SESSION['form_data']['tipoUsuario']) && $_SESSION['form_data']['tipoUsuario'] == '2') ? 'selected' : '' ?>>Médico</option>
-                <option value="3" <?= (isset($_SESSION['form_data']['tipoUsuario']) && $_SESSION['form_data']['tipoUsuario'] == '3') ? 'selected' : '' ?>>Administrador</option>
+                    <option value="" <?= empty($_SESSION['form_data']['tipoUsuario']) ? 'selected' : '' ?>>Seleccionar</option>
+                    <option value="1" <?= (isset($_SESSION['form_data']['tipoUsuario']) && $_SESSION['form_data']['tipoUsuario'] == '1') ? 'selected' : '' ?>>Paciente</option>
+                    <option value="2" <?= (isset($_SESSION['form_data']['tipoUsuario']) && $_SESSION['form_data']['tipoUsuario'] == '2') ? 'selected' : '' ?>>Médico</option>
+                    <option value="3" <?= (isset($_SESSION['form_data']['tipoUsuario']) && $_SESSION['form_data']['tipoUsuario'] == '3') ? 'selected' : '' ?>>Administrador</option>
                 </select>
+
+                <input type="text" id="rol-tipoUsuario" name="rol-tipoUsuario" readonly="true" value="">
+            </div>
+
+            <div class="form-doctor">
+                <label for="add-idespecialidad">Especialidad</label>
+                <select id="add-idespecialidad" name="idespecialidad">
+                    <option value="0">Seleccionar</option>
+                    <?php
+                    include '../conexion.php';
+                    $consulta = "SELECT * FROM Especialidades";
+                    $statement = $conn->prepare($consulta);
+                    $statement->execute();
+                    $resultset = $statement->fetchAll();
+                    foreach ($resultset as $especialidad) {
+                        $isselected = isset($_SESSION['form_data']['idespecialidad']) && $_SESSION['form_data']['idespecialidad'] == $especialidad['idEspecialidad'] ? 'selected' : '';
+                        echo '<option value="' . $especialidad['idEspecialidad'] . '" ' . $isselected . '>' . $especialidad['nombreEspecialidad'] . '</option>';
+                    }
+                    ?>
+                </select>
+
+                <label for="add-licenciaMedica">Nº Licencia Médica</label>
+                <input id="add-licenciaMedica" type="text" name="licenciaMedica" autocomplete="off" value="<?php echo isset($_SESSION['form_data']['licenciaMedica']) ? $_SESSION['form_data']['licenciaMedica'] : ''; ?>">
+
+                <label for="add-aniosExperiencia">Años de Experiencia</label>
+                <input id="add-aniosExperiencia" type="text" name="aniosExperiencia" autocomplete="off" value="<?php echo isset($_SESSION['form_data']['aniosExperiencia']) ? $_SESSION['form_data']['aniosExperiencia'] : ''; ?>">
+            </div>
+
+            <div class="form-paciente">
+                <label for="add-fechaNacimiento">Fecha de Nacimiento</label>
+                <input id="add-fechaNacimiento" type="date" name="fechaNacimiento" value="<?php echo isset($_SESSION['form_data']['fechaNacimiento']) ? $_SESSION['form_data']['fechaNacimiento'] : ''; ?>">
+
+                <label for="add-sexo">Sexo</label>
+                <select id="add-sexo" name="sexo">
+                    <option value="" <?= empty($_SESSION['form_data']['add-tipoUsuario']) ? 'selected' : '' ?>>Seleccionar</option>
+                    <option value="Masculino" <?= (isset($_SESSION['form_data']['sexo']) && $_SESSION['form_data']['sexo'] == 'Masculino') ? 'selected' : '' ?>>Masculino</option>
+                    <option value="Femenino" <?= (isset($_SESSION['form_data']['sexo']) && $_SESSION['form_data']['sexo'] == 'Femenino') ? 'selected' : '' ?>>Femenino</option>
+                </select>
+
+                <label for="add-telefono">Teléfono</label>
+                <input id="add-telefono" type="text" name="telefono" autocomplete="off" value="<?php echo isset($_SESSION['form_data']['telefono']) ? $_SESSION['form_data']['telefono'] : ''; ?>">
+
+                <label for="add-direccion">Dirección (opcional)</label>
+                <input id="add-direccion" type="text" name="direccion" autocomplete="off" value="<?php echo isset($_SESSION['form_data']['direccion']) ? $_SESSION['form_data']['direccion'] : ''; ?>">
             </div>
             <button type="submit" class="modificar">Registrar Usuario</button>
         </form>
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const tipoUsuarioSelect = document.getElementById("add-tipoUsuario");
+                const rolTipoUsuario = document.getElementById("rol-tipoUsuario");
+                const formDoctor = document.querySelector(".form-doctor");
+                const formPaciente = document.querySelector(".form-paciente");
+                const paginaActual = "<?php echo $paginaActual; ?>";
+
+                if (paginaActual === "medicos") {
+                    tipoUsuarioSelect.value = "2";
+                    tipoUsuarioSelect.hidden = true;
+                    rolTipoUsuario.value = "Médico";
+                    rolTipoUsuario.hidden = false;
+
+                } else if (paginaActual === "pacientes") {
+                    tipoUsuarioSelect.value = "1";
+                    tipoUsuarioSelect.hidden = true;
+                    rolTipoUsuario.value = "Paciente";
+                    rolTipoUsuario.hidden = false;
+                    
+                } else {
+                    tipoUsuarioSelect.hidden = false;
+                    rolTipoUsuario.value = "";
+                    rolTipoUsuario.hidden = true;
+                }
+
+                tipoUsuarioSelect.addEventListener("change", function() {
+                    if (tipoUsuarioSelect.value === "2") {
+                        formDoctor.style.display = "grid";
+                    } else {
+                        formDoctor.style.display = "none";
+                    }
+
+                    if (tipoUsuarioSelect.value === "1") {
+                        formPaciente.style.display = "grid";
+                    } else {
+                        formPaciente.style.display = "none";
+                    }
+                });
+
+                if (tipoUsuarioSelect.value === "2") {
+                    formDoctor.style.display = "grid";
+                } else {
+                    formDoctor.style.display = "none";
+                }
+
+                if (tipoUsuarioSelect.value === "1") {
+                    formPaciente.style.display = "grid";
+                } else {
+                    formPaciente.style.display = "none";
+                }
+            });
+        </script>
     </div>
 </div>
