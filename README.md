@@ -55,6 +55,12 @@ Herramientas:
   Modificaciones 11-03-2025:
     Modificaciones en la base de datos normalizando hasta la segunda forma normal.
 
+  Modificaciones 15-03-2025:
+    Creacion de modals para el apartado de documentos médicos.
+
+  Modificaciones 17-03-2025:
+    Creacion de modals para el apartado de documentos médicos y solucionando errores en el codigo.
+
 
 
 

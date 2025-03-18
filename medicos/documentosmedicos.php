@@ -220,8 +220,8 @@ $documentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <div class="contenedor">
         <?php include 'menu.php'; ?>
         <main class="contenido">
-            <?php include 'modals/editar-cita.php'; ?>
-            <?php include 'modals/agregar-cita.php'; ?>
+            <?php include 'modals/editar-documento.php'; ?>
+            <?php include 'modals/agregar-documento.php'; ?>
 
             <div class="filter-container">
                 <form method="GET" action="">
@@ -331,7 +331,7 @@ $documentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </style>
 
     <script>
-        const modals = document.querySelectorAll(".modalAgregarCita, .modalEditarCita");
+        const modals = document.querySelectorAll(".modalAgregarDocumento, .modalEditarDocumento");
         const closeButtons = document.querySelectorAll(".close");
         const editButtons = document.querySelectorAll(".edit-btn");
         const addButtons = document.querySelectorAll(".add-btn");
@@ -340,14 +340,14 @@ $documentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
         addButtons.forEach(btn => {
             btn.addEventListener("click", function(event) {
                 event.preventDefault();
-                modalAgregarCita.style.display = "block";
+                modalAgregarDocumento.style.display = "block";
             });
         });
 
         editButtons.forEach(btn => {
             btn.addEventListener("click", function(event) {
                 event.preventDefault();
-                modalEditarCita.style.display = "block";
+                modalEditarDocumento.style.display = "block";
             });
         });
 
@@ -363,9 +363,9 @@ $documentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
         deleteButtons.forEach(btn => {
             btn.addEventListener("click", async event => {
                 event.preventDefault();
-                const idCita = btn.dataset.idcita;
+                const idDocumento = btn.dataset.idDocumento;
                 const confirmacion = await Swal.fire({
-                    title: `¿Eliminar la cita Nº ${idCita}?`,
+                    title: `¿Eliminar el documento Nº ${idDocumento}?`,
                     text: "Esta acción no se puede deshacer.",
                     icon: "warning",
                     showCancelButton: true,
@@ -376,28 +376,116 @@ $documentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 });
                 if (!confirmacion.isConfirmed) return;
                 try {
-                    const response = await fetch("php/delete-cita.php", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/x-www-form-urlencoded"
-                        },
-                        body: `idCita=${idCita}`
-                    });
-                    const data = await response.json();
-                    await Swal.fire({
-                        title: data.status === "success" ? "Éxito" : "Error",
-                        text: data.message,
-                        icon: data.status === "success" ? "success" : "error"
-                    });
-                    if (data.status === "success") location.reload();
+                    const response = await fetch("php/delete-documento.php", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: `idDocumento=${idDocumento}`
+});
+const data = await response.json();
+if (data.status === "success") {
+    await Swal.fire({
+        title: "Éxito",
+        text: data.message,
+        icon: "success"
+    });
+    location.reload();
+} else {
+    await Swal.fire({
+        title: "Error",
+        text: data.message,
+        icon: "error"
+    });
+}
                 } catch (error) {
-                    Swal.fire({
-                        title: "Error",
-                        text: "Hubo un problema al eliminar la cita.",
-                        icon: "error"
-                    });
                     console.error("Error:", error);
                 }
+            });
+        });
+
+        modals.forEach(modal => {
+            modal.addEventListener("click", function(event) {
+                if (event.target === modal) {
+                    modal.style.display = "none";
+                }
+            });
+        });
+
+        window.addEventListener("click", function(event) {
+            if (event.target === modalAgregarDocumento || event.target === modalEditarDocumento) {
+                modals.forEach(modal => {
+                    modal.style.display = "none";
+                });
+            }
+        });
+
+        editButtons.forEach(btn => {
+            btn.addEventListener("click", function(event) {
+                event.preventDefault();
+                const idDocumento = btn.dataset.idDocumento;
+                const paciente = btn.dataset.paciente;
+                const cita = btn.dataset.cita;
+                document.getElementById("edit-idDocumento").value = idDocumento;
+                document.getElementById("edit-idPaciente").value = paciente;
+                document.getElementById("edit-idCita").value = cita;
+                modalEditarDocumento.style.display = "block";
+            });
+        });
+
+        addButtons.forEach(btn => {
+            btn.addEventListener("click", function(event) {
+                event.preventDefault();
+                modalAgregarDocumento.style.display = "block";
+            });
+        });
+
+        addButtons.forEach(btn => {
+            btn.addEventListener("click", function(event) {
+                event.preventDefault();
+                modalAgregarDocumento.style.display = "block";
+            });
+        });
+
+        addButtons.forEach(btn => {
+            btn.addEventListener("click", function(event) {
+                event.preventDefault();
+                modalAgregarDocumento.style.display = "block";
+            });
+        });
+
+        addButtons.forEach(btn => {
+            btn.addEventListener("click", function(event) {
+                event.preventDefault();
+                modalAgregarDocumento.style.display = "block";
+            });
+        });
+
+        addButtons.forEach(btn => {
+            btn.addEventListener("click", function(event) {
+                event.preventDefault();
+                modalAgregarDocumento.style.display = "block";
+            });
+        });
+
+        addButtons.forEach(btn => {
+            btn.addEventListener("click", function(event) {
+                event.preventDefault();
+                modalAgregarDocumento.style.display = "block";
+            });
+        });
+
+        addButtons.forEach(btn => {
+            btn.addEventListener("click", function(event) {
+                event.preventDefault();
+                modalAgregarDocumento.style.display = "block";
+            });
+        });
+
+        addButtons.forEach(btn => {
+            btn.addEventListener("click", function(event) {
+                event.preventDefault();
+                modalAgregarDocumento.style.display = "block";
             });
         });
     </script>
