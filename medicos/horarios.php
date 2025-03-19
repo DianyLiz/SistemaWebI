@@ -95,7 +95,6 @@ foreach ($cuposPorFecha as $row) {
         .unavailable {
             background-color: #f5f5f5;
             color: #999;
-            cursor: not-allowed;
             box-shadow: none;
         }
 
@@ -136,6 +135,21 @@ foreach ($cuposPorFecha as $row) {
                 font-size: 1.2rem;
             }
         }
+
+        @media (max-width: 724px) {
+            .calendar-container {
+                grid-template-columns: repeat(5, 1fr);
+            }
+
+            .day {
+                padding: 10px;
+                min-height: 60px;
+            }
+
+            .day h3 {
+                font-size: 1rem;
+            }
+        }
     </style>
 </head>
 
@@ -143,111 +157,9 @@ foreach ($cuposPorFecha as $row) {
     <?php include 'header.php'; ?>
     <div class="contenedor">
         <?php include 'menu.php'; ?>
-
-        <style>
-            .filter-container {
-                background: #ffffff;
-                padding: 20px;
-                border-radius: 10px;
-                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-                margin-bottom: 20px;
-                width: 100%;
-                max-width: 1200px;
-                margin: 20px auto;
-            }
-
-            .filter-container form {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                gap: 10px;
-                flex-wrap: wrap;
-            }
-
-            .filter-container input,
-            .filter-container select {
-                padding: 12px;
-                border: 1px solid #ddd;
-                border-radius: 8px;
-                font-size: 14px;
-                flex: 1;
-                min-width: 150px;
-                transition: border-color 0.3s ease;
-            }
-
-            .filter-container input:focus,
-            .filter-container select:focus {
-                border-color: #0099ff;
-                outline: none;
-            }
-
-            .filter-container button {
-                background-color: #0099ff;
-                color: white;
-                padding: 12px 24px;
-                border: none;
-                border-radius: 8px;
-                cursor: pointer;
-                font-size: 14px;
-                transition: background-color 0.3s ease;
-            }
-
-            .filter-container button:hover {
-                background-color: #0077cc;
-            }
-
-            @media (max-width: 768px) {
-                .filter-container form {
-                    flex-direction: column;
-                }
-
-                .filter-container input,
-                .filter-container select,
-                .filter-container button {
-                    width: 100%;
-                    margin-bottom: 10px;
-                }
-            }
-
-            .add-btn,
-            .btn-pdf,
-            .btn-excel,
-            .btn-word {
-                display: inline-block;
-                background-color: #0b5471;
-                color: white;
-                padding: 10px 20px;
-                margin-right: 10px;
-                margin-bottom: 10px;
-                border-radius: 5px;
-                text-decoration: none;
-                font-size: 14px;
-            }
-
-            .add-btn:hover,
-            .btn-pdf:hover,
-            .btn-excel:hover,
-            .btn-word:hover {
-                background-color: #9bbdf0;
-            }
-
-            @media (max-width: 768px) {
-                .export-buttons {
-                    flex-direction: column;
-                }
-
-                .add-btn,
-                .btn-pdf,
-                .btn-excel,
-                .btn-word {
-                    width: 100%;
-                    margin-right: 0;
-                }
-            }
-        </style>
+        <?php include 'modals/editar-horario.php'; ?>
+        <?php include 'modals/agregar-horario.php'; ?>
         <main class="contenido">
-            <?php include 'modals/editar-horario.php'; ?>
-            <?php include 'modals/agregar-horario.php'; ?>
             <div class="schedule-container">
                 <h2>Horarios Médicos</h2>
                 <div class="month-selector">
@@ -268,6 +180,16 @@ foreach ($cuposPorFecha as $row) {
                     <?php
                     for ($dia = 1; $dia <= $diasEnMes; $dia++) {
                         $fecha = "$anioActual-$mesActual-" . str_pad($dia, 2, "0", STR_PAD_LEFT);
+                        $dias = [
+                            'Sunday' => 'Domingo',
+                            'Monday' => 'Lunes',
+                            'Tuesday' => 'Martes',
+                            'Wednesday' => 'Miércoles',
+                            'Thursday' => 'Jueves',
+                            'Friday' => 'Viernes',
+                            'Saturday' => 'Sábado'
+                        ];
+                        $diaSemana = $dias[date('l', strtotime($fecha))];
                         $cupos = isset($cuposDisponibles[$fecha]) ? $cuposDisponibles[$fecha] : 0;
 
                         if ($cupos > 5) {
@@ -278,123 +200,138 @@ foreach ($cuposPorFecha as $row) {
                             $clase = "unavailable";
                         }
 
-                        echo "<div id='btnverhorarios' class='day $clase' onclick='verHorarios(\"$fecha\")'>
-                                <h3>$dia</h3>
-                                <small>$cupos cupos</small>
-                              </div>";
+                        $onclick = ($cupos == 0) ? "onclick=\"abrirModalAgregarHorario('$fecha','$diaSemana')\"" : "onclick=\"abrirModalEditarHorario('$fecha','$diaSemana')\"";
+
+                        echo "<div class='day $clase' $onclick>
+                <h3>$dia</h3>
+                <small>$cupos cupos</small>
+              </div>";
                     }
                     ?>
                 </div>
+
             </div>
         </main>
     </div>
-
-    <script>
-        function verHorarios(fecha) {
-            //window.location.href = "horarios.php?fecha=" + fecha;
-        }
-
-        function cargarMes() {
-            const mes = document.getElementById('selectMes').value;
-            const anio = document.getElementById('selectAnio').value;
-            window.location.href = `horarios.php?mes=${mes}&anio=${anio}`;
-        }
-    </script>
-    <script>
-        const modals = document.querySelectorAll(".modalAgregarHorario, .modalEditarHorario");
-        const estadocupo = <?php echo $cuposDisponibles[0]; ?>;
-        const closeButtons = document.querySelectorAll(".close");
-        const editButtons = document.querySelectorAll(".edit-btn");
-        const addButtons = document.querySelectorAll("#btnverhorarios");
-        const deleteButtons = document.querySelectorAll(".delete-btn");
-
-        addButtons.forEach(btn => {
-            btn.addEventListener("click", function(event) {
-                event.preventDefault();
-
-                if(estadocupo > 1){
-                    modalEditarHorario.style.display = "block";
-                }
-                else
-                {
-                    modalAgregarHorario.style.display = "block";
-                }
-                console.log(estadocupo);
-            });
-        });
-
-        editButtons.forEach(btn => {
-            btn.addEventListener("click", function(event) {
-                event.preventDefault();
-                document.getElementById("edit-idHorario").value = this.dataset.idHorario;
-                document.getElementById("edit-idmedico").value = this.dataset.idmedico;
-                document.getElementById("edit-nombreMedico").value = this.dataset.medico;
-                document.getElementById("edit-dia").value = this.dataset.dia;
-                document.getElementById("edit-horaInicio").value = this.dataset.horaInicio;
-                document.getElementById("edit-horaFin").value = this.dataset.horaFin;
-                document.getElementById("edit-cupos").value = this.dataset.cupos;
-                document.getElementById("edit-fecha").value = this.dataset.fecha;
-                modalEditarHorario.style.display = "block";
-            });
-        });
-
-
-        closeButtons.forEach(button => {
-            button.addEventListener("click", function() {
-                modals.forEach(modal => modal.style.display = "none");
-            });
-        });
-
-        window.onclick = function(event) {
-            modals.forEach(modal => {
-                if (event.target == modal) {
-                    modal.style.display = "none";
-                }
-            });
-        };
-
-        deleteButtons.forEach(btn => {
-            btn.addEventListener("click", async event => {
-                event.preventDefault();
-                const idHorario = btn.dataset.idhorario;
-                const confirmacion = await Swal.fire({
-                    title: `¿Eliminar el Horario Nº ${idHorario}?`,
-                    text: "Esta acción no se puede deshacer.",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonColor: "#d33",
-                    cancelButtonColor: "#3085d6",
-                    confirmButtonText: "Eliminar",
-                    cancelButtonText: "Cancelar"
-                });
-                if (!confirmacion.isConfirmed) return;
-                try {
-                    const response = await fetch("php/delete-horario.php", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/x-www-form-urlencoded"
-                        },
-                        body: `idHorario=${idHorario}`
-                    });
-                    const data = await response.json();
-                    await Swal.fire({
-                        title: data.status === "success" ? "Éxito" : "Error",
-                        text: data.message,
-                        icon: data.status === "success" ? "success" : "error"
-                    });
-                    if (data.status === "success") location.reload();
-                } catch (error) {
-                    Swal.fire({
-                        title: "Error",
-                        text: "Hubo un problema al eliminar el horario.",
-                        icon: "error"
-                    });
-                    console.error("Error:", error);
-                }
-            });
-        });
-    </script>
 </body>
+<script>
+    const modals = document.querySelectorAll(".modalAgregarHorario, .modalEditarHorario");
+    const closeButtons = document.querySelectorAll(".close");
+    const btneditar = document.querySelector("#editarbtn");
+
+    function verHorarios() {
+        console.log("Ver horarios de: ");
+    }
+
+    function abrirModalAgregarHorario(fecha, dia) {
+        const modal = document.getElementById("modalAgregarHorario");
+        if (!modal) {
+            console.error("El modal no existe en el DOM.");
+            return;
+        }
+        modal.style.display = "block";
+        
+        document.getElementById("add-fecha").value = fecha;
+        document.getElementById("add-diaSemana").value = dia;
+        btneditar.style.display = "none";
+    }
+
+    function abrirModalEditarHorario(fecha, dia) {
+        const modal = document.getElementById("modalEditarHorario");
+
+        if (!modal) {
+            console.error("El modal no existe en el DOM.");
+            return;
+        }
+        modal.style.display = "block";
+        document.getElementById("edit-idHorario").value = "";
+        document.getElementById("edit-dnimedico").value = "";
+        document.getElementById("edit-idmedico").value = "";
+        document.getElementById("edit-nombreMedico").value = "";
+        document.getElementById("edit-fecha").value = fecha;
+        document.getElementById("edit-diaSemana").value = dia;
+        document.getElementById("edit-hora").value = "";
+        document.getElementById("edit-fin").value = "";
+        document.getElementById("edit-cupos").value = "";
+        obtenerHorariosDisponibles(fecha);
+        btneditar.style.display = "block";
+    }
+
+    function obtenerHorariosDisponibles(fecha) {
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", "php/obtener-horarios.php?fecha=" + fecha, true);
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                const respuesta = JSON.parse(xhr.responseText);
+                if (respuesta.success) {
+                    actualizarTablaHorarios(respuesta.horarios);
+                } else {
+                    alert("No se pudieron obtener los horarios.");
+                }
+            }
+        };
+        xhr.send();
+    }
+
+    function actualizarTablaHorarios(horarios) {
+        const tbody = document.querySelector("#modalEditarHorario tbody");
+        tbody.innerHTML = ""; // Limpiar la tabla antes de agregar nuevos datos
+
+        if (horarios.length > 0) {
+            horarios.forEach(horario => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                <td>${horario.fecha}</td>
+                <td>${horario.diaSemana}</td>
+                <td>${horario.Medico}</td>
+                <td>${horario.HoraInicio} - ${horario.HoraFin}</td>
+                <td>${horario.cupos}</td>
+                <td>
+                <a href="#" class="edit-btn" 
+                    data-idhorario="${horario.idHorario}"
+                    data-dnimedico="${horario.DNIMedico}"
+                    data-idmedico="${horario.idMedico}"
+                    data-nombremedico="${horario.Medico}"
+                    data-fecha="${horario.fecha}"
+                    data-diasemana="${horario.diaSemana}"
+                    data-horainicio="${horario.HoraInicio}"
+                    data-horafin="${horario.HoraFin}"
+                    data-cupos="${horario.cupos}">
+                <img src="../img/edit.png" width="35" height="35"></a>
+                </td>
+            `;
+                tbody.appendChild(tr);
+                autocompletarCampos();
+            });
+        } else {
+            tbody.innerHTML = "<tr><td colspan='6'>No hay horarios disponibles para esta fecha.</td></tr>";
+        }
+    }
+
+    function cargarMes() {
+        const mes = document.getElementById('selectMes').value;
+        const anio = document.getElementById('selectAnio').value;
+        window.location.href = `horarios.php?mes=${mes}&anio=${anio}`;
+    }
+
+    closeButtons.forEach(button => {
+        button.addEventListener("click", function() {
+            modals.forEach(modal => modal.style.display = "none");
+        });
+    });
+
+    window.onclick = function(event) {
+        modals.forEach(modal => {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        });
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+
+    });
+</script>
 <?php
 include 'alert.php';
 ?>

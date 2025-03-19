@@ -1,39 +1,47 @@
-<?php
-session_start();
+<?php 
 include '../../conexion.php';
+session_start();
+if($_SERVER["REQUEST_METHOD"] == "POST") {
+    $_SESSION['form_data'] = $_POST;
+    $idmedico = $_POST['idmedico'];
+    $diasemana = $_POST['diaSemana'];
+    $horainicio = $_POST['horainicio'];
+    $horafin = $_POST['horafin'];
+    $cupos = $_POST['cupos'];
+    $fecha = $_POST['fecha'];
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $medico = filter_input(INPUT_POST, 'medico', FILTER_SANITIZE_NUMBER_INT);
-    $diaSemana = filter_input(INPUT_POST, 'diaSemana', FILTER_SANITIZE_STRING);
-    $horaInicio = filter_input(INPUT_POST, 'horaInicio', FILTER_SANITIZE_STRING);
-    $estado = filter_input(INPUT_POST, 'estado', FILTER_SANITIZE_STRING);
-    $horaFin = filter_input(INPUT_POST, 'horaFin', FILTER_SANITIZE_STRING);
-    $cupos = filter_input(INPUT_POST, 'cupos', FILTER_SANITIZE_NUMBER_INT);
-    $fecha = filter_input(INPUT_POST, 'fecha', FILTER_SANITIZE_STRING);
-
-    if (empty($medico) || empty($diaSemana) || empty($horaInicio) || empty($estado) || empty($horaFin) || empty($cupos) || empty($fecha)) {
-        $_SESSION['mensaje'] = "Todos los campos son obligatorios.";
-        $_SESSION['tipo_mensaje'] = "error";
+    if(empty($idmedico) || empty($diasemana) || empty($horainicio) || empty($horafin) || empty($cupos)) {
+        $_SESSION['error'] = "Complete los campos obligatorios.";
         header("Location: ../horarios.php");
-        exit;
+        exit();
     }
 
     try {
-        $sql = "INSERT INTO Horarios (idMedico, diaSemana, horaInicio, estado, horaFin, cupos, fecha) 
-                VALUES (?, ?, ?, ?, ?, ?, ?)";
-        $stmt = $conn->prepare($sql);
-        $stmt->execute([$medico, $diaSemana, $horaInicio, $estado, $horaFin, $cupos, $fecha]);
+        $consulta = "SELECT * FROM HorariosMedicos WHERE idMedico = ? AND fecha = ? AND horaInicio = ? AND horaFin = ?";
+        $statement = $conn->prepare($consulta);
+        $statement->execute([$idmedico, $fecha, $horainicio, $horafin]);
 
-        $_SESSION['mensaje'] = "Horario agregado correctamente.";
-        $_SESSION['tipo_mensaje'] = "success";
+        if($statement->fetch()) {
+            $_SESSION['error'] = "Ya existe un horario con este médico en la misma fecha y hora.";
+            header("Location: ../horarios.php");
+            exit();
+        }
+
+        $consulta = "INSERT INTO HorariosMedicos (idMedico, diaSemana, horaInicio, horaFin, cupos, fecha) VALUES (?, ?, ?, ?, ?, ?)";
+        $statement = $conn->prepare($consulta);
+        $statement->execute([$idmedico, $diasemana, $horainicio, $horafin, $cupos, $fecha]);
+
+        if($statement->rowCount() > 0) {
+            $_SESSION['success'] = "Horario agregado correctamente.";
+            unset($_SESSION['form_data']);
+            header("Location: ../horarios.php");
+        } else {
+            $_SESSION['error'] = "Hubo un problema al agregar el horario.";
+            header("Location: ../horarios.php");
+        }
+
     } catch (PDOException $e) {
-        $_SESSION['mensaje'] = "Error al agregar el horario: " . $e->getMessage();
-        $_SESSION['tipo_mensaje'] = "error";
+        $_SESSION['error'] = "Error en la base de datos: " . $e->getMessage();
     }
-
-    $conn = null;
-
-    header("Location: ../horarios.php");
-    exit;
 }
 ?>
