@@ -8,13 +8,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $idMedico = filter_input(INPUT_POST, 'idMedico', FILTER_SANITIZE_NUMBER_INT);
     $tipoDocumento = filter_input(INPUT_POST, 'tipoDocumento', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
     $descripcion = filter_input(INPUT_POST, 'descripcion', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-    $fechaSubida = filter_input(INPUT_POST, 'fechaSubida', FILTER_SANITIZE_STRING);
+    $fechaSubida = filter_input(INPUT_POST, 'fechaSubida', FILTER_SANITIZE_FULL_SPECIAL_CHARS);
 
-    if (empty($idDocumento)) {
-        $_SESSION['error'] = "ID de documento no válido.";
-        header('Location: ../documentosmedicos.php');
-        exit();
-    }
 
     if (empty($idDocumento) || empty($idPaciente) || empty($idMedico) || empty($tipoDocumento) || empty($descripcion) || empty($fechaSubida)) {
         $_SESSION['error'] = "Complete los campos obligatorios.";

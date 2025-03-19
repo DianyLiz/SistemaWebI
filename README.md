@@ -61,6 +61,7 @@ Herramientas:
   Modificaciones 17-03-2025:
     Creacion de modals para el apartado de documentos médicos y solucionando errores en el codigo.
 
-
+  Modificaciones 19-03-2025:
+    Solucionando errores en el codigo con el apartado de documentos medicos.
 
 

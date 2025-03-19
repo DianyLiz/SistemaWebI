@@ -5,8 +5,6 @@
         <form action="php/edit-documento.php" method="POST" enctype="multipart/form-data">
             <div class="title">Editar Documento Médico</div>
             <div class="form-group">
-                <label for="edit-idDocumento">ID Documento</label>
-                <input id="edit-idDocumento" type="text" name="idDocumento" autocomplete="off" readonly>
 
                 <label for="edit-idPaciente">ID Paciente</label>
                 <input id="edit-idPaciente" type="text" name="idPaciente" autocomplete="off" readonly>

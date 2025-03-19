@@ -23,7 +23,6 @@ $sql = "SELECT
     d.idCita,
     d.fechaSubida,
     d.tipoDocumento,
-    d.urlDocumento,
     d.descripcion
 FROM [dbo].[DocumentosMedicos] d
 LEFT JOIN [dbo].[Pacientes] p ON d.idPaciente = p.idPaciente
@@ -142,50 +141,56 @@ if (isset($_GET['export_excel'])) {
 }
 
 if (isset($_GET['export_word'])) {
-    $stmt = $conn->prepare($sql);
-    if ($paciente_filter) {
-        $stmt->bindValue(':paciente_filter', '%' . $paciente_filter . '%');
-    }
-    if ($medico_filter) {
-        $stmt->bindValue(':medico_filter', '%' . $medico_filter . '%');
-    }
-    if ($tipo_filter) {
-        $stmt->bindValue(':tipo_filter', '%' . $tipo_filter . '%');
-    }
-    if ($fecha_filter) {
-        $stmt->bindValue(':fecha_filter', $fecha_filter);
-    }
-    $stmt->execute();
-    $documentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    try {
+        $stmt = $conn->prepare($sql);
+        if ($paciente_filter) {
+            $stmt->bindValue(':paciente_filter', '%' . $paciente_filter . '%');
+        }
+        if ($medico_filter) {
+            $stmt->bindValue(':medico_filter', '%' . $medico_filter . '%');
+        }
+        if ($tipo_filter) {
+            $stmt->bindValue(':tipo_filter', '%' . $tipo_filter . '%');
+        }
+        if ($fecha_filter) {
+            $stmt->bindValue(':fecha_filter', $fecha_filter);
+        }
+        $stmt->execute();
+        $documentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    $phpWord = new PhpWord();
-    $section = $phpWord->addSection();
+        $phpWord = new PhpWord();
+        $section = $phpWord->addSection();
 
-    $section->addText("Lista de Documentos Médicos", ['bold' => true, 'size' => 16]);
-    $table = $section->addTable();
+        $section->addText("Lista de Documentos Médicos", ['bold' => true, 'size' => 16]);
+        $table = $section->addTable();
 
-    $table->addRow();
-    $table->addCell(2000)->addText("Paciente");
-    $table->addCell(2000)->addText("Médico");
-    $table->addCell(2000)->addText("Tipo");
-    $table->addCell(2000)->addText("Descripción");
-    $table->addCell(2000)->addText("Fecha Subida");
-
-    foreach ($documentos as $fila) {
         $table->addRow();
-        $table->addCell(2000)->addText($fila['paciente']);
-        $table->addCell(2000)->addText($fila['Medico']);
-        $table->addCell(2000)->addText($fila['tipoDocumento']);
-        $table->addCell(2000)->addText($fila['descripcion']);
-        $table->addCell(2000)->addText($fila['fechaSubida']);
+        $table->addCell(2000)->addText("Paciente");
+        $table->addCell(2000)->addText("Médico");
+        $table->addCell(2000)->addText("Tipo");
+        $table->addCell(2000)->addText("Descripción");
+        $table->addCell(2000)->addText("Fecha Subida");
+
+        foreach ($documentos as $fila) {
+            $table->addRow();
+            $table->addCell(2000)->addText($fila['paciente']);
+            $table->addCell(2000)->addText($fila['Medico']);
+            $table->addCell(2000)->addText($fila['tipoDocumento']);
+            $table->addCell(2000)->addText($fila['descripcion']);
+            $table->addCell(2000)->addText($fila['fechaSubida']);
+        }
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+        header("Content-Disposition: attachment;filename=\"documentos_medicos.docx\"");
+        header('Cache-Control: max-age=0');
+
+        $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
+        $objWriter->save('php://output');
+        exit;
+    } catch (Exception $e) {
+        echo 'Error al generar el documento Word: ',  $e->getMessage();
     }
-
-    header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-    header("Content-Disposition: attachment;filename=\"documentos_medicos.docx\"");
-    $phpWord->save('php://output');
-    exit;
 }
-
 $documentos = [];
 $stmt = $conn->prepare($sql);
 if ($paciente_filter) {
@@ -338,11 +343,25 @@ $documentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
         const deleteButtons = document.querySelectorAll(".delete-btn");
 
         addButtons.forEach(btn => {
-            btn.addEventListener("click", function(event) {
-                event.preventDefault();
-                modalAgregarDocumento.style.display = "block";
-            });
+        btn.addEventListener("click", function() {
+            event.preventDefault();
+            modalAgregarUsuario.style.display = "block";
         });
+    });
+
+    closeButtons.forEach(button => {
+        button.addEventListener("click", function() {
+            modals.forEach(modal => modal.style.display = "none");
+        });
+    });
+
+    window.onclick = function(event) {
+        modals.forEach(modal => {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        });
+    };
 
         editButtons.forEach(btn => {
             btn.addEventListener("click", function(event) {
@@ -351,14 +370,7 @@ $documentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
             });
         });
 
-        closeButtons.forEach(btn => {
-            btn.addEventListener("click", function(event) {
-                event.preventDefault();
-                modals.forEach(modal => {
-                    modal.style.display = "none";
-                });
-            });
-        });
+        
 
         deleteButtons.forEach(btn => {
             btn.addEventListener("click", async event => {
@@ -440,54 +452,17 @@ if (data.status === "success") {
             });
         });
 
-        addButtons.forEach(btn => {
+        deleteButtons.forEach(btn => {
             btn.addEventListener("click", function(event) {
                 event.preventDefault();
-                modalAgregarDocumento.style.display = "block";
-            });
-        });
-
-        addButtons.forEach(btn => {
-            btn.addEventListener("click", function(event) {
-                event.preventDefault();
-                modalAgregarDocumento.style.display = "block";
-            });
-        });
-
-        addButtons.forEach(btn => {
-            btn.addEventListener("click", function(event) {
-                event.preventDefault();
-                modalAgregarDocumento.style.display = "block";
-            });
-        });
-
-        addButtons.forEach(btn => {
-            btn.addEventListener("click", function(event) {
-                event.preventDefault();
-                modalAgregarDocumento.style.display = "block";
-            });
-        });
-
-        addButtons.forEach(btn => {
-            btn.addEventListener("click", function(event) {
-                event.preventDefault();
-                modalAgregarDocumento.style.display = "block";
-            });
-        });
-
-        addButtons.forEach(btn => {
-            btn.addEventListener("click", function(event) {
-                event.preventDefault();
-                modalAgregarDocumento.style.display = "block";
-            });
-        });
-
-        addButtons.forEach(btn => {
-            btn.addEventListener("click", function(event) {
-                event.preventDefault();
-                modalAgregarDocumento.style.display = "block";
+                const idDocumento = btn.dataset.idDocumento;
+                const confirmacion = confirm(`¿Eliminar el documento Nº ${idDocumento}?`);
+                if (confirmacion) {
+                    location.href = `php/delete-documento.php?idDocumento=${idDocumento}`;
+                }
             });
         });
     </script>
 </body>
+<?php include 'alert.php'; ?>
 </html>
