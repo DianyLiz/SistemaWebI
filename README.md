@@ -64,4 +64,9 @@ Herramientas:
   Modificaciones 19-03-2025:
     Solucionando errores en el codigo con el apartado de documentos medicos.
 
+  Modificaciones 20-03-2025:
+    Solucionando errores en el codigo con el apartado de documentos medicos.
+    Modificacion de las restricciones en la base de datos de la tabla de DocumentosMedicos.
+
+
 

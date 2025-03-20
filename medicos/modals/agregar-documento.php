@@ -10,6 +10,7 @@
                 <select id="add-paciente" name="idPaciente" required>
                     <option value="">Seleccionar</option>
                     <?php
+                    include '../../conexion.php';
                     $sql = "SELECT idPaciente, nombre, apellido 
                             FROM Pacientes 
                             INNER JOIN Usuarios ON Pacientes.idUsuario = Usuarios.idUsuario";
@@ -37,16 +38,31 @@
                     }
                     ?>
                 </select>
+        <label for="add-cita">Cita</label>
+        <select id="add-cita" name="idCita" required>
+            <option value="">Seleccionar</option>
+            <?php
+            try {
+                $sql = "SELECT C.idCita , h.fecha FROM Citas C
+                        inner JOIN HorariosMedicos h ON c.idHorario = h.idHorario"; 
+                $query = $conn->prepare($sql);
+                $query->execute();
+                $citas = $query->fetchAll(PDO::FETCH_ASSOC);
+                foreach ($citas as $cita) {
+                    echo "<option value='{$cita['idCita']}'>{$cita['fecha']}</option>";
+                }
+            } catch (PDOException $e) {
+                echo "<option value=''>Error al cargar citas</option>";
+            }
+            ?>
+        </select>
 
                 <label for="add-tipo">Tipo de Documento</label>
                 <select id="add-tipo" name="tipoDocumento" required>
                     <option value="">Seleccionar</option>
                     <option value="Receta">Receta</option>
-                    <option value="Informe">Constancia</option>
+                    <option value="Constancia">Constancia</option>
                 </select>
-
-                <label for="add-archivo">Documento</label>
-                <input type="file" id="add-archivo" name="urlDocumento" accept="application/pdf,image/*" required>
 
                 <label for="add-descripcion">Descripción</label>
                 <textarea id="add-descripcion" name="descripcion" autocomplete="off" required></textarea>
@@ -78,3 +94,6 @@
         }
     }
 </script>
+<?php
+$conn = null;
+?>
