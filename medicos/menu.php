@@ -6,7 +6,7 @@
         <li><a href="pacientes.php">Pacientes</a></li>
         <li><a href="horarios.php">Horarios Médicos</a></li>
         <li><a href="documentosmedicos.php">Documentos Médicos</a></li>
-        <li><a href="#">Expedientes Médicos</a></li>
+        <li><a href="expedientesmedicos.php">Expedientes Médicos</a></li>
     </ul>
 </aside>
 <script>

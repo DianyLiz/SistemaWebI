@@ -16,39 +16,35 @@ $tipo_filter = $_GET['tipo'] ?? '';
 $fecha_filter = $_GET['fecha'] ?? '';
 
 $sql = "SELECT  
-    d.idDocumento,
-    d.idPaciente, 
+    e.IdExpediente,
+    e.idPaciente, 
     CONCAT(u1.nombre, ' ', u1.apellido) AS paciente, 
-    h.fecha as fechaCita, 
-    d.IdMedico,
-    Concat(u2.nombre, ' ', u2.apellido) as Medico, 
-    d.tipoDocumento, 
-    d.descripcion, 
-    d.fechaSubida,
-    c.idCita  
-FROM DocumentosMedicos d
-LEFT JOIN [dbo].[Pacientes] p ON d.idPaciente = p.idPaciente
-LEFT JOIN Citas c ON d.idCita = c.idCita
-LEFT JOIN HorariosMedicos h ON c.idHorario = h.idHorario
-LEFT JOIN Medicos m ON h.idMedico = m.idMedico
+    e.FechaCreacion,
+    e.Antecedentes,
+    e.Alergias,
+    e.MedicamentosActuales,
+    e.EnfermedadesCronicas,
+    e.Descripcion,
+    e.FechaActualizacion
+FROM ExpedienteMedico e
+LEFT JOIN [dbo].[Pacientes] p ON e.idPaciente = p.idPaciente
 LEFT JOIN [dbo].[Usuarios] u1 ON p.idUsuario = u1.idUsuario  
-LEFT JOIN Usuarios u2 ON m.idUsuario = u2.idUsuario
 WHERE 1=1";
 
 if ($paciente_filter) {
     $sql .= " AND u1.nombre LIKE :paciente_filter";
 }
 if ($cita_filter) {
-    $sql .= " AND h.idHorario = :cita_filter";
+    $sql .= " AND e.IdExpediente = :cita_filter"; // Ajustado para usar IdExpediente
 }
 if ($medico_filter) {
-    $sql .= " AND u2.nombre LIKE :medico_filter";
+    $sql .= " AND u1.nombre LIKE :medico_filter"; // Ajustado para usar u1.nombre
 }
 if ($tipo_filter) {
-    $sql .= " AND d.tipoDocumento LIKE :tipo_filter";
+    $sql .= " AND e.Descripcion LIKE :tipo_filter"; // Ajustado para usar Descripcion
 }
 if ($fecha_filter) {
-    $sql .= " AND d.fechaSubida = :fecha_filter";
+    $sql .= " AND e.FechaCreacion = :fecha_filter"; // Ajustado para usar FechaCreacion
 }
 
 $stmt = $conn->prepare($sql);
@@ -71,27 +67,31 @@ $stmt->execute();
 $documentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 if (isset($_GET['export_pdf'])) {
-    $html = "<h1>Lista de Documentos Médicos</h1>";
+    $html = "<h1>Lista de Expedientes Médicos</h1>";
     $html .= "<table border='1' cellpadding='10' cellspacing='0'>";
     $html .= "<thead>
                 <tr>
                     <th>Paciente</th>
-                    <th>Cita</th>
-                    <th>Médico</th>
-                    <th>Tipo</th>
+                    <th>Fecha Creación</th>
+                    <th>Antecedentes</th>
+                    <th>Alergias</th>
+                    <th>Medicamentos Actuales</th>
+                    <th>Enfermedades Crónicas</th>
                     <th>Descripción</th>
-                    <th>Fecha Subida</th>
+                    <th>Fecha Actualización</th>
                 </tr>
               </thead><tbody>";
 
     foreach ($documentos as $fila) {
         $html .= "<tr>
                     <td>{$fila['paciente']}</td>
-                    <td>{$fila['fechaCita']}</td>
-                    <td>{$fila['Medico']}</td>
-                    <td>{$fila['tipoDocumento']}</td>
-                    <td>{$fila['descripcion']}</td>
-                    <td>{$fila['fechaSubida']}</td>
+                    <td>{$fila['FechaCreacion']}</td>
+                    <td>{$fila['Antecedentes']}</td>
+                    <td>{$fila['Alergias']}</td>
+                    <td>{$fila['MedicamentosActuales']}</td>
+                    <td>{$fila['EnfermedadesCronicas']}</td>
+                    <td>{$fila['Descripcion']}</td>
+                    <td>{$fila['FechaActualizacion']}</td>
                   </tr>";
     }
     $html .= "</tbody></table>";
@@ -104,7 +104,7 @@ if (isset($_GET['export_pdf'])) {
     $dompdf->setPaper('A4', 'portrait');
     $dompdf->render();
 
-    $dompdf->stream("documentos_medicos.pdf", array("Attachment" => true));
+    $dompdf->stream("expedientes_medicos.pdf", array("Attachment" => true));
     exit;
 }
 
@@ -112,25 +112,29 @@ if (isset($_GET['export_excel'])) {
     $spreadsheet = new Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
     $sheet->setCellValue('A1', 'Paciente');
-    $sheet->setCellValue('B1', 'Cita');
-    $sheet->setCellValue('C1', 'Médico');
-    $sheet->setCellValue('D1', 'Tipo');
-    $sheet->setCellValue('E1', 'Descripción');
-    $sheet->setCellValue('F1', 'Fecha Subida');
+    $sheet->setCellValue('B1', 'Fecha Creación');
+    $sheet->setCellValue('C1', 'Antecedentes');
+    $sheet->setCellValue('D1', 'Alergias');
+    $sheet->setCellValue('E1', 'Medicamentos Actuales');
+    $sheet->setCellValue('F1', 'Enfermedades Crónicas');
+    $sheet->setCellValue('G1', 'Descripción');
+    $sheet->setCellValue('H1', 'Fecha Actualización');
 
     $row = 2;
     foreach ($documentos as $fila) {
         $sheet->setCellValue("A$row", $fila['paciente']);
-        $sheet->setCellValue("B$row", $fila['fechaCita']);
-        $sheet->setCellValue("C$row", $fila['Medico']);
-        $sheet->setCellValue("D$row", $fila['tipoDocumento']);
-        $sheet->setCellValue("E$row", $fila['descripcion']);
-        $sheet->setCellValue("F$row", $fila['fechaSubida']);
+        $sheet->setCellValue("B$row", $fila['FechaCreacion']);
+        $sheet->setCellValue("C$row", $fila['Antecedentes']);
+        $sheet->setCellValue("D$row", $fila['Alergias']);
+        $sheet->setCellValue("E$row", $fila['MedicamentosActuales']);
+        $sheet->setCellValue("F$row", $fila['EnfermedadesCronicas']);
+        $sheet->setCellValue("G$row", $fila['Descripcion']);
+        $sheet->setCellValue("H$row", $fila['FechaActualizacion']);
         $row++;
     }
 
     $writer = new Xlsx($spreadsheet);
-    $filename = 'documentos_medicos.xlsx';
+    $filename = 'expedientes_medicos.xlsx';
 
     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     header("Content-Disposition: attachment;filename=\"$filename\"");
@@ -144,29 +148,33 @@ if (isset($_GET['export_word'])) {
         $phpWord = new PhpWord();
         $section = $phpWord->addSection();
 
-        $section->addText("Lista de Documentos Médicos", ['bold' => true, 'size' => 16]);
+        $section->addText("Lista de Expedientes Médicos", ['bold' => true, 'size' => 16]);
         $table = $section->addTable();
 
         $table->addRow();
         $table->addCell(2000)->addText("Paciente");
-        $table->addCell(2000)->addText("Cita");
-        $table->addCell(2000)->addText("Médico");
-        $table->addCell(2000)->addText("Tipo");
+        $table->addCell(2000)->addText("Fecha Creación");
+        $table->addCell(2000)->addText("Antecedentes");
+        $table->addCell(2000)->addText("Alergias");
+        $table->addCell(2000)->addText("Medicamentos Actuales");
+        $table->addCell(2000)->addText("Enfermedades Crónicas");
         $table->addCell(2000)->addText("Descripción");
-        $table->addCell(2000)->addText("Fecha Subida");
+        $table->addCell(2000)->addText("Fecha Actualización");
 
         foreach ($documentos as $fila) {
             $table->addRow();
             $table->addCell(2000)->addText($fila['paciente']);
-            $table->addCell(2000)->addText($fila['fechaCita']);
-            $table->addCell(2000)->addText($fila['Medico']);
-            $table->addCell(2000)->addText($fila['tipoDocumento']);
-            $table->addCell(2000)->addText($fila['descripcion']);
-            $table->addCell(2000)->addText($fila['fechaSubida']);
+            $table->addCell(2000)->addText($fila['FechaCreacion']);
+            $table->addCell(2000)->addText($fila['Antecedentes']);
+            $table->addCell(2000)->addText($fila['Alergias']);
+            $table->addCell(2000)->addText($fila['MedicamentosActuales']);
+            $table->addCell(2000)->addText($fila['EnfermedadesCronicas']);
+            $table->addCell(2000)->addText($fila['Descripcion']);
+            $table->addCell(2000)->addText($fila['FechaActualizacion']);
         }
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-        header("Content-Disposition: attachment;filename=\"documentos_medicos.docx\"");
+        header("Content-Disposition: attachment;filename=\"expedientes_medicos.docx\"");
         header('Cache-Control: max-age=0');
 
         $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
@@ -176,26 +184,6 @@ if (isset($_GET['export_word'])) {
         echo 'Error al generar el documento Word: ',  $e->getMessage();
     }
 }
-$documentos = [];
-$stmt = $conn->prepare($sql);
-if ($paciente_filter) {
-    $stmt->bindValue(':paciente_filter', '%' . $paciente_filter . '%');
-}
-if ($cita_filter) {
-    $stmt->bindValue(':cita_filter', $cita_filter);
-}
-if ($medico_filter) {
-    $stmt->bindValue(':medico_filter', '%' . $medico_filter . '%');
-}
-if ($tipo_filter) {
-    $stmt->bindValue(':tipo_filter', '%' . $tipo_filter . '%');
-}
-if ($fecha_filter) {
-    $stmt->bindValue(':fecha_filter', $fecha_filter);
-}
-$stmt->execute();
-$documentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -203,7 +191,7 @@ $documentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Citas</title>
+    <title>Gestión de Expedientes Médicos</title>
     <link rel="stylesheet" href="../css/tabla.css">
     <link rel="stylesheet" href="../css/filter.css">
 </head>
@@ -226,9 +214,9 @@ $documentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
 
             <div class="table-container">
-                <h2>Documentos Médicos</h2>
+                <h2>Expedientes Médicos</h2>
                 <div class="export-buttons">
-                    <a href="#" class="add-btn">Agregar Documento</a>
+                    <a href="#" class="add-btn">Agregar Expediente</a>
                     <a href="?export_pdf" class="btn-pdf">Exportar a PDF</a>
                     <a href="?export_excel" class="btn-excel">Exportar a Excel</a>
                     <a href="?export_word" class="btn-word">Exportar a Word</a>
@@ -239,11 +227,13 @@ $documentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <tr>
                                 <th>ID</th>
                                 <th>Paciente</th>
-                                <th>Cita</th>
-                                <th>Médico</th>
-                                <th>Tipo</th>
+                                <th>Fecha Creación</th>
+                                <th>Antecedentes</th>
+                                <th>Alergias</th>
+                                <th>Medicamentos Actuales</th>
+                                <th>Enfermedades Crónicas</th>
                                 <th>Descripción</th>
-                                <th>Fecha Subida</th>
+                                <th>Fecha Actualización</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -251,29 +241,31 @@ $documentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <?php if ($documentos) {
                                 foreach ($documentos as $fila) {
                                     echo "<tr>
-                                        <td>{$fila['idDocumento']}</td>
+                                        <td>{$fila['IdExpediente']}</td>
                                         <td>{$fila['paciente']}</td>
-                                        <td>{$fila['fechaCita']}</td>
-                                        <td>{$fila['Medico']}</td>
-                                        <td>{$fila['tipoDocumento']}</td>
-                                        <td>{$fila['descripcion']}</td>
-                                        <td>{$fila['fechaSubida']}</td>
+                                        <td>{$fila['FechaCreacion']}</td>
+                                        <td>{$fila['Antecedentes']}</td>
+                                        <td>{$fila['Alergias']}</td>
+                                        <td>{$fila['MedicamentosActuales']}</td>
+                                        <td>{$fila['EnfermedadesCronicas']}</td>
+                                        <td>{$fila['Descripcion']}</td>
+                                        <td>{$fila['FechaActualizacion']}</td>
                                         <td>
                                             <a href='#' class='edit-btn' 
-                                                data-id='{$fila['idDocumento']}'
+                                                data-id='{$fila['IdExpediente']}'
                                                 data-idpaciente='{$fila['idPaciente']}'
                                                 data-paciente='{$fila['paciente']}'
-                                                data-idcita='{$fila['idCita']}'
-                                                data-cita='{$fila['fechaCita']}'
-                                                data-medico='{$fila['Medico']}'
-                                                data-tipo='{$fila['tipoDocumento']}'
-                                                data-descripcion='{$fila['descripcion']}'
-                                                data-fecha='{$fila['fechaSubida']}'
-                                                data-idmedico='{$fila['IdMedico']}'
+                                                data-fechacreacion='{$fila['FechaCreacion']}'
+                                                data-antecedentes='{$fila['Antecedentes']}'
+                                                data-alergias='{$fila['Alergias']}'
+                                                data-medicamentos='{$fila['MedicamentosActuales']}'
+                                                data-enfermedades='{$fila['EnfermedadesCronicas']}'
+                                                data-descripcion='{$fila['Descripcion']}'
+                                                data-fechaactualizacion='{$fila['FechaActualizacion']}'
                                             >
                                             <img src='../img/edit.png' width='35' height='35'>
                                             </a>
-                                            <a href='#' class='delete-btn' data-id='{$fila['idDocumento']}'>
+                                            <a href='#' class='delete-btn' data-id='{$fila['IdExpediente']}'>
                                                 <img src='../img/delete.png' width='35' height='35'>
                                             </a>
                                         </td>
@@ -282,7 +274,7 @@ $documentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             }
 
                             if (empty($documentos)) {
-                                echo "<tr><td colspan='7'>No hay documentos medicos registrados</td></tr>";
+                                echo "<tr><td colspan='10'>No hay expedientes médicos registrados</td></tr>";
                             }
                             ?>
                         </tbody>
@@ -362,27 +354,27 @@ $documentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
     editButtons.forEach(btn => {
     btn.addEventListener("click", function(event) {
         event.preventDefault();
-        const idDocumento = btn.dataset.id;
+        const idExpediente = btn.dataset.id;
         const idPaciente = btn.dataset.idpaciente; 
         const paciente = btn.dataset.paciente;
-        const idCita = btn.dataset.idcita;  
-        const cita = btn.dataset.cita;  
-        const medico = btn.dataset.medico;
-        const tipo = btn.dataset.tipo;
+        const fechaCreacion = btn.dataset.fechacreacion;  
+        const antecedentes = btn.dataset.antecedentes;  
+        const alergias = btn.dataset.alergias;
+        const medicamentos = btn.dataset.medicamentos;
+        const enfermedades = btn.dataset.enfermedades;
         const descripcion = btn.dataset.descripcion;
-        const fecha = btn.dataset.fecha;
-        const idMedico = btn.dataset.idmedico;
+        const fechaActualizacion = btn.dataset.fechaactualizacion;
 
-        document.getElementById("edit-idDocumento").value = idDocumento;
+        document.getElementById("edit-idExpediente").value = idExpediente;
         document.getElementById("edit-idPaciente").value = idPaciente; 
         document.getElementById("edit-nombrePaciente").value = paciente;
-        document.getElementById("edit-idCita").value = idCita; 
-        document.getElementById("edit-fechaCita").value = cita;  
-        document.getElementById("edit-tipoDocumento").value = tipo;
+        document.getElementById("edit-fechaCreacion").value = fechaCreacion; 
+        document.getElementById("edit-antecedentes").value = antecedentes;  
+        document.getElementById("edit-alergias").value = alergias;
+        document.getElementById("edit-medicamentos").value = medicamentos;
+        document.getElementById("edit-enfermedades").value = enfermedades;
         document.getElementById("edit-descripcion").value = descripcion;
-        document.getElementById("edit-fechaSubida").value = fecha;
-        document.getElementById("edit-idMedico").value = idMedico;
-        document.getElementById("edit-nombreMedico").value = medico;
+        document.getElementById("edit-fechaActualizacion").value = fechaActualizacion;
 
         document.getElementById("modalEditarDocumento").style.display = "block";
     });
@@ -391,11 +383,11 @@ $documentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 deleteButtons.forEach(btn => {
     btn.addEventListener("click", async event => {
         event.preventDefault();
-        const idDocumento = btn.dataset.id;
+        const idExpediente = btn.dataset.id;
 
         // Confirmación de eliminación
         const confirmacion = await Swal.fire({
-            title: `¿Eliminar el documento Nº ${idDocumento}?`,
+            title: `¿Eliminar el expediente Nº ${idExpediente}?`,
             text: "Esta acción no se puede deshacer.",
             icon: "warning",
             showCancelButton: true,
@@ -409,12 +401,12 @@ deleteButtons.forEach(btn => {
 
         try {
             
-            const response = await fetch("php/delete-documento.php", {
+            const response = await fetch("php/delete-expediente.php", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded"
                 },
-                body: `idDocumento=${idDocumento}`
+                body: `idExpediente=${idExpediente}`
             });
 
             const data = await response.json();
@@ -437,7 +429,7 @@ deleteButtons.forEach(btn => {
             console.error("Error:", error);
             await Swal.fire({
                 title: "Error",
-                text: "Hubo un problema al eliminar el documento.",
+                text: "Hubo un problema al eliminar el expediente.",
                 icon: "error"
             });
         }

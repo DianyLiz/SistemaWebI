@@ -68,5 +68,9 @@ Herramientas:
     Solucionando errores en el codigo con el apartado de documentos medicos.
     Modificacion de las restricciones en la base de datos de la tabla de DocumentosMedicos.
 
+  Modificaciones 21-03-2025:
+    Creacion de la interfaz principal para Expedientes Medicos.
+    Creando código para descargar los archivos pdf, word y excel.
+
 
 
