@@ -35,16 +35,16 @@ if ($paciente_filter) {
     $sql .= " AND u1.nombre LIKE :paciente_filter";
 }
 if ($cita_filter) {
-    $sql .= " AND e.IdExpediente = :cita_filter"; // Ajustado para usar IdExpediente
+    $sql .= " AND e.IdExpediente = :cita_filter"; 
 }
 if ($medico_filter) {
-    $sql .= " AND u1.nombre LIKE :medico_filter"; // Ajustado para usar u1.nombre
+    $sql .= " AND u1.nombre LIKE :medico_filter"; 
 }
 if ($tipo_filter) {
-    $sql .= " AND e.Descripcion LIKE :tipo_filter"; // Ajustado para usar Descripcion
+    $sql .= " AND e.Descripcion LIKE :tipo_filter"; 
 }
 if ($fecha_filter) {
-    $sql .= " AND e.FechaCreacion = :fecha_filter"; // Ajustado para usar FechaCreacion
+    $sql .= " AND e.FechaCreacion = :fecha_filter"; 
 }
 
 $stmt = $conn->prepare($sql);
@@ -201,8 +201,8 @@ if (isset($_GET['export_word'])) {
     <div class="contenedor">
         <?php include 'menu.php'; ?>
         <main class="contenido">
-            <?php include 'modals/editar-documento.php'; ?>
-            <?php include 'modals/agregar-documento.php'; ?>
+            <?php include 'modals/editar-expediente.php'; ?>
+            <?php include 'modals/agregar-expediente.php'; ?>
 
             <div class="filter-container">
                 <form method="GET" action="">
@@ -323,17 +323,17 @@ if (isset($_GET['export_word'])) {
     </style>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-    const modals = document.querySelectorAll(".modalAgregarDocumento, .modalEditarDocumento");
-    const closeButtons = document.querySelectorAll(".close");
-    const editButtons = document.querySelectorAll(".edit-btn");
-    const addButtons = document.querySelectorAll(".add-btn");
-    const deleteButtons = document.querySelectorAll(".delete-btn");
+    document.addEventListener("DOMContentLoaded", function() {
+        const modals = document.querySelectorAll(".modalAgregarExpediente, .modalEditarExpediente");
+        const closeButtons = document.querySelectorAll(".close");
+        const editButtons = document.querySelectorAll(".edit-btn");
+        const addButtons = document.querySelectorAll(".add-btn");
+        const deleteButtons = document.querySelectorAll(".delete-btn");
 
     addButtons.forEach(btn => {
         btn.addEventListener("click", function(event) {
             event.preventDefault();
-            document.getElementById("modalAgregarDocumento").style.display = "block";
+            document.getElementById("modalAgregarExpediente").style.display = "block";
         });
     });
 
@@ -351,41 +351,46 @@ if (isset($_GET['export_word'])) {
         });
     };
 
+    // Abrir modal de edición
     editButtons.forEach(btn => {
-    btn.addEventListener("click", function(event) {
-        event.preventDefault();
-        const idExpediente = btn.dataset.id;
-        const idPaciente = btn.dataset.idpaciente; 
-        const paciente = btn.dataset.paciente;
-        const fechaCreacion = btn.dataset.fechacreacion;  
-        const antecedentes = btn.dataset.antecedentes;  
-        const alergias = btn.dataset.alergias;
-        const medicamentos = btn.dataset.medicamentos;
-        const enfermedades = btn.dataset.enfermedades;
-        const descripcion = btn.dataset.descripcion;
-        const fechaActualizacion = btn.dataset.fechaactualizacion;
+        btn.addEventListener("click", function(event) {
+            event.preventDefault();
+            console.log("Botón de edición clickeado"); // Depuración
 
-        document.getElementById("edit-idExpediente").value = idExpediente;
-        document.getElementById("edit-idPaciente").value = idPaciente; 
-        document.getElementById("edit-nombrePaciente").value = paciente;
-        document.getElementById("edit-fechaCreacion").value = fechaCreacion; 
-        document.getElementById("edit-antecedentes").value = antecedentes;  
-        document.getElementById("edit-alergias").value = alergias;
-        document.getElementById("edit-medicamentos").value = medicamentos;
-        document.getElementById("edit-enfermedades").value = enfermedades;
-        document.getElementById("edit-descripcion").value = descripcion;
-        document.getElementById("edit-fechaActualizacion").value = fechaActualizacion;
+            const idExpediente = btn.dataset.id;
+            const idPaciente = btn.dataset.idpaciente;
+            const paciente = btn.dataset.paciente;
+            const fechaCreacion = btn.dataset.fechacreacion;
+            const antecedentes = btn.dataset.antecedentes;
+            const alergias = btn.dataset.alergias;
+            const medicamentos = btn.dataset.medicamentos;
+            const enfermedades = btn.dataset.enfermedades;
+            const descripcion = btn.dataset.descripcion;
+            const fechaActualizacion = btn.dataset.fechaactualizacion;
 
-        document.getElementById("modalEditarDocumento").style.display = "block";
+            // Asignar valores al modal
+            document.getElementById("edit-idExpediente").value = idExpediente;
+            document.getElementById("edit-idPaciente").value = idPaciente;
+            document.getElementById("edit-nombrePaciente").value = paciente;
+            document.getElementById("edit-fechaCreacion").value = fechaCreacion;
+            document.getElementById("edit-antecedentes").value = antecedentes;
+            document.getElementById("edit-alergias").value = alergias;
+            document.getElementById("edit-medicamentos").value = medicamentos;
+            document.getElementById("edit-enfermedades").value = enfermedades;
+            document.getElementById("edit-descripcion").value = descripcion;
+            document.getElementById("edit-fechaActualizacion").value = fechaActualizacion;
+
+            // Mostrar el modal
+            document.getElementById("modalEditarExpediente").style.display = "block";
+        });
     });
-});
 
 deleteButtons.forEach(btn => {
     btn.addEventListener("click", async event => {
         event.preventDefault();
         const idExpediente = btn.dataset.id;
 
-        // Confirmación de eliminación
+     
         const confirmacion = await Swal.fire({
             title: `¿Eliminar el expediente Nº ${idExpediente}?`,
             text: "Esta acción no se puede deshacer.",

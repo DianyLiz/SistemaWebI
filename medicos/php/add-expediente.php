@@ -4,49 +4,42 @@ session_start();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $_SESSION['form_data'] = $_POST;
-    $idPaciente = $_POST['idPaciente'];
-    $idCita = $_POST['idCita'];
-    $tipoDocumento = $_POST['tipoDocumento'];
-    $descripcion = $_POST['descripcion'];
-    $fechaSubida = $_POST['fechaSubida'];
-    $idMedico = $_POST['idMedico'];
 
-    if (empty($idPaciente) || empty($idCita) || empty($tipoDocumento) || empty($descripcion) || empty($fechaSubida) || empty($idMedico)) {
+    $idPaciente = $_POST['idPaciente'];
+    $fechaCreacion = $_POST['fechaCreacion'];
+    $antecedentes = $_POST['antecedentes'];
+    $alergias = $_POST['alergias'];
+    $medicamentosActuales = $_POST['medicamentosActuales'];
+    $enfermedadesCronicas = $_POST['enfermedadesCronicas'];
+    $descripcion = $_POST['descripcion'];
+    $fechaActualizacion = $_POST['fechaActualizacion'];
+
+    if (empty($idPaciente) || empty($fechaCreacion) || empty($antecedentes) || empty($alergias) || empty($medicamentosActuales) || empty($enfermedadesCronicas) || empty($descripcion) || empty($fechaActualizacion)) {
         $_SESSION['error'] = "Complete los campos obligatorios.";
-        header("Location: ../documentosmedicos.php");
+        header("Location: ../expedientesmedicos.php");
         exit();
     }
 
     try {
-        // Verificar si ya existe un documento con los mismos datos
-        $consulta = "SELECT * FROM DocumentosMedicos WHERE idPaciente = ? AND idCita = ? AND tipoDocumento = ? AND descripcion = ? AND fechaSubida = ? AND idMedico = ?";
+        $consulta = "INSERT INTO ExpedienteMedico (idPaciente, FechaCreacion, Antecedentes, Alergias, MedicamentosActuales, EnfermedadesCronicas, Descripcion, FechaActualizacion) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         $statement = $conn->prepare($consulta);
-        $statement->execute([$idPaciente, $idCita, $tipoDocumento, $descripcion, $fechaSubida, $idMedico]);
-
-        if ($statement->fetch()) {
-            $_SESSION['error'] = "Ya existe un documento con este paciente, cita, médico, tipo de documento, descripción y fecha de subida.";
-            header("Location: ../documentosmedicos.php");
-            exit();
-        }
-
-        // Insertar el nuevo documento
-        $consulta = "INSERT INTO DocumentosMedicos (idPaciente, idCita, tipoDocumento, descripcion, fechaSubida, idMedico) VALUES (?, ?, ?, ?, ?, ?)";
-        $statement = $conn->prepare($consulta);
-        $statement->execute([$idPaciente, $idCita, $tipoDocumento, $descripcion, $fechaSubida, $idMedico]);
+        $statement->execute([$idPaciente, $fechaCreacion, $antecedentes, $alergias, $medicamentosActuales, $enfermedadesCronicas, $descripcion, $fechaActualizacion]);
 
         if ($statement->rowCount() > 0) {
-            $_SESSION['success'] = "Documento agregado correctamente.";
+            $_SESSION['success'] = "Expediente agregado correctamente.";
             unset($_SESSION['form_data']);
-            header("Location: ../documentosmedicos.php");
+            header("Location: ../expedientesmedicos.php");
         } else {
-            $_SESSION['error'] = "Hubo un problema al agregar el documento.";
-            header("Location: ../documentosmedicos.php");
+            $_SESSION['error'] = "Hubo un problema al agregar el expediente.";
+            header("Location: ../expedientesmedicos.php");
         }
-    } catch (PDOException $e) {
+    } catch (Exception $e) {
         $_SESSION['error'] = "Error en la base de datos: " . $e->getMessage();
+        header("Location: ../expedientesmedicos.php");
     }
-
-    header("Location: ../documentosmedicos.php");
+} else {
+    $_SESSION['error'] = "Error en la solicitud.";
+    header("Location: ../expedientesmedicos.php");
     exit();
 }
 ?>

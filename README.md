@@ -71,6 +71,7 @@ Herramientas:
   Modificaciones 21-03-2025:
     Creacion de la interfaz principal para Expedientes Medicos.
     Creando código para descargar los archivos pdf, word y excel.
+    Terminado este apartado
 
 
 
