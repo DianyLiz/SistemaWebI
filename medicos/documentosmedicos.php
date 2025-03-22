@@ -393,7 +393,6 @@ deleteButtons.forEach(btn => {
         event.preventDefault();
         const idDocumento = btn.dataset.id;
 
-        // Confirmación de eliminación
         const confirmacion = await Swal.fire({
             title: `¿Eliminar el documento Nº ${idDocumento}?`,
             text: "Esta acción no se puede deshacer.",

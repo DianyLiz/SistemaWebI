@@ -73,5 +73,8 @@ Herramientas:
     Creando código para descargar los archivos pdf, word y excel.
     Terminado este apartado
 
+  Modificaciones 22-03-2025:
+    Investigaciones de librerias necesarias para poder implementar las librerias necesarias 
+    para poder descargar los documentos médicos ya sea receta o constancia.
 
 
