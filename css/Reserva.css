@@ -1,0 +1,133 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background: #f4f4f4;
+}
+
+.table-container {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+h2, h3 {
+    text-align: center;
+    color: #333;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+th {
+    background: #007bff;
+    color: white;
+}
+
+.btn-seleccionar, .btn-horario, #btn-continuar, #btn-regresar {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-seleccionar {
+    background: #0b5471;
+    color: white;
+}
+
+.btn-seleccionar:hover {
+    background: #0b5471;
+}
+
+.btn-horario {
+    background: #0b5471;
+    color: white;
+}
+
+.btn-horario:hover {
+    background: #0b5471;
+}
+
+.btn-horario.selected {
+    background: #0b5471;
+    color: rgb(255, 255, 255);
+    transform: scale(1.1);
+    transition: 0.3s;
+}
+
+#btn-continuar {
+    background: #0b5471;
+    color: white;
+    display: block;
+    width: 100%;
+    margin-top: 15px;
+}
+
+#btn-continuar:hover {
+    background: #0b5471
+}
+
+#btn-regresar {
+    background: #0b5471;
+    color: white;
+}
+
+#btn-regresar:hover {
+    background: #0b5471;
+}
+
+#fecha-cita {
+    display: block;
+    margin: 10px auto;
+    padding: 10px;
+    font-size: 16px;
+    border: 2px solid #0b5471;
+    border-radius: 5px;
+    outline: none;
+    text-align: center;
+    transition: 0.3s;
+}
+
+#fecha-cita:hover {
+    background: #e3f2fd;
+}
+
+#cita-container {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+    display: none;
+    animation: fadeIn 0.5s ease-in-out;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleUp {
+    from { transform: scale(0.95); }
+    to { transform: scale(1); }
+}
+
+.flatpickr-calendar {
+    font-family: "Arial", sans-serif;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(255, 253, 253, 0.1);
+}
+
+.flatpickr-day.selected {
+    background: #007bff !important;
+    color: white !important;
+    border-radius: 50%;
+}

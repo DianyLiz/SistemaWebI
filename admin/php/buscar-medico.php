@@ -1,19 +1,16 @@
 <?php
 include '../../conexion.php';
 if($_SERVER["REQUEST_METHOD"] == "POST") {
-    $DNImedico = $_POST['query'];
-    $consulta = "SELECT T1.nombre + ' ' + T1.apellido AS Medico, T2.idMedico
+    $busqueda = "%" . $_POST['query'] . "%"; // Permite buscar nombres parciales
+    $consulta = "SELECT TOP 10 T1.nombre + ' ' + T1.apellido AS Medico, T2.idMedico, T1.dni
                  FROM Usuarios T1 
                  INNER JOIN Medicos T2 ON T2.idUsuario = T1.idUsuario
-                 WHERE T1.dni = ? AND T1.rol = 'Médico'";
-    $statement = $conn->prepare($consulta);
-    $statement->execute([$DNImedico]);
-    $result = $statement->fetch(PDO::FETCH_ASSOC);
+                 WHERE T1.nombre LIKE ? AND T1.rol = 'Médico'";
 
-    if ($result) {
-        echo json_encode(["nombre" => $result["Medico"], "idMedico" => $result["idMedico"]]);
-    } else {
-        echo json_encode(["nombre" => "", "idMedico" => ""]);
-    }
+    $statement = $conn->prepare($consulta);
+    $statement->execute([$busqueda]);
+    $result = $statement->fetchAll(PDO::FETCH_ASSOC);
+
+     echo json_encode($result ?: []); // Si no hay resultados, devolver un array vacío
 }
 ?>

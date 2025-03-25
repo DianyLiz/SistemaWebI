@@ -9,7 +9,11 @@
 }
 
 /* Modal */
-.modalEditarUsuario, .modalAgregarUsuario, .modalEditarMedico, .modalEditarPaciente, .modalAgregarEspecialidad, .modalEditarEspecialidad {
+.modalEditarUsuario, .modalAgregarUsuario, 
+.modalEditarMedico, .modalEditarPaciente, 
+.modalAgregarEspecialidad, .modalEditarEspecialidad,
+.modalAgregarCita, .modalEditarCita,
+.modalAgregarHorario, .modalEditarHorario {
     display: none; /* Oculto por defecto */
     position: fixed;
     z-index: 1000;
@@ -102,6 +106,70 @@ form .modificar {
 }
 
 form button:hover {
+    background-color: #0d81c1;
+}
+/* Estilos de subtablas */
+.modal-content .table-responsive, 
+.modal-content .edit-table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 10px;
+}
+
+.modal-content .tabla-container, 
+.modal-content .edit-tabla-container {
+    background: white;
+    padding: 5px;
+    border-radius: 15px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 20px auto;
+    text-align: center;
+}
+
+.modal-content table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.modal-content table th, table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.modal-content table th {
+    background: #16a8e2;
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 14px;
+}
+
+.modal-content table tr:hover {
+    background-color: #f8f9fa;
+    transition: background-color 0.2s ease;
+}
+
+form .botones {
+    display: flex;
+    justify-content: space-between;
+}
+
+form .estilobotones {
+    width: 100%;
+    padding: 10px;
+    font-size: 18px;
+    color: #fff;
+    background-color: #16a8e2;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 20px;
+    margin-left: 5px;
+}
+
+form .estilobotones:hover {
     background-color: #0d81c1;
 }
 

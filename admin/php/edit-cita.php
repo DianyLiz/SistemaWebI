@@ -1,6 +1,15 @@
-<?php 
+<?php
 include '../../conexion.php';
 session_start();
+
+function validarHoraEnRango($hora, $horaInicio, $horaFin)
+{
+    $hora = strtotime($hora);
+    $horaInicio = strtotime($horaInicio);
+    $horaFin = strtotime($horaFin);
+
+    return $hora >= $horaInicio && $hora <= $horaFin;
+}
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $idCita = $_POST['idCita'];
@@ -8,27 +17,54 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $paciente = $_POST['paciente'];
     $idMedico = $_POST['idMedico'];
     $medico = $_POST['medico'];
-    $fecha = $_POST['fecha'];
     $hora = $_POST['hora'];
     $motivo = $_POST['motivo'];
     $estado = $_POST['estado'];
+    $idhorario = $_POST['idHorario'];
 
-    if (empty($idPaciente) || empty($idMedico) || empty($fecha) || empty($hora) || empty($motivo) || empty($estado)) {
+    if (empty($idPaciente) || empty($idMedico) || empty($hora) || empty($motivo) || empty($estado)) {
         $_SESSION['error'] = "Complete los campos obligatorios.";
         header('Location: ../ListadeCitas.php');
         exit();
     }
 
-    if($paciente == "No encontrado" || $medico == "No encontrado") {
+    if ($paciente == "No encontrado" || $medico == "No encontrado") {
         $_SESSION['error'] = "Paciente o Médico no encontrado.";
         header('Location: ../ListadeCitas.php');
         exit();
     }
 
     try {
-        $consulta = "SELECT * FROM Citas WHERE idPaciente = ? AND idMedico = ? AND fecha = ? AND hora = ? AND idCita != ?";
+        // Obtener el horario actual de la cita antes de modificarla
+        $consulta = "SELECT idHorario FROM Citas WHERE idCita = ?";
         $statement = $conn->prepare($consulta);
-        $statement->execute([$idPaciente, $idMedico, $fecha, $hora, $idCita]);
+        $statement->execute([$idCita]);
+        $citaAnterior = $statement->fetch();
+
+        if (!$citaAnterior) {
+            $_SESSION['error'] = "La cita no existe.";
+            header('Location: ../ListadeCitas.php');
+            exit();
+        }
+
+        $idHorarioAnterior = $citaAnterior['idHorario'];
+
+        // Verificar que la hora de la cita esté dentro del rango del horario seleccionado
+        $consulta = "SELECT horaInicio, horaFin FROM HorariosMedicos WHERE idHorario = ?";
+        $statement = $conn->prepare($consulta);
+        $statement->execute([$idhorario]);
+        $horario = $statement->fetch();
+
+        if (!validarHoraEnRango($hora, $horario['horaInicio'], $horario['horaFin'])) {
+            $_SESSION['error'] = "La hora de la cita no está dentro del rango del horario seleccionado.";
+            header('Location: ../ListadeCitas.php');
+            exit();
+        }
+
+        // Verificar que no exista otra cita con el mismo paciente, médico, fecha y hora
+        $consulta = "SELECT * FROM Citas WHERE idPaciente = ? AND idMedico = ? AND hora = ? AND idCita != ?";
+        $statement = $conn->prepare($consulta);
+        $statement->execute([$idPaciente, $idMedico, $hora, $idCita]);
 
         if ($statement->fetch()) {
             $_SESSION['error'] = "Ya existe una cita con este paciente y médico en la misma fecha y hora.";
@@ -36,20 +72,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             exit();
         }
 
-        $consulta = "UPDATE Citas SET idPaciente = :idPaciente, idMedico = :idMedico, fecha = :fecha, hora = :hora, motivo = :motivo, estado = :estado WHERE idCita = :idCita";
+        $consulta = "UPDATE Citas SET idPaciente = :idPaciente, idMedico = :idMedico, hora = :hora, motivo = :motivo, estado = :estado, idHorario = :idHorario WHERE idCita = :idCita";
         $statement = $conn->prepare($consulta);
         $statement->execute([
             'idPaciente' => $idPaciente,
             'idMedico' => $idMedico,
-            'fecha' => $fecha,
             'hora' => $hora,
             'motivo' => $motivo,
             'estado' => $estado,
-            'idCita' => $idCita
+            'idCita' => $idCita,
+            'idHorario' => $idhorario
         ]);
+
+        $idHorarioActual = $horario['idHorario'];
 
         if ($statement->rowCount() > 0) {
             $_SESSION['success'] = "Cita Nº {$idCita} actualizada correctamente.";
+            
+            // Solo modificar cupos si el horario cambió
+            if ($idHorarioAnterior != $idhorario) {
+                $consulta = "UPDATE HorariosMedicos SET cupos = cupos + 1 WHERE idHorario = ?";
+                $statement = $conn->prepare($consulta);
+                $statement->execute([$idHorarioAnterior]);
+
+                $consulta = "UPDATE HorariosMedicos SET cupos = cupos - 1 WHERE idHorario = ? AND cupos > 0";
+                $statement = $conn->prepare($consulta);
+                $statement->execute([$idhorario]);
+            }
+
             header('Location: ../ListadeCitas.php');
             exit();
         } else {
@@ -63,4 +113,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 }
-?>

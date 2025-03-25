@@ -77,4 +77,12 @@ Herramientas:
     Investigaciones de librerias necesarias para poder implementar las librerias necesarias 
     para poder descargar los documentos médicos ya sea receta o constancia.
 
+  Modificaciones 23-03-2025:
+    Modificaciones en el modulo de Administrador.
+
+  Modificaciones 24-03-2025:
+    Modificaciones en el modulo de Administrador.
+
+
+
 
