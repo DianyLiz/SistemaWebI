@@ -1,10 +1,10 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <aside class="menu-lateral" id="menuLateral">
     <ul>
-        <li><a href="index.php"><i class="fa-solid fa-user"></i>Inicio</a></li>
-        <li><a href="ListadeCitas.php">Citas Medicas</a></li>
-        <li><a href="pacientes.php">Pacientes</a></li>
-        <li><a href="horarios.php">Horarios Médicos</a></li>
+        <li><a href="index.php"><i class="fas fa-home"></i>Inicio</a></li>
+        <li><a href="ListadeCitas.php"><i class="fa-solid fa-stethoscope"></i>Citas Médicas</a></li>
+        <li><a href="pacientes.php"><i class="fas fa-hospital-user"></i>Pacientes</a></li>
+        <li><a href="horarios.php"><i class="fa-solid fa-calendar"></i>Horarios</a></li>
         <li><a href="documentosmedicos.php">Documentos Médicos</a></li>
         <li><a href="expedientesmedicos.php">Expedientes Médicos</a></li>
     </ul>

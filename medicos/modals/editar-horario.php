@@ -1,11 +1,35 @@
-<link rel="stylesheet" href="../css/modal-horario.css">
-<link rel="stylesheet" href="../css/tabla.css">
+<style>
+    .autocomplete-container {
+        position: relative;
+    }
+
+    .suggestions {
+        position: absolute;
+        width: 100%;
+        border: 1px solid #ccc;
+        border-top: none;
+        background: white;
+        max-height: 150px;
+        overflow-y: auto;
+        display: none;
+    }
+
+    .suggestions div {
+        padding: 8px;
+        cursor: pointer;
+    }
+
+    .suggestions div:hover {
+        background-color: #f0f0f0;
+    }
+</style>
+<link rel="stylesheet" href="../css/modal-usuario.css">
 <div id="modalEditarHorario" class="modalEditarHorario">
     <div class="modal-content">
         <span class="close">&times;</span>
         <form action="php/edit-horario.php" method="POST">
             <div class="title">Actualizar datos del Horario</div>
-            <div class="table-container">
+            <div class="tabla-container">
                 <div class="table-responsive">
                     <table>
                         <thead>
@@ -33,8 +57,11 @@
                 <label for="edit-idmedico">ID Médico</label>
                 <input id="edit-idmedico" type="text" name="idMedico">
 
-                <label for="edit-nombreMedico">Médico</label>
-                <input id="edit-nombreMedico" type="text" name="nombreMedico">
+                <label for="edit-buscarmedico">Médico</label>
+                <div class="autocomplete-container">
+                    <input type="text" id="edit-buscarmedico" name="nombreMedico" placeholder="Buscar médico..." autocomplete="off">
+                    <div class="suggestions" id="suggestionsEditar"></div>
+                </div>
 
                 <label for="edit-fecha">Fecha</label>
                 <input id="edit-fecha" type="date" name="fecha">
@@ -97,7 +124,7 @@
                 document.getElementById("edit-idHorario").value = this.dataset.idhorario;
                 document.getElementById("edit-dnimedico").value = this.dataset.dnimedico;
                 document.getElementById("edit-idmedico").value = this.dataset.idmedico;
-                document.getElementById("edit-nombreMedico").value = this.dataset.nombremedico;
+                document.getElementById("edit-buscarmedico").value = this.dataset.nombremedico;
                 document.getElementById("edit-fecha").value = this.dataset.fecha;
                 document.getElementById("edit-diaSemana").value = this.dataset.diasemana;
                 document.getElementById("edit-hora").value = this.dataset.horainicio;
@@ -154,6 +181,69 @@
                     });
                     console.error("Error:", error);
                 }
+            }
+        });
+    });
+
+    // Limpiar campos de medicos si está vacío
+    document.getElementById("edit-buscarmedico").addEventListener("input", function() {
+        const medico = this.value;
+
+        if(!medico) {
+            document.getElementById("edit-idmedico").value = "";
+            document.getElementById("edit-dnimedico").value = "";
+        }
+    });
+
+    // Lista dinamica de medicos
+    document.addEventListener("DOMContentLoaded", function() {
+        const inputEditar = document.getElementById("edit-buscarmedico");
+        const suggestionsEditar = document.getElementById("suggestionsEditar");
+
+        inputEditar.addEventListener("input", function() {
+            let query = this.value.trim();
+            suggestionsEditar.innerHTML = "";
+
+            if (query.length === 0) {
+                suggestionsEditar.style.display = "none";
+                return;
+            }
+
+            fetch("php/buscar-medico.php", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    body: "query=" + encodeURIComponent(query)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    suggestionsEditar.innerHTML = "";
+                    if (data.length > 0) {
+                        suggestionsEditar.style.display = "block";
+                        data.forEach(medico => {
+                            let div = document.createElement("div");
+                            div.textContent = medico.Medico;
+                            div.dataset.id = medico.idMedico;
+                            div.dataset.dni = medico.dni;
+                            div.addEventListener("click", function() {
+                                inputEditar.value = this.textContent;
+                                document.getElementById("edit-idmedico").value = this.dataset.id;
+                                document.getElementById("edit-dnimedico").value = this.dataset.dni;
+                                suggestionsEditar.style.display = "none";
+                            });
+                            suggestionsEditar.appendChild(div);
+                        });
+                    } else {
+                        suggestionsEditar.style.display = "none";
+                    }
+                })
+                .catch(error => console.error("Error:", error));
+        });
+
+        document.addEventListener("click", function(e) {
+            if (!document.querySelector(".autocomplete-container").contains(e.target)) {
+                suggestionsEditar.style.display = "none";
             }
         });
     });

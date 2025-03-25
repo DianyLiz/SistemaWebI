@@ -14,14 +14,14 @@ $fecha_filter = $_GET['fecha'] ?? '';
 $hora_filter = $_GET['hora'] ?? '';
 $motivo_filter = $_GET['motivo'] ?? '';
 $estado_filter = $_GET['estado'] ?? '';
-$idHorario_filter = $_GET['idHorario'] ?? '';
-$fecha_filter = $_GET['fecha'] ?? '';
 
-$sql = "SELECT Citas.idCita, 
-       Citas.idPaciente, CONCAT(U1.nombre, ' ', U1.apellido) AS paciente, 
-       Citas.idMedico, CONCAT(U2.nombre, ' ', U2.apellido) AS medico, 
-       HorariosMedicos.fecha, 
-       CONVERT(VARCHAR(5), Citas.hora, 108) AS hora,
+$sql = "SELECT Citas.idCita,
+       U1.dni AS dnipaciente, 
+       Citas.idPaciente, U1.nombre + ' ' + U1.apellido AS paciente, 
+       U2.dni AS dnimedico,
+       Citas.idMedico, U2.nombre + ' ' + U2.apellido AS medico, 
+       HorariosMedicos.fecha AS FechaAtencion, 
+       CONVERT(VARCHAR, Citas.hora, 108) AS hora,
        Citas.motivo,
        Citas.estado,
        Citas.idHorario
@@ -30,109 +30,106 @@ $sql = "SELECT Citas.idCita,
         INNER JOIN Usuarios U1 ON Pacientes.idUsuario = U1.idUsuario
         INNER JOIN Medicos ON Citas.idMedico = Medicos.idMedico
         INNER JOIN Usuarios U2 ON Medicos.idUsuario = U2.idUsuario
-        INNER JOIN HorariosMedicos ON Citas.idHorario = HorariosMedicos.idHorario
-        WHERE 1 = 1";
+		INNER JOIN HorariosMedicos ON Citas.idHorario = HorariosMedicos.idHorario
+        WHERE 1=1";
 
 if ($medico_filter) {
-    $sql .= " AND U2.nombre LIKE :medico_filter";
+    $sql .= " AND U2.nombre LIKE '%$medico_filter%'";
 }
 if ($paciente_filter) {
-    $sql .= " AND U1.nombre LIKE :paciente_filter";
-}
-
-if ($hora_filter) {
-    $sql .= " AND Citas.hora = :hora_filter";
-}
-if ($motivo_filter) {
-    $sql .= " AND Citas.motivo = :motivo_filter";
-}
-if ($estado_filter) {
-    $sql .= " AND Citas.estado = :estado_filter";
-}
-if ($idHorario_filter) {
-    $sql .= " AND Citas.idHorario = :idHorario_filter";
+    $sql .= " AND U1.nombre LIKE '%$paciente_filter%'";
 }
 if ($fecha_filter) {
-    $sql .= " AND HorariosMedicos.fecha = :fecha_filter";
+    $sql .= " AND HorariosMedicos.fecha = '$fecha_filter'";
+}
+if ($hora_filter) {
+    $sql .= " AND Citas.hora = '$hora_filter'";
+}
+if ($estado_filter) {
+    $sql .= " AND Citas.estado = '$estado_filter'";
 }
 
 try {
     $query = $conn->prepare($sql);
-    if ($medico_filter) $query->bindValue(':medico_filter', "%$medico_filter%");
-    if ($paciente_filter) $query->bindValue(':paciente_filter', "%$paciente_filter%");
-    if ($hora_filter) $query->bindValue(':hora_filter', $hora_filter);
-    if ($motivo_filter) $query->bindValue(':motivo_filter', $motivo_filter);
-    if ($estado_filter) $query->bindValue(':estado_filter', $estado_filter);
-    if ($idHorario_filter) $query->bindValue(':idHorario_filter', $idHorario_filter);
-    if ($fecha_filter) $query->bindValue(':fecha_filter', $fecha_filter);
     $query->execute();
     $citas = $query->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     die("Error al ejecutar la consulta: " . $e->getMessage());
 }
 
+if (isset($_GET['ajax'])) {
+    echo json_encode($citas);
+    exit;
+}
+
 if (isset($_GET['export_pdf'])) {
     $html = "<h1>Lista de Citas Médicas</h1>";
     $html .= "<table border='1' cellpadding='10' cellspacing='0'>";
-    $html .= "<thead>
-                <tr>
-                    <th>Paciente</th>
-                    <th>Médico</th>
-                    <th>Hora</th>
-                    <th>Estado</th>
-                    <th>Fecha</th>
-                </tr>
-              </thead><tbody>";
+    $html = "<table border='1'><thead><tr>
+        <th>ID</th>
+        <th>Paciente</th>
+        <th>Médico</th>
+        <th>Fecha</th>
+        <th>Hora</th>
+        <th>Motivo</th>
+        <th>Estado</th>
+    </tr></thead>L<tbody>";
 
     foreach ($citas as $fila) {
-        $hora_formateada = date("H:i", strtotime($fila['hora']));
         $html .= "<tr>
-                    <td>{$fila['paciente']}</td>
-                    <td>{$fila['medico']}</td>
-                    <td>{$hora_formateada}</td>
-                    <td>{$fila['estado']}</td>
-                    <td>{$fila['fecha']}</td>
-                  </tr>";
+            <td>{$fila['idCita']}</td>
+            <td>{$fila['paciente']}</td>
+            <td>{$fila['medico']}</td>
+            <td>{$fila['FechaAtencion']}</td>
+            <td>{$fila['hora']}</td>
+            <td>{$fila['motivo']}</td>
+            <td>{$fila['estado']}</td>
+        </tr>";
     }
+
     $html .= "</tbody></table>";
 
     $options = new Options();
     $options->set('isHtml5ParserEnabled', true);
     $options->set('isPhpEnabled', true);
+
     $dompdf = new Dompdf($options);
     $dompdf->loadHtml($html);
-    $dompdf->setPaper('A4', 'portrait');
+    $dompdf->setPaper('A4', 'landscape');
     $dompdf->render();
-    $dompdf->stream("citas_medicas.pdf", array("Attachment" => false));
-    exit;
+    $dompdf->stream("citas_medicas.pdf");
 }
 
 if (isset($_GET['export_excel'])) {
     $spreadsheet = new Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
-    $sheet->setCellValue('A1', 'Paciente');
-    $sheet->setCellValue('B1', 'Médico');
-    $sheet->setCellValue('C1', 'Hora');
-    $sheet->setCellValue('D1', 'Motivo');
-    $sheet->setCellValue('E1', 'Estado');
-    $sheet->setCellValue('F1', 'Fecha');
+    $sheet->setCellValue('A1', 'ID');
+    $sheet->setCellValue('B1', 'Paciente');
+    $sheet->setCellValue('C1', 'Médico');
+    $sheet->setCellValue('D1', 'Fecha');
+    $sheet->setCellValue('E1', 'Hora');
+    $sheet->setCellValue('F1', 'Motivo');
+    $sheet->setCellValue('G1', 'Estado');
 
     $row = 2;
     foreach ($citas as $fila) {
-        $sheet->setCellValue("A$row", $fila['paciente']);
-        $sheet->setCellValue("B$row", $fila['medico']);
-        $sheet->setCellValue("C$row", $fila['hora']);
-        $sheet->setCellValue("D$row", $fila['motivo']);
-        $sheet->setCellValue("E$row", $fila['estado']);
-        $sheet->setCellValue("F$row", $fila['fecha']);
+        $sheet->setCellValue('A' . $row, $fila['idCita']);
+        $sheet->setCellValue('B' . $row, $fila['paciente']);
+        $sheet->setCellValue('C' . $row, $fila['medico']);
+        $sheet->setCellValue('D' . $row, $fila['FechaAtencion']);
+        $sheet->setCellValue('E' . $row, $fila['hora']);
+        $sheet->setCellValue('F' . $row, $fila['motivo']);
+        $sheet->setCellValue('G' . $row, $fila['estado']);
         $row++;
     }
 
     $writer = new Xlsx($spreadsheet);
-    $filename = 'citas_medicas.xlsx';
+    $writer->save('citas_medicas.xlsx');
+
     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    header("Content-Disposition: attachment;filename=\"$filename\"");
-    $writer->save('php://output');
+    header('Content-Disposition: attachment;filename="citas_medicas.xlsx"');
+    header('Cache-Control: max-age=0');
+    readfile('citas_medicas.xlsx');
     exit;
 }
 
@@ -166,10 +163,48 @@ if (isset($_GET['export_word'])) {
     $phpWord->save('php://output');
     exit;
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="es">
+<style>
+    .add-btn,
+    .btn-pdf,
+    .btn-excel,
+    .btn-word {
+        display: inline-block;
+        background-color: #0b5471;
+        color: white;
+        margin-right: 10px;
+        margin-bottom: 10px;
+        padding: 10px 20px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-size: 14px;
+    }
+
+    .add-btn:hover,
+    .btn-pdf:hover,
+    .btn-excel:hover,
+    .btn-word:hover {
+        background-color: rgb(10, 60, 80);
+    }
+
+    @media (max-width: 768px) {
+
+
+        .export-buttons {
+            flex-direction: column;
+        }
+
+        .add-btn,
+        .btn-pdf,
+        .btn-excel,
+        .btn-word {
+            width: 100%;
+            margin-right: 0;
+        }
+    }
+</style>
 
 <head>
     <meta charset="UTF-8">
@@ -186,18 +221,18 @@ if (isset($_GET['export_word'])) {
         <main class="contenido">
             <?php include 'modals/editar-cita.php'; ?>
             <?php include 'modals/agregar-cita.php'; ?>
+            <?php include 'alert.php'; ?>
 
             <div class="filter-container">
                 <form method="GET" action="">
-                    <input type="text" name="paciente" placeholder="Buscar por Paciente" value="<?= $paciente_filter ?>" autocomplete="off">
-                    <input type="text" name="medico" placeholder="Buscar por Médico" value="<?= $medico_filter ?>" autocomplete="off">
-                    <input type="date" name="fecha" value="<?= $fecha_filter ?>">
-                    <button type="submit">Filtrar</button>
+                    <input type="text" id="searchPaciente" name="paciente" placeholder="Buscar por Paciente" value="<?= $paciente_filter ?>" autocomplete="off">
+                    <input type="text" id="searchMedico" name="medico" placeholder="Buscar por Médico" value="<?= $medico_filter ?>" autocomplete="off">
+                    <input type="date" id="searchFecha" name="fecha" value="<?= $fecha_filter ?>">
                 </form>
             </div>
 
             <div class="table-container">
-                <h2>Lista de Citas Médicas</h2>
+                <h2>LISTA DE CITAS MÉDICAS</h2>
                 <div class="export-buttons">
                     <a href="#" class="add-btn">Agregar Cita</a>
                     <a href="?export_pdf" class="btn-pdf">Exportar a PDF</a>
@@ -218,7 +253,7 @@ if (isset($_GET['export_word'])) {
                                 <th>Acción</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="citasTable">
                             <?php
                             $estadoClases = [
                                 'Confirmada' => 'confirmed',
@@ -237,26 +272,25 @@ if (isset($_GET['export_word'])) {
                                         <td>{$hora_formateada}</td>
                                         <td>{$fila['motivo']}</td>
                                         <td class='$claseEstado'>{$fila['estado']}</td>
-                                        <td>{$fila['fecha']}</td>
+                                        <td>{$fila['FechaAtencion']}</td>
                                         <td>
-                                            <a href='#' class='edit-btn' 
+                                            <a href='#' class='edit-btn'
                                                 data-idcita='{$fila['idCita']}'
                                                 data-idpaciente='{$fila['idPaciente']}'
+                                                data-dnipaciente='{$fila['dnipaciente']}'
                                                 data-paciente='{$fila['paciente']}'
                                                 data-idmedico='{$fila['idMedico']}'
+                                                data-dnimedico='{$fila['dnimedico']}'
                                                 data-medico='{$fila['medico']}'
-                                                data-fecha='{$fila['fecha']}'
+                                                data-fecha='{$fila['FechaAtencion']}'
                                                 data-hora='{$fila['hora']}'
                                                 data-motivo='{$fila['motivo']}'
-                                                data-estado='{$fila['estado']}'>
-                                                <img src='../img/edit.png' width='35' height='35'>
-                                               <a href='#' class='delete-btn' data-idcita='{$fila['idCita']}'>
-                                                <img src='../img/delete.png' width='35' height='35'>
-                                            </a>
-                                            </a>
+                                                data-estado='{$fila['estado']}'
+                                                data-idhorario='{$fila['idHorario']}'><img src='../img/edit.png' width='35' height='35'></a>
+                                            <a href='#' class='delete-btn' data-idcita='{$fila['idCita']}'>
+                                            <img src='../img/delete.png' width='35' height='35'></a>
 
                                         </td>
-                                        
                                       </tr>";
                                 }
                             } else {
@@ -269,89 +303,103 @@ if (isset($_GET['export_word'])) {
             </div>
         </main>
     </div>
-    <style>
-        .add-btn,
-        .btn-pdf,
-        .btn-excel,
-        .btn-word {
-            display: inline-block;
-            background-color:#0b5471;
-            color: white;
-            padding: 10px 20px;
-            margin-right: 10px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            text-decoration: none;
-            font-size: 14px;
+</body>
+<script>
+    // --------------------------------- Script para filtrar en tiempo real y actualizar la tabla dinamicamente ---------------------------------
+    document.addEventListener("DOMContentLoaded", function() {
+        const searchPaciente = document.getElementById("searchPaciente");
+        const searchMedico = document.getElementById("searchMedico");
+        const searchFecha = document.getElementById("searchFecha");
+        const citasTable = document.getElementById("citasTable");
+
+        window.fetchCitas = function() {
+            const paciente = searchPaciente.value.trim();
+            const medico = searchMedico.value.trim();
+            const fecha = searchFecha.value.trim();
+
+            const params = new URLSearchParams({
+                paciente,
+                medico,
+                fecha,
+                ajax: 1
+            });
+
+            fetch(`ListadeCitas.php?${params}`)
+                .then(response => response.json())
+                .then(data => {
+                    citasTable.innerHTML = "";
+                    if (data.length > 0) {
+                        data.forEach(citas => {
+                            const row = `
+                    <tr>
+                        <td>${citas.idCita}</td>
+                        <td>${citas.paciente}</td>
+                        <td>${citas.medico}</td>
+                        <td>${citas.hora}</td>
+                        <td>${citas.motivo}</td>
+                        <td class="${citas.estado}">${citas.estado}</td>
+                        <td>${citas.FechaAtencion}</td>
+                        <td>
+                            <a href="#" class="edit-btn" 
+                                data-idcita="${citas.idCita}"
+                                data-idpaciente="${citas.idPaciente}"
+                                data-dnipaciente="${citas.dnipaciente}"
+                                data-paciente="${citas.paciente}"
+                                data-idmedico="${citas.idMedico}"
+                                data-dnimedico="${citas.dnimedico}"
+                                data-medico="${citas.medico}"
+                                data-fecha="${citas.FechaAtencion}"
+                                data-hora="${citas.hora}"
+                                data-motivo="${citas.motivo}"
+                                data-estado="${citas.estado}"
+                                data-idhorario="${citas.idHorario}">
+                                <img src="../img/edit.png" width="35" height="35"></a>
+                            <a href="#" class="delete-btn" data-idcita="${citas.idCita}">
+                                <img src="../img/delete.png" width="35" height="35">
+                            </a>
+                        </td>
+                    </tr>
+                `;
+                            citasTable.innerHTML += row;
+                        });
+                    } else {
+                        citasTable.innerHTML = "<tr><td colspan='8'>No hay usuarios registrados</td></tr>";
+                    }
+
+                    // Vuelve a asignar eventos a los botones después de actualizar la tabla
+                    asignarEventosBotones();
+                })
+                .catch(error => console.error("Error en la búsqueda:", error));
         }
-
-        .add-btn:hover,
-        .btn-pdf:hover,
-        .btn-excel:hover,
-        .btn-word:hover {
-            background-color: #9bbdf0;
-        }
-
-        @media (max-width: 768px) {
-
-
-            .export-buttons {
-                flex-direction: column;
-            }
-
-            .add-btn,
-            .btn-pdf,
-            .btn-excel,
-            .btn-word {
-                width: 100%;
-                margin-right: 0;
-            }
-        }
-    </style>
-
-    <script>
-        const modals = document.querySelectorAll(".modalAgregarCita, .modalEditarCita");
-        const closeButtons = document.querySelectorAll(".close");
+        // Eventos para filtrar en tiempo real
+        searchPaciente.addEventListener("keyup", fetchCitas);
+        searchMedico.addEventListener("keyup", fetchCitas);
+        searchFecha.addEventListener("change", fetchCitas);
+    });
+    // --------------------------------- Funcion para asignar eventos a los botones de editar y eliminar ---------------------------------
+    function asignarEventosBotones() {
         const editButtons = document.querySelectorAll(".edit-btn");
-        const addButtons = document.querySelectorAll(".add-btn");
         const deleteButtons = document.querySelectorAll(".delete-btn");
 
-        addButtons.forEach(btn => {
+        editButtons.forEach(btn => {
             btn.addEventListener("click", function(event) {
                 event.preventDefault();
-                modalAgregarCita.style.display = "block";
+                document.getElementById("edit-idCita").value = this.dataset.idcita;
+                document.getElementById("edit-idpaciente").value = this.dataset.idpaciente;
+                document.getElementById("edit-dnipaciente").value = this.dataset.dnipaciente;
+                document.getElementById("edit-buscarpaciente").value = this.dataset.paciente;
+                document.getElementById("edit-idmedico").value = this.dataset.idmedico;
+                document.getElementById("edit-dnimedico").value = this.dataset.dnimedico;
+                document.getElementById("edit-medico").value = this.dataset.medico;
+                document.getElementById("edit-fecha").value = this.dataset.fecha;
+                document.getElementById("edit-hora").value = this.dataset.hora;
+                document.getElementById("edit-motivo").value = this.dataset.motivo;
+                document.getElementById("edit-estado").value = this.dataset.estado;
+                document.getElementById("edit-idhorario").value = this.dataset.idhorario;
+                console.log(this.dataset);
+                modalEditarCita.style.display = "block";
             });
         });
-
-        editButtons.forEach(btn => {
-    btn.addEventListener("click", function(event) {
-        event.preventDefault();
-        document.getElementById("edit-idCita").value = this.dataset.idcita;
-        document.getElementById("edit-idpaciente").value = this.dataset.idpaciente;
-        document.getElementById("edit-nombrePaciente").value = this.dataset.paciente;
-        document.getElementById("edit-idmedico").value = this.dataset.idmedico;
-        document.getElementById("edit-nombreMedico").value = this.dataset.medico;
-        document.getElementById("edit-hora").value = this.dataset.hora;
-        document.getElementById("edit-motivo").value = this.dataset.motivo;
-        document.getElementById("edit-estado").value = this.dataset.estado;
-        document.getElementById("edit-fecha").value = this.dataset.fecha;
-        modalEditarCita.style.display = "block";
-    });
-});
-
-        closeButtons.forEach(button => {
-            button.addEventListener("click", function() {
-                modals.forEach(modal => modal.style.display = "none");
-            });
-        });
-
-        window.onclick = function(event) {
-            modals.forEach(modal => {
-                if (event.target == modal) {
-                    modal.style.display = "none";
-                }
-            });
-        };
 
         deleteButtons.forEach(btn => {
             btn.addEventListener("click", async event => {
@@ -393,10 +441,34 @@ if (isset($_GET['export_word'])) {
                 }
             });
         });
-    </script>
-</body>
-<?php
-include 'alert.php';
-?>
+    }
+    // --------------------------------- Metodos para abrir y cerrar modales ---------------------------------
+    const modals = document.querySelectorAll(".modalAgregarCita, .modalEditarCita");
+    const closeButtons = document.querySelectorAll(".close");
+    const addButtons = document.querySelectorAll(".add-btn");
+
+    addButtons.forEach(btn => {
+        btn.addEventListener("click", function(event) {
+            event.preventDefault();
+            modalAgregarCita.style.display = "block";
+        });
+    });
+
+    closeButtons.forEach(button => {
+        button.addEventListener("click", function() {
+            modals.forEach(modal => modal.style.display = "none");
+        });
+    });
+
+    asignarEventosBotones();
+
+    window.onclick = function(event) {
+        modals.forEach(modal => {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        });
+    };
+</script>
 
 </html>

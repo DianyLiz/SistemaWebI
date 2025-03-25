@@ -21,7 +21,7 @@ include 'session-control.php';
         </button>
         <div class="logo">MediCitas</div>
         <div class="usuario">
-            <span><?php echo "(Médico) " . $_SESSION['usuario']['nombre'] . " " . $_SESSION['usuario']['apellido']; ?></span>
+            <span><?php echo "(MÉDICO) " . $_SESSION['usuario']['nombre'] . " " . $_SESSION['usuario']['apellido']; ?></span>
             <a href="../cerrar-sesion.php" class="btn-salir">Salir</a>
         </div>
     </header>
