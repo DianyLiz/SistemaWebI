@@ -137,30 +137,53 @@ if (isset($_GET['export_word'])) {
     $phpWord = new PhpWord();
     $section = $phpWord->addSection();
 
-    $section->addText("Lista de Citas Médicas", ['bold' => true, 'size' => 16]);
-    $table = $section->addTable();
+    // Título con formato
+    $section->addText("Lista de Citas Médicas", [
+        'bold' => true, 
+        'size' => 16,
+        'color' => '0066CC',
+        'alignment' => 'center'
+    ]);
+    $section->addTextBreak(1); // Salto de línea
 
+    $table = $section->addTable([
+        'borderSize' => 6,
+        'borderColor' => '0066CC',
+        'cellMargin' => 50
+    ]);
+
+    // Encabezados de la tabla
     $table->addRow();
-    $table->addCell(2000)->addText("Paciente");
-    $table->addCell(2000)->addText("Médico");
-    $table->addCell(2000)->addText("Hora");
-    $table->addCell(2000)->addText("Motivo");
-    $table->addCell(2000)->addText("Estado");
-    $table->addCell(2000)->addText("Fecha");
+    $table->addCell(2000)->addText("ID", ['bold' => true]);
+    $table->addCell(2000)->addText("Paciente", ['bold' => true]);
+    $table->addCell(2000)->addText("Médico", ['bold' => true]);
+    $table->addCell(2000)->addText("Fecha", ['bold' => true]);
+    $table->addCell(2000)->addText("Hora", ['bold' => true]);
+    $table->addCell(2000)->addText("Motivo", ['bold' => true]);
+    $table->addCell(2000)->addText("Estado", ['bold' => true]);
 
+    // Datos de la tabla
     foreach ($citas as $fila) {
+        $hora_formateada = date("H:i", strtotime($fila['hora']));
+        
         $table->addRow();
+        $table->addCell(2000)->addText($fila['idCita']);
         $table->addCell(2000)->addText($fila['paciente']);
         $table->addCell(2000)->addText($fila['medico']);
-        $table->addCell(2000)->addText($fila['hora']);
+        $table->addCell(2000)->addText($fila['FechaAtencion']);
+        $table->addCell(2000)->addText($hora_formateada);
         $table->addCell(2000)->addText($fila['motivo']);
         $table->addCell(2000)->addText($fila['estado']);
-        $table->addCell(2000)->addText($fila['fecha']);
     }
 
+    // Configuración de headers para la descarga
     header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-    header("Content-Disposition: attachment;filename=\"citas_medicas.docx\"");
-    $phpWord->save('php://output');
+    header('Content-Disposition: attachment;filename="citas_medicas.docx"');
+    header('Cache-Control: max-age=0');
+    
+    // Guardar el documento
+    $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
+    $objWriter->save('php://output');
     exit;
 }
 ?>
