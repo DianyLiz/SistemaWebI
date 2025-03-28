@@ -98,9 +98,8 @@ if (isset($_GET['ajax'])) {
                                         data-nombre='{$fila['nombre']}' 
                                         data-apellido='{$fila['apellido']}' 
                                         data-usuario='{$fila['usuario']}' 
-                                        data-correo='{$fila['correo']}'>
-                                        <img src=\"../img/edit.png\" width=\"35\" height=\"35\"></a>
-                                    <a href='#' class='delete-btn' data-idusuario='{$fila['idusuario']}'><img src=\"../img/delete.png\" width=\"35\" height=\"35\"></a>
+                                        data-correo='{$fila['correo']}'></a>
+                                    <a href='#' class='delete-btn' data-idusuario='{$fila['idusuario']}'></a>
                                 </td>
                               </tr>";
                                 }
@@ -156,11 +155,8 @@ if (isset($_GET['ajax'])) {
                                 data-nombre="${usuario.nombre}"
                                 data-apellido="${usuario.apellido}"
                                 data-usuario="${usuario.usuario}"
-                                data-correo="${usuario.correo}">
-                                <img src="../img/edit.png" width="35" height="35"></a>
-                            <a href="#" class="delete-btn" data-idusuario="${usuario.idusuario}">
-                                <img src="../img/delete.png" width="35" height="35">
-                            </a>
+                                data-correo="${usuario.correo}"></a>
+                            <a href="#" class="delete-btn" data-idusuario="${usuario.idusuario}"></a>
                         </td>
                     </tr>
                 `;

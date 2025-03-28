@@ -21,27 +21,37 @@
                 <label for="add-apellido">Apellido</label>
                 <input id="add-apellido" type="text" name="apellido" autocomplete="off" value="<?php echo isset($_SESSION['form_data']['apellido']) ? $_SESSION['form_data']['apellido'] : ''; ?>">
 
-                <label for="add-correo">Correo</label>
-                <input id="add-correo" type="email" name="correo" autocomplete="off" value="<?php echo isset($_SESSION['form_data']['correo']) ? $_SESSION['form_data']['correo'] : ''; ?>">
+                <div id="camposNino">
+                    <label for="es-nino">¿Es un paciente niño?</label>
+                    <select id="es-nino" name="esNino">
+                        <option value="no">No</option>
+                        <option value="si">Sí</option>
+                    </select>
+                </div>
 
-                <label for="add-usuario">Nombre de Usuario</label>
-                <input id="add-usuario" type="text" name="usuario" autocomplete="off" value="<?php echo isset($_SESSION['form_data']['usuario']) ? $_SESSION['form_data']['usuario'] : ''; ?>">
+                <div id="camposUsuario">
+                    <label for="add-correo">Correo</label>
+                    <input id="add-correo" type="email" name="correo" autocomplete="off" value="<?php echo isset($_SESSION['form_data']['correo']) ? $_SESSION['form_data']['correo'] : ''; ?>">
 
-                <label for="add-password">Contraseña</label>
-                <input id="add-password" type="password" name="password" autocomplete="off" value="<?php echo isset($_SESSION['form_data']['password']) ? $_SESSION['form_data']['password'] : ''; ?>">
+                    <label for="add-usuario">Nombre de Usuario</label>
+                    <input id="add-usuario" type="text" name="usuario" autocomplete="off" value="<?php echo isset($_SESSION['form_data']['usuario']) ? $_SESSION['form_data']['usuario'] : ''; ?>">
 
-                <label for="add-confirmPassword">Confirmar Contraseña</label>
-                <input id="add-confirmPassword" type="password" name="confirmPassword" autocomplete="off" value="<?php echo isset($_SESSION['form_data']['confirmPassword']) ? $_SESSION['form_data']['confirmPassword'] : ''; ?>">
+                    <label for="add-password">Contraseña</label>
+                    <input id="add-password" type="password" name="password" autocomplete="off" value="<?php echo isset($_SESSION['form_data']['password']) ? $_SESSION['form_data']['password'] : ''; ?>">
 
-                <label for="add-tipoUsuario">Tipo de Usuario</label>
-                <select id="add-tipoUsuario" name="tipoUsuario">
-                    <option value="" <?= empty($_SESSION['form_data']['tipoUsuario']) ? 'selected' : '' ?>>Seleccionar</option>
-                    <option value="1" <?= (isset($_SESSION['form_data']['tipoUsuario']) && $_SESSION['form_data']['tipoUsuario'] == '1') ? 'selected' : '' ?>>Paciente</option>
-                    <option value="2" <?= (isset($_SESSION['form_data']['tipoUsuario']) && $_SESSION['form_data']['tipoUsuario'] == '2') ? 'selected' : '' ?>>Médico</option>
-                    <option value="3" <?= (isset($_SESSION['form_data']['tipoUsuario']) && $_SESSION['form_data']['tipoUsuario'] == '3') ? 'selected' : '' ?>>Administrador</option>
-                </select>
+                    <label for="add-confirmPassword">Confirmar Contraseña</label>
+                    <input id="add-confirmPassword" type="password" name="confirmPassword" autocomplete="off" value="<?php echo isset($_SESSION['form_data']['confirmPassword']) ? $_SESSION['form_data']['confirmPassword'] : ''; ?>">
 
-                <input type="text" id="rol-tipoUsuario" name="rol-tipoUsuario" readonly="true" value="">
+                    <label for="add-tipoUsuario">Tipo de Usuario</label>
+                    <select id="add-tipoUsuario" name="tipoUsuario">
+                        <option value="" <?= empty($_SESSION['form_data']['tipoUsuario']) ? 'selected' : '' ?>>Seleccionar</option>
+                        <option value="1" <?= (isset($_SESSION['form_data']['tipoUsuario']) && $_SESSION['form_data']['tipoUsuario'] == '1') ? 'selected' : '' ?>>Paciente</option>
+                        <option value="2" <?= (isset($_SESSION['form_data']['tipoUsuario']) && $_SESSION['form_data']['tipoUsuario'] == '2') ? 'selected' : '' ?>>Médico</option>
+                        <option value="3" <?= (isset($_SESSION['form_data']['tipoUsuario']) && $_SESSION['form_data']['tipoUsuario'] == '3') ? 'selected' : '' ?>>Administrador</option>
+                    </select>
+                    <input type="text" id="rol-tipoUsuario" name="rol-tipoUsuario" readonly="true" value="">
+                </div>
+
             </div>
 
             <div class="form-doctor">
@@ -66,6 +76,9 @@
 
                 <label for="add-aniosExperiencia">Años de Experiencia</label>
                 <input id="add-aniosExperiencia" type="text" name="aniosExperiencia" autocomplete="off" value="<?php echo isset($_SESSION['form_data']['aniosExperiencia']) ? $_SESSION['form_data']['aniosExperiencia'] : ''; ?>">
+
+                <label for="add-telefonoMedico">Teléfono</label>
+                <input id="add-telefonoMedico" type="text" name="telefonoMedico" autocomplete="off" value="<?php echo isset($_SESSION['form_data']['telefonoMedico']) ? $_SESSION['form_data']['telefonoMedico'] : ''; ?>">
             </div>
 
             <div class="form-paciente">
@@ -78,6 +91,14 @@
                     <option value="Masculino" <?= (isset($_SESSION['form_data']['sexo']) && $_SESSION['form_data']['sexo'] == 'Masculino') ? 'selected' : '' ?>>Masculino</option>
                     <option value="Femenino" <?= (isset($_SESSION['form_data']['sexo']) && $_SESSION['form_data']['sexo'] == 'Femenino') ? 'selected' : '' ?>>Femenino</option>
                 </select>
+
+                <div id="camposTutor" style="display: none;">
+                    <label for="add-dniTutor">DNI del Tutor</label>
+                    <input id="add-dniTutor" type="text" name="dniTutor" autocomplete="off" value="<?php echo isset($_SESSION['form_data']['dniTutor']) ? $_SESSION['form_data']['dniTutor'] : ''; ?>">
+
+                    <label for="add-nombreTutor">Nombre del Tutor</label>
+                    <input id="add-nombreTutor" type="text" name="nombreTutor" autocomplete="off" value="<?php echo isset($_SESSION['form_data']['nombreTutor']) ? $_SESSION['form_data']['nombreTutor'] : ''; ?>">
+                </div>
 
                 <label for="add-telefono">Teléfono</label>
                 <input id="add-telefono" type="text" name="telefono" autocomplete="off" value="<?php echo isset($_SESSION['form_data']['telefono']) ? $_SESSION['form_data']['telefono'] : ''; ?>">
@@ -100,17 +121,20 @@
                     tipoUsuarioSelect.hidden = true;
                     rolTipoUsuario.value = "Médico";
                     rolTipoUsuario.hidden = false;
+                    document.getElementById("camposNino").style.display = "none";
 
                 } else if (paginaActual === "pacientes") {
                     tipoUsuarioSelect.value = "1";
                     tipoUsuarioSelect.hidden = true;
                     rolTipoUsuario.value = "Paciente";
                     rolTipoUsuario.hidden = false;
-                    
+                    document.getElementById("camposNino").style.display = "contents";
+
                 } else {
                     tipoUsuarioSelect.hidden = false;
                     rolTipoUsuario.value = "";
                     rolTipoUsuario.hidden = true;
+                    document.getElementById("camposNino").style.display = "contents";
                 }
 
                 tipoUsuarioSelect.addEventListener("change", function() {
@@ -137,6 +161,18 @@
                     formPaciente.style.display = "grid";
                 } else {
                     formPaciente.style.display = "none";
+                }
+            });
+
+            document.getElementById("es-nino").addEventListener("change", function() {
+                let esNino = this.value === "si";
+                document.getElementById("camposUsuario").style.display = esNino ? "none" : "contents";
+                document.getElementById("camposTutor").style.display = esNino ? "contents" : "none";
+
+                if ("<?php echo $paginaActual; ?>" === "pacientes") {
+                    document.querySelector(".form-paciente").style.display = esNino ? "grid" : "grid";
+                } else {
+                    document.querySelector(".form-paciente").style.display = esNino ? "grid" : "none";
                 }
             });
         </script>

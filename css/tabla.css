@@ -39,6 +39,42 @@ table tr:hover {
     transition: background-color 0.2s ease;
 }
 
+.edit-btn {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    background: url('../img/edit.png') no-repeat center/cover;
+    transition: background 0.3s ease-in-out;
+}
+
+.edit-btn:hover {
+    background: url('../img/edit-hover.png') no-repeat center/cover;
+}
+
+.delete-btn {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    background: url('../img/delete.png') no-repeat center/cover;
+    transition: background 0.3s ease-in-out;
+}
+
+.delete-btn:hover {
+    background: url('../img/delete-hover.png') no-repeat center/cover;
+}
+
+.pdf-btn {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    background: url('../img/pdf.png') no-repeat center/cover;
+    transition: background 0.3s ease-in-out;
+}
+
+.pdf-btn:hover {
+    background: url('../img/pdf-hover.png') no-repeat center/cover;
+}
+
 @media (max-width: 768px) {
     .table-responsive {
         overflow-x: auto;

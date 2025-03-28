@@ -13,7 +13,8 @@
 .modalEditarMedico, .modalEditarPaciente, 
 .modalAgregarEspecialidad, .modalEditarEspecialidad,
 .modalAgregarCita, .modalEditarCita,
-.modalAgregarHorario, .modalEditarHorario {
+.modalAgregarHorario, .modalEditarHorario,
+.modalAgregarDocumento, .modalEditarDocumento {
     display: none; /* Oculto por defecto */
     position: fixed;
     z-index: 1000;
@@ -66,6 +67,26 @@ form .title {
     grid-template-columns: 1fr 1.5fr;
     gap: 15px;
     margin-bottom: 20px;
+    align-items: start;
+}
+
+#camposUsuario, #camposTutor, #camposNino {
+    display: contents; /* Mantiene la estructura grid del padre */
+}
+
+/* Ocultar campos sin desajustar el diseño */
+.hidden-field {
+    visibility: hidden;
+    height: 0;
+    overflow: hidden;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Mostrar cuando sea necesario */
+.visible-field {
+    visibility: visible;
+    height: auto;
+    overflow: visible;
 }
 
 .form-group, .form-doctor, .form-paciente label {

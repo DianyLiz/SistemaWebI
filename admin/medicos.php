@@ -6,7 +6,7 @@ $nombre_apellido_filter = $_GET['nombre_apellido'] ?? '';
 $especialidad_filter = $_GET['especialidad'] ?? '';
 
 $sql = "SELECT T1.idUsuario, T1.idMedico, T2.dni, T2.nombre, T2.apellido, 
-T1.idEspecialidad, T3.nombreEspecialidad, T1.numeroLicenciaMedica, T1.anosExperiencia
+T1.idEspecialidad, T3.nombreEspecialidad, T1.numeroLicenciaMedica, T1.anosExperiencia, T1.telefono AS telefonoMedico
 FROM Medicos T1
 INNER JOIN Usuarios T2 ON T2.idUsuario = T1.idUsuario
 INNER JOIN Especialidades T3 on T3.idEspecialidad = T1.idEspecialidad WHERE 1=1";
@@ -89,6 +89,7 @@ if (isset($_GET['ajax'])) {
                                 <th>ESPECIALIDAD</th>
                                 <th>LICENCIA MEDICA</th>
                                 <th>EXPERIENCIA</th>
+                                <th>TELEFONO</th>
                                 <th>ACCION</th>
                             </tr>
                         </thead>
@@ -104,6 +105,7 @@ if (isset($_GET['ajax'])) {
                                 <td>{$fila['nombreEspecialidad']}</td>
                                 <td>{$fila['numeroLicenciaMedica']}</td>
                                 <td>{$fila['anosExperiencia']} años</td>
+                                <td>{$fila['telefonoMedico']}</td>
                                 <td>
                                     <a href='#' class='edit-btn'
                                         data-idusuario='{$fila['idUsuario']}'
@@ -113,9 +115,9 @@ if (isset($_GET['ajax'])) {
                                         data-apellido='{$fila['apellido']}'
                                         data-especialidad='{$fila['idEspecialidad']}'
                                         data-licencia='{$fila['numeroLicenciaMedica']}'
-                                        data-experiencia='{$fila['anosExperiencia']}'>
-                                    <img src=\"../img/edit.png\" width=\"35\" height=\"35\"></a>
-                                    <a href='#' class='delete-btn' data-idmedico='{$fila['idMedico']}' data-idusuario='{$fila['idUsuario']}'><img src=\"../img/delete.png\" width=\"35\" height=\"35\"></a>
+                                        data-experiencia='{$fila['anosExperiencia']}'
+                                        data-telefonomedico='{$fila['telefonoMedico']}'></a>
+                                    <a href='#' class='delete-btn' data-idmedico='{$fila['idMedico']}' data-idusuario='{$fila['idUsuario']}'></a>
                                 </td>
                               </tr>";
                                 }
@@ -165,6 +167,7 @@ if (isset($_GET['ajax'])) {
                         <td>${medicos.nombreEspecialidad}</td>
                         <td>${medicos.numeroLicenciaMedica}</td>
                         <td>${medicos.anosExperiencia} años</td>
+                        <td>${medicos.telefonoMedico}</td>
                         <td>
                             <a href="#" class="edit-btn" 
                                 data-idusuario="${medicos.idUsuario}"
@@ -174,11 +177,9 @@ if (isset($_GET['ajax'])) {
                                 data-apellido="${medicos.apellido}"
                                 data-especialidad="${medicos.idEspecialidad}"
                                 data-licencia="${medicos.numeroLicenciaMedica}"
-                                data-experiencia="${medicos.anosExperiencia}">
-                                <img src="../img/edit.png" width="35" height="35"></a>
-                            <a href="#" class="delete-btn" data-idmedico="${medicos.idmedico}" data-idusuario="${medicos.idusuario}">
-                                <img src="../img/delete.png" width="35" height="35">
-                            </a>
+                                data-experiencia="${medicos.anosExperiencia}"
+                                data-telefonomedico="${medicos.telefonoMedico}"></a>
+                            <a href="#" class="delete-btn" data-idmedico="${medicos.idmedico}" data-idusuario="${medicos.idusuario}"></a>
                         </td>
                     </tr>
                 `;
@@ -243,6 +244,7 @@ if (isset($_GET['ajax'])) {
                 document.getElementById("edit-idespecialidad").value = this.dataset.especialidad;
                 document.getElementById("edit-licenciaMedica").value = this.dataset.licencia;
                 document.getElementById("edit-aniosExperiencia").value = this.dataset.experiencia;
+                document.getElementById("edit-telefonoMedico").value = this.dataset.telefonomedico;
                 modalEditarMedico.style.display = "block";
             });
         });

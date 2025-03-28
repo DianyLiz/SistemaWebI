@@ -83,6 +83,12 @@ Herramientas:
   Modificaciones 24-03-2025:
     Modificaciones en el modulo de Administrador.
 
+   Modificaciones 25-03-2025:
+    Solución al problema de descargar archivos pdf, word y excel.
+
+  Modificaciones 28-03-2025:
+    Agregando implementaciones en los diferentes modúlos del sistema web.
+
 
 
 

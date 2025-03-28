@@ -35,16 +35,16 @@ if ($paciente_filter) {
     $sql .= " AND u1.nombre LIKE :paciente_filter";
 }
 if ($cita_filter) {
-    $sql .= " AND e.IdExpediente = :cita_filter"; 
+    $sql .= " AND e.IdExpediente = :cita_filter";
 }
 if ($medico_filter) {
-    $sql .= " AND u1.nombre LIKE :medico_filter"; 
+    $sql .= " AND u1.nombre LIKE :medico_filter";
 }
 if ($tipo_filter) {
-    $sql .= " AND e.Descripcion LIKE :tipo_filter"; 
+    $sql .= " AND e.Descripcion LIKE :tipo_filter";
 }
 if ($fecha_filter) {
-    $sql .= " AND e.FechaCreacion = :fecha_filter"; 
+    $sql .= " AND e.FechaCreacion = :fecha_filter";
 }
 
 $stmt = $conn->prepare($sql);
@@ -323,125 +323,124 @@ if (isset($_GET['export_word'])) {
     </style>
 
     <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const modals = document.querySelectorAll(".modalAgregarExpediente, .modalEditarExpediente");
-        const closeButtons = document.querySelectorAll(".close");
-        const editButtons = document.querySelectorAll(".edit-btn");
-        const addButtons = document.querySelectorAll(".add-btn");
-        const deleteButtons = document.querySelectorAll(".delete-btn");
+        document.addEventListener("DOMContentLoaded", function() {
+            const modals = document.querySelectorAll(".modalAgregarExpediente, .modalEditarExpediente");
+            const closeButtons = document.querySelectorAll(".close");
+            const editButtons = document.querySelectorAll(".edit-btn");
+            const addButtons = document.querySelectorAll(".add-btn");
+            const deleteButtons = document.querySelectorAll(".delete-btn");
 
-    addButtons.forEach(btn => {
-        btn.addEventListener("click", function(event) {
-            event.preventDefault();
-            document.getElementById("modalAgregarExpediente").style.display = "block";
-        });
-    });
-
-    closeButtons.forEach(button => {
-        button.addEventListener("click", function() {
-            modals.forEach(modal => modal.style.display = "none");
-        });
-    });
-
-    window.onclick = function(event) {
-        modals.forEach(modal => {
-            if (event.target == modal) {
-                modal.style.display = "none";
-            }
-        });
-    };
-
-    // Abrir modal de edición
-    editButtons.forEach(btn => {
-        btn.addEventListener("click", function(event) {
-            event.preventDefault();
-            console.log("Botón de edición clickeado"); // Depuración
-
-            const idExpediente = btn.dataset.id;
-            const idPaciente = btn.dataset.idpaciente;
-            const paciente = btn.dataset.paciente;
-            const fechaCreacion = btn.dataset.fechacreacion;
-            const antecedentes = btn.dataset.antecedentes;
-            const alergias = btn.dataset.alergias;
-            const medicamentos = btn.dataset.medicamentos;
-            const enfermedades = btn.dataset.enfermedades;
-            const descripcion = btn.dataset.descripcion;
-            const fechaActualizacion = btn.dataset.fechaactualizacion;
-
-            // Asignar valores al modal
-            document.getElementById("edit-idExpediente").value = idExpediente;
-            document.getElementById("edit-idPaciente").value = idPaciente;
-            document.getElementById("edit-nombrePaciente").value = paciente;
-            document.getElementById("edit-fechaCreacion").value = fechaCreacion;
-            document.getElementById("edit-antecedentes").value = antecedentes;
-            document.getElementById("edit-alergias").value = alergias;
-            document.getElementById("edit-medicamentos").value = medicamentos;
-            document.getElementById("edit-enfermedades").value = enfermedades;
-            document.getElementById("edit-descripcion").value = descripcion;
-            document.getElementById("edit-fechaActualizacion").value = fechaActualizacion;
-
-            // Mostrar el modal
-            document.getElementById("modalEditarExpediente").style.display = "block";
-        });
-    });
-
-deleteButtons.forEach(btn => {
-    btn.addEventListener("click", async event => {
-        event.preventDefault();
-        const idExpediente = btn.dataset.id;
-
-     
-        const confirmacion = await Swal.fire({
-            title: `¿Eliminar el expediente Nº ${idExpediente}?`,
-            text: "Esta acción no se puede deshacer.",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#d33",
-            cancelButtonColor: "#3085d6",
-            confirmButtonText: "Eliminar",
-            cancelButtonText: "Cancelar"
-        });
-
-        if (!confirmacion.isConfirmed) return;
-
-        try {
-            
-            const response = await fetch("php/delete-expediente.php", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded"
-                },
-                body: `idExpediente=${idExpediente}`
+            addButtons.forEach(btn => {
+                btn.addEventListener("click", function(event) {
+                    event.preventDefault();
+                    document.getElementById("modalAgregarExpediente").style.display = "block";
+                });
             });
 
-            const data = await response.json();
-
-            if (data.status === "success") {
-                await Swal.fire({
-                    title: "Éxito",
-                    text: data.message,
-                    icon: "success"
+            closeButtons.forEach(button => {
+                button.addEventListener("click", function() {
+                    modals.forEach(modal => modal.style.display = "none");
                 });
-                location.reload(); 
-            } else {
-                await Swal.fire({
-                    title: "Error",
-                    text: data.message,
-                    icon: "error"
-                });
-            }
-        } catch (error) {
-            console.error("Error:", error);
-            await Swal.fire({
-                title: "Error",
-                text: "Hubo un problema al eliminar el expediente.",
-                icon: "error"
             });
-        }
-    });
-});
-});
 
+            window.onclick = function(event) {
+                modals.forEach(modal => {
+                    if (event.target == modal) {
+                        modal.style.display = "none";
+                    }
+                });
+            };
+
+            // Abrir modal de edición
+            editButtons.forEach(btn => {
+                btn.addEventListener("click", function(event) {
+                    event.preventDefault();
+                    console.log("Botón de edición clickeado"); // Depuración
+
+                    const idExpediente = btn.dataset.id;
+                    const idPaciente = btn.dataset.idpaciente;
+                    const paciente = btn.dataset.paciente;
+                    const fechaCreacion = btn.dataset.fechacreacion;
+                    const antecedentes = btn.dataset.antecedentes;
+                    const alergias = btn.dataset.alergias;
+                    const medicamentos = btn.dataset.medicamentos;
+                    const enfermedades = btn.dataset.enfermedades;
+                    const descripcion = btn.dataset.descripcion;
+                    const fechaActualizacion = btn.dataset.fechaactualizacion;
+
+                    // Asignar valores al modal
+                    document.getElementById("edit-idExpediente").value = idExpediente;
+                    document.getElementById("edit-idPaciente").value = idPaciente;
+                    document.getElementById("edit-nombrePaciente").value = paciente;
+                    document.getElementById("edit-fechaCreacion").value = fechaCreacion;
+                    document.getElementById("edit-antecedentes").value = antecedentes;
+                    document.getElementById("edit-alergias").value = alergias;
+                    document.getElementById("edit-medicamentos").value = medicamentos;
+                    document.getElementById("edit-enfermedades").value = enfermedades;
+                    document.getElementById("edit-descripcion").value = descripcion;
+                    document.getElementById("edit-fechaActualizacion").value = fechaActualizacion;
+
+                    // Mostrar el modal
+                    document.getElementById("modalEditarExpediente").style.display = "block";
+                });
+            });
+
+            deleteButtons.forEach(btn => {
+                btn.addEventListener("click", async event => {
+                    event.preventDefault();
+                    const idExpediente = btn.dataset.id;
+
+
+                    const confirmacion = await Swal.fire({
+                        title: `¿Eliminar el expediente Nº ${idExpediente}?`,
+                        text: "Esta acción no se puede deshacer.",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#d33",
+                        cancelButtonColor: "#3085d6",
+                        confirmButtonText: "Eliminar",
+                        cancelButtonText: "Cancelar"
+                    });
+
+                    if (!confirmacion.isConfirmed) return;
+
+                    try {
+
+                        const response = await fetch("php/delete-expediente.php", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/x-www-form-urlencoded"
+                            },
+                            body: `idExpediente=${idExpediente}`
+                        });
+
+                        const data = await response.json();
+
+                        if (data.status === "success") {
+                            await Swal.fire({
+                                title: "Éxito",
+                                text: data.message,
+                                icon: "success"
+                            });
+                            location.reload();
+                        } else {
+                            await Swal.fire({
+                                title: "Error",
+                                text: data.message,
+                                icon: "error"
+                            });
+                        }
+                    } catch (error) {
+                        console.error("Error:", error);
+                        await Swal.fire({
+                            title: "Error",
+                            text: "Hubo un problema al eliminar el expediente.",
+                            icon: "error"
+                        });
+                    }
+                });
+            });
+        });
     </script>
 </body>
 <?php include 'alert.php'; ?>

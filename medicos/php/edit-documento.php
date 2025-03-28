@@ -3,24 +3,33 @@ include '../../conexion.php';
 session_start();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $idDocumento = intval($_POST['idDocumento']);
-    $idPaciente = intval($_POST['idPaciente']);
-    $idCita = intval($_POST['idCita']);
+    $idDocumento = $_POST['idDocumento'];
+    $idCita = $_POST['idCita'];
     $tipoDocumento = $_POST['tipoDocumento'];
     $descripcion = $_POST['descripcion'];
-    $fechaSubida = $_POST['fechaSubida'];
-    $idMedico = intval($_POST['idMedico']);
+    $fechaSubida = date("Y-m-d");
 
-    if (empty($idPaciente) || empty($idCita) || empty($tipoDocumento) || empty($descripcion) || empty($fechaSubida) || empty($idMedico)) {
+    if (empty($idDocumento) || empty($idCita) || empty($tipoDocumento) || empty($descripcion) || empty($fechaSubida)) {
         $_SESSION['error'] = "Complete los campos obligatorios.";
         header("Location: ../documentosmedicos.php");
         exit();
     }
 
     try {
-        $consulta = "UPDATE DocumentosMedicos SET idPaciente = ?, idCita = ?, tipoDocumento = ?, descripcion = ?, fechaSubida = ?, idMedico = ? WHERE idDocumento = ?";
+        // Verificar si ya existe un documento con los mismos datos
+        $consulta = "SELECT * FROM DocumentosMedicos WHERE idCita = ? AND tipoDocumento = ? AND descripcion = ? AND idDocumento != ?";
         $statement = $conn->prepare($consulta);
-        $statement->execute([$idPaciente, $idCita, $tipoDocumento, $descripcion, $fechaSubida, $idMedico, $idDocumento]);
+        $statement->execute([$idCita, $tipoDocumento, $descripcion, $idDocumento]);
+
+        if ($statement->fetch()) {
+            $_SESSION['error'] = "Ya existe un documento con los mismos datos de Cita y tipo de documento.";
+            header("Location: ../documentosmedicos.php");
+            exit();
+        }
+
+        $consulta = "UPDATE DocumentosMedicos SET idCita = ?, tipoDocumento = ?, descripcion = ?, fechaSubida = ? WHERE idDocumento = ?";
+        $statement = $conn->prepare($consulta);
+        $statement->execute([$idCita, $tipoDocumento, $descripcion, $fechaSubida, $idDocumento]);
 
         if ($statement->rowCount() > 0) {
             $_SESSION['success'] = "Documento actualizado correctamente.";

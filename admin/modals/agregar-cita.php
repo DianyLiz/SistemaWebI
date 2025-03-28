@@ -165,9 +165,7 @@
                     data-idhorario="${horario.idHorario}"
                     data-dnimedico="${horario.DNIMedico}"
                     data-idmedico="${horario.idMedico}"
-                    data-medico="${horario.medico}">
-                    <img src="../img/edit.png" width="35" height="35">
-                </a>
+                    data-medico="${horario.medico}"></a>
             </td>
         `;
                 tbody.appendChild(tr);

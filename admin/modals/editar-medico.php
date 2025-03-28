@@ -32,15 +32,15 @@
                     }
                     ?>
                 </select>
-                <script>
 
-                </script>
-
-                <label for="edit-licenciaMedica">Especialidad Medica</label>
+                <label for="edit-licenciaMedica">Nº Licencia Medica</label>
                 <input id="edit-licenciaMedica" type="text" name="licenciaMedica" autocomplete="off" value="">
 
                 <label for="edit-aniosExperiencia">Años de Experiencia</label>
                 <input id="edit-aniosExperiencia" type="text" name="aniosExperiencia" autocomplete="off" value="">
+
+                <label for="edit-telefonoMedico">Teléfono</label>
+                <input id="edit-telefonoMedico" type="text" name="telefonoMedico" autocomplete="off" value="">
             </div>
             <button type="submit" class="modificar">Modificar Médico</button>
         </form>

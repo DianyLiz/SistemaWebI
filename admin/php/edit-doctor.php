@@ -1,7 +1,7 @@
-<?php 
+<?php
 include '../../conexion.php';
 session_start();
-if($_SERVER["REQUEST_METHOD"] == "POST") {
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $idusuario = $_POST['idusuario'];
     $idmedico = $_POST['idmedico'];
     $dni = $_POST['dni'];
@@ -10,44 +10,56 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
     $idespecialidad = $_POST['idespecialidad'];
     $licenciaMedica = $_POST['licenciaMedica'];
     $aniosExperiencia = $_POST['aniosExperiencia'];
+    $telefonoMedico = $_POST['telefonoMedico'];
 
-    if(empty($dni) || empty($nombre) || empty($apellido) || empty($idespecialidad) || empty($licenciaMedica) || empty($aniosExperiencia)) {
+    if (empty($dni) || empty($nombre) || empty($apellido) || empty($idespecialidad) || empty($licenciaMedica) || empty($aniosExperiencia) || empty($telefonoMedico)) {
         $_SESSION['error'] = "Complete los campos obligatorios.";
         header('Location: ../medicos.php');
         exit();
     }
 
     try {
-        $consulta = "SELECT * FROM Usuarios WHERE (dni = ?) AND idUsuario != $idusuario";
+        // Verificar que el DNI no se repita
+        $consulta = "SELECT * FROM Usuarios WHERE (dni = ?) AND idUsuario != ?";
         $statement = $conn->prepare($consulta);
-        $statement->execute([$dni]);
+        $statement->execute([$dni, $idusuario]);
 
-        if($statement->fetch()) {
+        if ($statement->fetch()) {
             $_SESSION['error'] = "El DNI ya está registrado.";
             header('Location: ../medicos.php');
             exit();
         }
-        // Actualizar datos del médico
-        $consulta = "UPDATE Medicos SET idEspecialidad = :idespecialidad, numeroLicenciaMedica = :licenciaMedica, anosExperiencia = :aniosExperiencia WHERE idMedico = :idmedico";
-        $statement = $conn->prepare($consulta);
-        $statement->execute([$idespecialidad, $licenciaMedica, $aniosExperiencia, $idmedico]);
 
-        if($statement->rowCount() > 0) {
+        // Verificar que el numero de licencia o el telefono no se repitan
+        $consulta = "SELECT * FROM Medicos WHERE (numeroLicenciaMedica = ? OR telefono = ?) AND idMedico != ?";
+        $statement = $conn->prepare($consulta);
+        $statement->execute([$licenciaMedica, $telefonoMedico, $idmedico]);
+
+        if ($statement->fetch()) {
+            $_SESSION['error'] = "El número de licencia médica o el número telefónico ya está registrado.";
+            header('Location: ../medicos.php');
+            exit();
+        }
+
+        // Actualizar datos del médico
+        $consulta = "UPDATE Medicos SET idEspecialidad = :idespecialidad, numeroLicenciaMedica = :licenciaMedica, anosExperiencia = :aniosExperiencia, telefono = :telefonoMedico WHERE idMedico = :idmedico";
+        $statement = $conn->prepare($consulta);
+        $statement->execute([$idespecialidad, $licenciaMedica, $aniosExperiencia, $telefonoMedico, $idmedico]);
+
+        if ($statement->rowCount() > 0) {
             // Actualizar datos del usuario para el médico
             $consulta = "UPDATE Usuarios SET dni = :dni, nombre = :nombre, apellido = :apellido WHERE idUsuario = :idusuario";
             $statement = $conn->prepare($consulta);
             $statement->execute([$dni, $nombre, $apellido, $idusuario]);
 
-            if($statement->rowCount() > 0) {
+            if ($statement->rowCount() > 0) {
                 $_SESSION['success'] = "Médico Nº {$idmedico} actualizado correctamente.";
                 header('Location: ../medicos.php');
                 exit();
-
             } else {
                 $_SESSION['error'] = "Error al actualizar el usuario del médico Nº {$idmedico}.";
                 header('Location: ../medicos.php');
                 exit();
-
             }
         } else {
             $_SESSION['error'] = "Error al actualizar los datos del médico Nº {$idmedico}.";
@@ -60,4 +72,3 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 }
-?>

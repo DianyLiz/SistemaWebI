@@ -24,6 +24,7 @@
     }
 </style>
 <link rel="stylesheet" href="../css/modal-usuario.css">
+<link rel="stylesheet" href="../css/tabla.css">
 <div id="modalEditarHorario" class="modalEditarHorario">
     <div class="modal-content">
         <span class="close">&times;</span>

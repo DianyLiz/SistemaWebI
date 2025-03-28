@@ -293,8 +293,7 @@ foreach ($cuposPorFecha as $row) {
                     data-diasemana="${horario.diaSemana}"
                     data-horainicio="${horario.HoraInicio}"
                     data-horafin="${horario.HoraFin}"
-                    data-cupos="${horario.cupos}">
-                <img src="../img/edit.png" width="35" height="35"></a>
+                    data-cupos="${horario.cupos}"></a>
                 </td>
             `;
                 tbody.appendChild(tr);
