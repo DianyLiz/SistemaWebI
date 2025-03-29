@@ -65,65 +65,71 @@ if (isset($_GET['ajax'])) {
 if (isset($_GET['export_pdf'])) {
     $html = "<h1>Lista de Citas Médicas</h1>";
     $html .= "<table border='1' cellpadding='10' cellspacing='0'>";
-    $html .= "<thead>
-                <tr>
-                    <th>Paciente</th>
-                    <th>Médico</th>
-                    <th>Fecha</th>
-                    <th>Hora</th>
-                    <th>Estado</th>
-                </tr>
-              </thead><tbody>";
+    $html = "<table border='1'><thead><tr>
+        <th>ID</th>
+        <th>Paciente</th>
+        <th>Médico</th>
+        <th>Fecha</th>
+        <th>Hora</th>
+        <th>Motivo</th>
+        <th>Estado</th>
+    </tr></thead>L<tbody>";
 
     foreach ($citas as $fila) {
-        $hora_formateada = date("H:i", strtotime($fila['hora']));
         $html .= "<tr>
-                    <td>{$fila['paciente']}</td>
-                    <td>{$fila['medico']}</td>
-                    <td>{$fila['fecha']}</td>
-                    <td>{$hora_formateada}</td>
-                    <td>{$fila['estado']}</td>
-                  </tr>";
+            <td>{$fila['idCita']}</td>
+            <td>{$fila['paciente']}</td>
+            <td>{$fila['medico']}</td>
+            <td>{$fila['FechaAtencion']}</td>
+            <td>{$fila['hora']}</td>
+            <td>{$fila['motivo']}</td>
+            <td>{$fila['estado']}</td>
+        </tr>";
     }
+
     $html .= "</tbody></table>";
 
     $options = new Options();
     $options->set('isHtml5ParserEnabled', true);
     $options->set('isPhpEnabled', true);
+
     $dompdf = new Dompdf($options);
     $dompdf->loadHtml($html);
-    $dompdf->setPaper('A4', 'portrait');
+    $dompdf->setPaper('A4', 'landscape');
     $dompdf->render();
-    $dompdf->stream("citas_medicas.pdf", array("Attachment" => false));
-    exit;
+    $dompdf->stream("citas_medicas.pdf");
 }
 
 if (isset($_GET['export_excel'])) {
     $spreadsheet = new Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
-    $sheet->setCellValue('A1', 'Paciente');
-    $sheet->setCellValue('B1', 'Médico');
-    $sheet->setCellValue('C1', 'Fecha');
-    $sheet->setCellValue('D1', 'Hora');
-    $sheet->setCellValue('E1', 'Motivo');
-    $sheet->setCellValue('F1', 'Estado');
+    $sheet->setCellValue('A1', 'ID');
+    $sheet->setCellValue('B1', 'Paciente');
+    $sheet->setCellValue('C1', 'Médico');
+    $sheet->setCellValue('D1', 'Fecha');
+    $sheet->setCellValue('E1', 'Hora');
+    $sheet->setCellValue('F1', 'Motivo');
+    $sheet->setCellValue('G1', 'Estado');
 
     $row = 2;
     foreach ($citas as $fila) {
-        $sheet->setCellValue("A$row", $fila['paciente']);
-        $sheet->setCellValue("B$row", $fila['medico']);
-        $sheet->setCellValue("C$row", $fila['fecha']);
-        $sheet->setCellValue("D$row", $fila['hora']);
-        $sheet->setCellValue("E$row", $fila['motivo']);
-        $sheet->setCellValue("E$row", $fila['estado']);
+        $sheet->setCellValue('A' . $row, $fila['idCita']);
+        $sheet->setCellValue('B' . $row, $fila['paciente']);
+        $sheet->setCellValue('C' . $row, $fila['medico']);
+        $sheet->setCellValue('D' . $row, $fila['FechaAtencion']);
+        $sheet->setCellValue('E' . $row, $fila['hora']);
+        $sheet->setCellValue('F' . $row, $fila['motivo']);
+        $sheet->setCellValue('G' . $row, $fila['estado']);
         $row++;
     }
 
     $writer = new Xlsx($spreadsheet);
-    $filename = 'citas_medicas.xlsx';
+    $writer->save('citas_medicas.xlsx');
+
     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    header("Content-Disposition: attachment;filename=\"$filename\"");
-    $writer->save('php://output');
+    header('Content-Disposition: attachment;filename="citas_medicas.xlsx"');
+    header('Cache-Control: max-age=0');
+    readfile('citas_medicas.xlsx');
     exit;
 }
 
@@ -131,32 +137,56 @@ if (isset($_GET['export_word'])) {
     $phpWord = new PhpWord();
     $section = $phpWord->addSection();
 
-    $section->addText("Lista de Citas Médicas", ['bold' => true, 'size' => 16]);
-    $table = $section->addTable();
+    // Título con formato
+    $section->addText("Lista de Citas Médicas", [
+        'bold' => true, 
+        'size' => 16,
+        'color' => '0066CC',
+        'alignment' => 'center'
+    ]);
+    $section->addTextBreak(1); // Salto de línea
 
+    $table = $section->addTable([
+        'borderSize' => 6,
+        'borderColor' => '0066CC',
+        'cellMargin' => 50
+    ]);
+
+    // Encabezados de la tabla
     $table->addRow();
-    $table->addCell(2000)->addText("Paciente");
-    $table->addCell(2000)->addText("Médico");
-    $table->addCell(2000)->addText("Fecha");
-    $table->addCell(2000)->addText("Hora");
-    $table->addCell(2000)->addText("Motivo");
-    $table->addCell(2000)->addText("Estado");
+    $table->addCell(2000)->addText("ID", ['bold' => true]);
+    $table->addCell(2000)->addText("Paciente", ['bold' => true]);
+    $table->addCell(2000)->addText("Médico", ['bold' => true]);
+    $table->addCell(2000)->addText("Fecha", ['bold' => true]);
+    $table->addCell(2000)->addText("Hora", ['bold' => true]);
+    $table->addCell(2000)->addText("Motivo", ['bold' => true]);
+    $table->addCell(2000)->addText("Estado", ['bold' => true]);
 
+    // Datos de la tabla
     foreach ($citas as $fila) {
+        $hora_formateada = date("H:i", strtotime($fila['hora']));
+        
         $table->addRow();
+        $table->addCell(2000)->addText($fila['idCita']);
         $table->addCell(2000)->addText($fila['paciente']);
         $table->addCell(2000)->addText($fila['medico']);
-        $table->addCell(2000)->addText($fila['fecha']);
-        $table->addCell(2000)->addText($fila['hora']);
+        $table->addCell(2000)->addText($fila['FechaAtencion']);
+        $table->addCell(2000)->addText($hora_formateada);
         $table->addCell(2000)->addText($fila['motivo']);
         $table->addCell(2000)->addText($fila['estado']);
     }
 
+    // Configuración de headers para la descarga
     header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-    header("Content-Disposition: attachment;filename=\"citas_medicas.docx\"");
-    $phpWord->save('php://output');
+    header('Content-Disposition: attachment;filename="citas_medicas.docx"');
+    header('Cache-Control: max-age=0');
+    
+    // Guardar el documento
+    $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
+    $objWriter->save('php://output');
     exit;
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -231,7 +261,6 @@ if (isset($_GET['export_word'])) {
                     <a href="#" class="add-btn">Agregar Cita</a>
                     <a href="?export_pdf" class="btn-pdf">Exportar a PDF</a>
                     <a href="?export_excel" class="btn-excel">Exportar a Excel</a>
-                    <a href="?export_word" class="btn-word">Exportar a Word</a>
                 </div>
                 <div class="table-responsive">
                     <table>
