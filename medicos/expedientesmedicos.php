@@ -219,7 +219,6 @@ if (isset($_GET['export_word'])) {
                     <a href="#" class="add-btn">Agregar Expediente</a>
                     <a href="?export_pdf" class="btn-pdf">Exportar a PDF</a>
                     <a href="?export_excel" class="btn-excel">Exportar a Excel</a>
-                    <a href="?export_word" class="btn-word">Exportar a Word</a>
                 </div>
                 <div class="table-responsive">
                     <table>

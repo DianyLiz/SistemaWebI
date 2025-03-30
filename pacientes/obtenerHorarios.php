@@ -24,13 +24,14 @@ if (isset($_POST['fecha']) && isset($_POST['especialidad'])) {
         CONVERT(VARCHAR(5), h.horaInicio, 108) AS horaInicio, 
         CONVERT(VARCHAR(5), h.horaFin, 108) AS horaFin, 
         b.nombre AS nombreMedico,
-        b.apellido AS apellidoMedico
-        FROM HorariosMedicos h
-        JOIN Medicos u ON h.idMedico = u.idMedico
-        JOIN Usuarios b ON b.idUsuario = u.idUsuario
-        JOIN Especialidades e ON e.idEspecialidad = u.idEspecialidad
-        WHERE h.diaSemana = :diaSemana AND e.nombreEspecialidad = :especialidad
-";
+        b.apellido AS apellidoMedico,
+        u.idMedico
+    FROM HorariosMedicos h
+    JOIN Medicos u ON h.idMedico = u.idMedico
+    JOIN Usuarios b ON b.idUsuario = u.idUsuario
+    JOIN Especialidades e ON e.idEspecialidad = u.idEspecialidad
+    WHERE h.diaSemana = :diaSemana AND e.nombreEspecialidad = :especialidad
+    ";
 
     $consulta = $conn->prepare($sql);
     $consulta->bindParam(':diaSemana', $diaSemana);
@@ -41,16 +42,18 @@ if (isset($_POST['fecha']) && isset($_POST['especialidad'])) {
 
     if (!empty($horarios)) {
         foreach ($horarios as $horario) {
-            
             $horaInicio = date("H:i", strtotime($horario['horaInicio']));
             $horaFin = date("H:i", strtotime($horario['horaFin']));
 
             echo "<tr>
                     <td>" . $horario['horaInicio'] . "</td>
                     <td>" . $horario['horaFin'] . "</td>
-                    <td>" . $horario['nombreMedico'] ." ". $horario['apellidoMedico'] . "</td>
+                    <td>" . $horario['nombreMedico'] . " " . $horario['apellidoMedico'] . "</td>
                     <td>
-                        <button class='btn-horario' data-horario='" . $horario['idHorario'] ."' >
+                        <button class='btn-horario' 
+                                data-horario='" . $horario['idHorario'] . "' 
+                                data-medico='" . $horario['idMedico'] . "' 
+                                data-hora='" . $horaInicio . "'>
                             Seleccionar
                         </button>
                     </td>
@@ -60,4 +63,3 @@ if (isset($_POST['fecha']) && isset($_POST['especialidad'])) {
         echo "<tr><td colspan='4'>No hay horarios disponibles para esta fecha.</td></tr>";
     }
 }
-?>

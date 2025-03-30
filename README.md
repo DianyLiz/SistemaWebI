@@ -89,6 +89,9 @@ Herramientas:
   Modificaciones 28-03-2025:
     Agregando implementaciones en los diferentes modúlos del sistema web.
 
+  Modificaciones 29-03-2025:
+    Solucionando problemas en el modulo de pacientes.
+
 
 
 

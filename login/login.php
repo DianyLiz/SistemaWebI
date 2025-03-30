@@ -20,7 +20,7 @@
             <i class="fa-solid fa-lock"></i>
             <input placeholder="contraseña" type="password" name="password" autocomplete="off">
         </label>
-        <a href="#" class="link">¿Olvidó su contraseña?</a>
+        <a href="../Pacientes/recuperar_contrasena.php" class="link">¿Olvidó su contraseña?</a>
         <br><button>Iniciar sesión</button></br>
         <a href="registrarse.php" class="link">¿No tienes cuenta? Regístrate aquí</a>
         <a href="../principal/" class="link">Volver a inicio</a>
