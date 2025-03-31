@@ -92,6 +92,9 @@ Herramientas:
   Modificaciones 29-03-2025:
     Solucionando problemas en el modulo de pacientes.
 
+   Modificaciones 30-03-2025:
+    Solucionando problemas en el modulo de pacientes con la inserción de citas.
+
 
 
 
