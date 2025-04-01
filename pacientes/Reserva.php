@@ -428,13 +428,10 @@ $(document).ready(function() {
         });
     }
 
-    // Prevenir pérdida de datos
-    window.addEventListener('beforeunload', function(e) {
-        if ($('#motivo-cita').is(':visible') && $('#motivo').val().trim() !== '') {
-            e.preventDefault();
-            e.returnValue = '¿Estás seguro de salir? Los datos no guardados se perderán.';
-        }
-    });
+    // Manejo de eventos para el botón de regresar
+    $('#btn-regresar').click(function() {
+        resetearProcesoReserva();
+    }); 
 });
 </script>
 

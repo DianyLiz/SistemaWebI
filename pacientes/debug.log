@@ -1,0 +1,48 @@
+2025-04-01 07:24:00 - Solicitud recibida - Fecha: 2025-03-31, Especialidad: Medicina General
+2025-04-01 07:24:00 - Día calculado: Monday => Lunes
+2025-04-01 07:24:00 - Bloques horarios encontrados: 1
+2025-04-01 07:24:00 - Citas ocupadas encontradas: Array
+(
+)
+
+2025-04-01 07:24:00 - Procesando bloque: Array
+(
+    [idHorario] => 4
+    [horaInicio] => 09:00:00
+    [horaFin] => 04:00:00
+    [medico] => Liz Fernandez
+    [idMedico] => 1
+    [nombreEspecialidad] => Medicina General
+)
+
+2025-04-01 07:24:00 - Mostrados en bloque 4: 0
+2025-04-01 07:24:00 - No se mostraron horarios disponibles
+2025-04-01 07:24:05 - Solicitud recibida - Fecha: 2025-04-06, Especialidad: Medicina General
+2025-04-01 07:24:05 - Día calculado: Sunday => Domingo
+2025-04-01 07:24:05 - Bloques horarios encontrados: 2
+2025-04-01 07:24:05 - Citas ocupadas encontradas: Array
+(
+)
+
+2025-04-01 07:24:05 - Procesando bloque: Array
+(
+    [idHorario] => 8
+    [horaInicio] => 08:00:00
+    [horaFin] => 16:00:00
+    [medico] => Liz Fernandez
+    [idMedico] => 1
+    [nombreEspecialidad] => Medicina General
+)
+
+2025-04-01 07:24:05 - Mostrados en bloque 8: 8
+2025-04-01 07:24:05 - Procesando bloque: Array
+(
+    [idHorario] => 9
+    [horaInicio] => 08:20:00
+    [horaFin] => 16:20:00
+    [medico] => Liz Fernandez
+    [idMedico] => 1
+    [nombreEspecialidad] => Medicina General
+)
+
+2025-04-01 07:24:05 - Mostrados en bloque 9: 8

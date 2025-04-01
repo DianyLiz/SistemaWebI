@@ -14,114 +14,125 @@ if (isset($_POST['fecha']) && isset($_POST['especialidad'])) {
         $especialidad = $_POST['especialidad'];
 
         // Validación de fecha
-        if (!DateTime::createFromFormat('Y-m-d', $fecha)) {
+        $fechaObj = DateTime::createFromFormat('Y-m-d', $fecha);
+        if (!$fechaObj) {
             throw new Exception("Formato de fecha inválido");
         }
 
-        // Obtener día de la semana en español
-        $fechaObj = new DateTime($fecha);
-        $diasSemana = [
-            'Monday' => 'Lunes', 'Tuesday' => 'Martes', 'Wednesday' => 'Miércoles',
-            'Thursday' => 'Jueves', 'Friday' => 'Viernes', 'Saturday' => 'Sábado',
-            'Sunday' => 'Domingo'
-        ];
-        $diaSemana = $diasSemana[$fechaObj->format('l')] ?? '';
-        
-        if (empty($diaSemana)) {
-            throw new Exception("No se pudo determinar el día de la semana");
-        }
-
-        // 1. Obtener todos los horarios base para ese día y especialidad
+        // Consulta SQL para obtener horarios
         $sqlHorarios = "SELECT 
                 h.idHorario,
+                h.idMedico,
                 CONVERT(VARCHAR(8), h.horaInicio, 108) AS horaInicio,
                 CONVERT(VARCHAR(8), h.horaFin, 108) AS horaFin,
+                h.diaSemana,
+                h.fecha,
+                h.cupos,
                 CONCAT(u.nombre, ' ', u.apellido) AS medico,
-                m.idMedico
+                e.nombreEspecialidad
             FROM HorariosMedicos h
             INNER JOIN Medicos m ON h.idMedico = m.idMedico
             INNER JOIN Usuarios u ON m.idUsuario = u.idUsuario
             INNER JOIN Especialidades e ON m.idEspecialidad = e.idEspecialidad
-            WHERE h.diaSemana = :diaSemana
+            WHERE (h.fecha = :fecha OR (h.fecha IS NULL AND h.diaSemana = (
+                    SELECT CASE DATEPART(WEEKDAY, :fechaParam)
+                        WHEN 1 THEN 'Domingo'
+                        WHEN 2 THEN 'Lunes'
+                        WHEN 3 THEN 'Martes'
+                        WHEN 4 THEN 'Miércoles'
+                        WHEN 5 THEN 'Jueves'
+                        WHEN 6 THEN 'Viernes'
+                        WHEN 7 THEN 'Sábado'
+                    END
+                )))
             AND e.nombreEspecialidad = :especialidad
             ORDER BY h.horaInicio";
 
         $stmtHorarios = $conn->prepare($sqlHorarios);
-        $stmtHorarios->bindParam(':diaSemana', $diaSemana, PDO::PARAM_STR);
+        $stmtHorarios->bindParam(':fecha', $fecha, PDO::PARAM_STR);
+        $stmtHorarios->bindParam(':fechaParam', $fecha, PDO::PARAM_STR);
         $stmtHorarios->bindParam(':especialidad', $especialidad, PDO::PARAM_STR);
-        $stmtHorarios->execute();
+        
+        if (!$stmtHorarios->execute()) {
+            throw new Exception("Error al obtener horarios: " . implode(" ", $stmtHorarios->errorInfo()));
+        }
+
         $bloquesHorarios = $stmtHorarios->fetchAll(PDO::FETCH_ASSOC);
 
         if (count($bloquesHorarios) == 0) {
-            echo "<tr><td colspan='4' class='no-horarios'>No hay horarios programados para ".htmlspecialchars($diaSemana, ENT_QUOTES, 'UTF-8')."</td></tr>";
+            echo "<tr><td colspan='4' class='no-horarios'>No hay horarios programados para esta fecha</td></tr>";
             exit;
         }
 
-        // 2. Obtener todas las citas existentes para la fecha seleccionada
+        // Consulta para obtener citas existentes
         $sqlCitas = "SELECT 
-                FORMAT(hora, 'HH:mm') AS hora_cita,
-                idHorario
-            FROM Citas
-            WHERE CAST(hora AS DATE) = CAST(:fecha AS DATE)
-            AND estado NOT IN ('Cancelada', 'Rechazada')";
+                c.idHorario,
+                FORMAT(c.hora, 'HH:mm') AS hora_cita,
+                COUNT(*) AS cupos_ocupados
+            FROM Citas c
+            WHERE CAST(c.hora AS DATE) = CAST(:fecha AS DATE)
+            AND c.estado NOT IN ('Cancelada', 'Rechazada')
+            GROUP BY c.idHorario, FORMAT(c.hora, 'HH:mm')";
 
         $stmtCitas = $conn->prepare($sqlCitas);
         $stmtCitas->bindParam(':fecha', $fecha, PDO::PARAM_STR);
-        $stmtCitas->execute();
-        $citasOcupadas = $stmtCitas->fetchAll(PDO::FETCH_ASSOC);
+        
+        if (!$stmtCitas->execute()) {
+            throw new Exception("Error al obtener citas: " . implode(" ", $stmtCitas->errorInfo()));
+        }
 
-        // 3. Procesar cada bloque horario
+        $citasOcupadas = $stmtCitas->fetchAll(PDO::FETCH_GROUP|PDO::FETCH_UNIQUE);
+
+        // Procesar cada bloque horario
         foreach ($bloquesHorarios as $bloque) {
             $horaInicio = DateTime::createFromFormat('H:i:s', $bloque['horaInicio']);
             $horaFin = DateTime::createFromFormat('H:i:s', $bloque['horaFin']);
             
-            // Mostrar encabezado del bloque
-            echo "<tr><td colspan='4' class='bloque-horario'>Horario de "
+            $tipoHorario = $bloque['fecha'] ? "Horario específico" : "Horario regular (" . $bloque['diaSemana'] . ")";
+            
+            echo "<tr><td colspan='4' class='bloque-horario'>$tipoHorario de "
                 .$horaInicio->format('H:i')." a "
                 .$horaFin->format('H:i')." - "
                 .htmlspecialchars($bloque['medico'], ENT_QUOTES, 'UTF-8')
-                ."</td></tr>";
+                ." (Cupos: ".($bloque['cupos'] ?: 'Sin límite').")</td></tr>";
 
-            // Generar intervalos exactos para este bloque
             $horaActual = clone $horaInicio;
+            $idHorario = $bloque['idHorario'];
             
             while ($horaActual < $horaFin) {
                 $horaFormato = $horaActual->format('H:i');
                 
-                // Verificar si este horario está ocupado
                 $ocupado = false;
-                foreach ($citasOcupadas as $cita) {
-                    if ($cita['hora_cita'] == $horaFormato && $cita['idHorario'] == $bloque['idHorario']) {
+                $cuposDisponibles = $bloque['cupos'];
+                
+                if (isset($citasOcupadas[$idHorario][$horaFormato])) {
+                    if ($cuposDisponibles && $citasOcupadas[$idHorario][$horaFormato]['cupos_ocupados'] >= $cuposDisponibles) {
                         $ocupado = true;
-                        break;
                     }
                 }
 
-                // Mostrar fila según disponibilidad
+                echo "<tr>
+                        <td>".$horaFormato."</td>
+                        <td>".htmlspecialchars($bloque['medico'], ENT_QUOTES, 'UTF-8')."</td>
+                        <td>60 min</td>
+                        <td>";
+                
                 if ($ocupado) {
-                    echo "<tr>
-                            <td>".$horaFormato."</td>
-                            <td>".htmlspecialchars($bloque['medico'], ENT_QUOTES, 'UTF-8')."</td>
-                            <td>60 min</td>
-                            <td><span class='btn-ocupado'>Cupo ya reservado</span></td>
-                        </tr>";
+                    echo "<span class='btn-ocupado'>Cupo lleno</span>";
                 } else {
-                    echo "<tr>
-                            <td>".$horaFormato."</td>
-                            <td>".htmlspecialchars($bloque['medico'], ENT_QUOTES, 'UTF-8')."</td>
-                            <td>60 min</td>
-                            <td>
-                                <button class='btn-reservar' 
-                                        data-horario='".htmlspecialchars($bloque['idHorario'], ENT_QUOTES, 'UTF-8')."' 
-                                        data-medico='".htmlspecialchars($bloque['idMedico'], ENT_QUOTES, 'UTF-8')."'
-                                        data-hora-inicio='".$horaFormato."'>
-                                    Reservar
-                                </button>
-                            </td>
-                        </tr>";
+                    echo "<button class='btn-reservar' 
+                            data-horario='".htmlspecialchars($idHorario, ENT_QUOTES, 'UTF-8')."' 
+                            data-medico='".htmlspecialchars($bloque['idMedico'], ENT_QUOTES, 'UTF-8')."'
+                            data-hora-inicio='".$horaFormato."'
+                            data-cupos='".htmlspecialchars($bloque['cupos'], ENT_QUOTES, 'UTF-8')."'
+                            data-disponible='".($ocupado ? 'false' : 'true')."'
+                            ".($ocupado ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : '').">
+                          Reservar
+                        </button>";
                 }
+                
+                echo "</td></tr>";
 
-                // Avanzar exactamente 60 minutos
                 $horaActual->add(new DateInterval('PT60M'));
             }
         }
