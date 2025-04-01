@@ -149,7 +149,7 @@ echo $alertScript;
                 <p><strong>Fecha:</strong> <span id="fecha-seleccionada"></span></p>
                 <p><strong>Hora:</strong> <span id="hora-seleccionada"></span></p>
                 <p><strong>Médico:</strong> <span id="medico-seleccionado"></span></p>
-                <p><strong>Duración:</strong> <span id="duracion-cita"></span> minutos</p>
+                <p><strong>Duración:</strong> <span id="duracion-cita">60</span> minutos</p> <!-- Duración fija -->
             </div>
             <button id="btn-confirmar" class="btn-aceptar">Confirmar Cita</button>
         </div>
@@ -190,7 +190,7 @@ $(document).ready(function() {
         }
     });
 
-    // Función mejorada para cargar horarios
+    // Función para cargar horarios disponibles
     function cargarHorariosDisponibles() {
         $('#horarios-list').html('<tr><td colspan="4"><div class="loading-spinner"></div> Cargando horarios...</td></tr>');
         $('#horarios-disponibles').show();
@@ -205,7 +205,6 @@ $(document).ready(function() {
             success: function(response) {
                 $('#horarios-list').html(response);
                 
-                // Verificar si hay resultados
                 if ($('#horarios-list tr').length === 1 && $('#horarios-list .no-horarios').length > 0) {
                     // No hay horarios disponibles (mensaje ya está incluido)
                 } else if ($('#horarios-list tr').length === 0) {
@@ -232,7 +231,6 @@ $(document).ready(function() {
         
         const horaInicio = $(this).data('hora-inicio');
         const medico = $(this).closest('tr').find('td:nth-child(2)').text();
-        const duracion = $(this).data('duracion') || 60;
         
         // Validar formato de hora
         if(!/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(horaInicio)) {
@@ -240,11 +238,11 @@ $(document).ready(function() {
             return;
         }
         
-        // Actualizar UI
+        // Actualizar UI - Duración siempre será 60 minutos
         $('#hora-seleccionada').text(horaInicio);
         $('#fecha-seleccionada').text(fechaSeleccionada);
         $('#medico-seleccionado').text(medico);
-        $('#duracion-cita').text(duracion);
+        $('#duracion-cita').text('60');
         
         $('#motivo-cita').fadeIn();
         
@@ -326,16 +324,14 @@ $(document).ready(function() {
             // Confirmar con todos los datos
             Swal.fire({
                 title: 'Confirmar Cita',
-                html: `
-                    <div style="text-align:left;">
-                        <p><strong>Fecha:</strong> ${fechaSeleccionada}</p>
-                        <p><strong>Hora:</strong> ${botonSeleccionado.data('hora-inicio')}</p>
-                        <p><strong>Médico:</strong> ${$('#medico-seleccionado').text()}</p>
-                        <p><strong>Duración:</strong> ${$('#duracion-cita').text()} minutos</p>
-                        <p><strong>DNI:</strong> ${dni}</p>
-                        <p><strong>Motivo:</strong> ${motivo}</p>
-                    </div>
-                `,
+                html: `<div style="text-align:left;">
+                    <p><strong>Fecha:</strong> ${fechaSeleccionada}</p>
+                    <p><strong>Hora:</strong> ${botonSeleccionado.data('hora-inicio')}</p>
+                    <p><strong>Médico:</strong> ${$('#medico-seleccionado').text()}</p>
+                    <p><strong>Duración:</strong> 60 minutos</p>
+                    <p><strong>DNI:</strong> ${dni}</p>
+                    <p><strong>Motivo:</strong> ${motivo}</p>
+                </div>`,
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: 'Confirmar',
@@ -350,7 +346,7 @@ $(document).ready(function() {
                             horario: botonSeleccionado.data('horario'),
                             hora_inicio: botonSeleccionado.data('hora-inicio'),
                             fecha: fechaSeleccionada,
-                            duracion: $('#duracion-cita').text()
+                            duracion: 60 // Duración fija de 60 minutos
                         }, resolve);
                     });
                 },
@@ -385,7 +381,7 @@ $(document).ready(function() {
             data: {
                 fecha: fechaSeleccionada,
                 horario: botonSeleccionado.data('horario'),
-                hora_inicio: horaInicio
+                horaInicio: horaInicio
             },
             dataType: 'json',
             timeout: 10000

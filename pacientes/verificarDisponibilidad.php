@@ -3,9 +3,8 @@ include '../conexion.php';
 
 header('Content-Type: application/json');
 
-// Verificar conexión
 if (!$conn) {
-    echo json_encode(['disponible' => false, 'error' => 'Error de conexión a la base de datos']);
+    echo json_encode(['disponible' => false, 'error' => 'Error de conexión']);
     exit;
 }
 
@@ -14,7 +13,6 @@ if ($_SERVER["REQUEST_METHOD"] != "POST") {
     exit;
 }
 
-// Validar campos requeridos
 $required = ['fecha', 'horario', 'horaInicio'];
 foreach ($required as $field) {
     if (!isset($_POST[$field])) {
@@ -24,45 +22,39 @@ foreach ($required as $field) {
 }
 
 try {
-    $conn->beginTransaction();
-    
     $fecha = $_POST['fecha'];
     $idHorario = (int)$_POST['horario'];
-    $horaInicio = date("H:i:s", strtotime($_POST['horaInicio'])); // Asegurar formato correcto
+    $horaInicio = $_POST['horaInicio'];
 
-    // Consulta corregida
-    $sqlCitas = "SELECT COUNT(*) AS total FROM Citas 
-                 WHERE idHorario = :horario AND hora = :hora";
-
-    error_log("Consulta SQL: $sqlCitas | Parámetros: idHorario=$idHorario, hora=$horaInicio");
-
-    $stmtCitas = $conn->prepare($sqlCitas);
-    $stmtCitas->bindParam(':horario', $idHorario, PDO::PARAM_INT);
-    $stmtCitas->bindParam(':hora', $horaInicio, PDO::PARAM_STR);
-
-    if (!$stmtCitas->execute()) {
-        throw new Exception("Error al ejecutar la consulta de verificación");
+    // CONSULTA CORREGIDA - MANEJO SEGURO DE FECHAS/HORAS
+    $sql = "SELECT COUNT(*) AS ocupado FROM Citas 
+            WHERE idHorario = :horario 
+            AND CAST(hora AS DATE) = CAST(:fecha AS DATE)
+            AND FORMAT(hora, 'HH:mm') = :horaInicio
+            AND estado NOT IN ('Cancelada', 'Rechazada')";
+    
+    $stmt = $conn->prepare($sql);
+    $stmt->bindParam(':horario', $idHorario, PDO::PARAM_INT);
+    $stmt->bindParam(':fecha', $fecha, PDO::PARAM_STR);
+    $stmt->bindParam(':horaInicio', $horaInicio, PDO::PARAM_STR);
+    
+    if (!$stmt->execute()) {
+        throw new Exception("Error en verificación: " . implode(" ", $stmt->errorInfo()));
     }
 
-    $resultCitas = $stmtCitas->fetch(PDO::FETCH_ASSOC);
-    $disponible = ($resultCitas['total'] == 0);
-
-    $conn->commit();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    $disponible = ($result['ocupado'] == 0);
 
     echo json_encode([
         'disponible' => $disponible,
-        'message' => $disponible ? 'Horario disponible' : 'Horario ocupado'
+        'message' => $disponible ? 'Disponible' : 'Ocupado'
     ]);
     
 } catch (Exception $e) {
-    if ($conn->inTransaction()) {
-        $conn->rollBack();
-    }
-    
-    error_log("Error en verificarDisponibilidad: " . $e->getMessage());
+    error_log("Error verificarDisponibilidad: ".$e->getMessage());
     echo json_encode([
         'disponible' => false,
-        'error' => 'Error al verificar disponibilidad'
+        'error' => 'Error al verificar: ' . $e->getMessage()
     ]);
 } finally {
     $conn = null;
