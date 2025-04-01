@@ -25,8 +25,7 @@ try {
     $fecha = $_POST['fecha'];
     $idHorario = (int)$_POST['horario'];
     $horaInicio = $_POST['horaInicio'];
-
-    // CONSULTA CORREGIDA - MANEJO SEGURO DE FECHAS/HORAS
+    
     $sql = "SELECT COUNT(*) AS ocupado FROM Citas 
             WHERE idHorario = :horario 
             AND CAST(hora AS DATE) = CAST(:fecha AS DATE)
