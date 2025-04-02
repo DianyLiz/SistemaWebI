@@ -1,83 +1,67 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Confirmación de Cita</title>
-    <link rel="stylesheet" href="../css/estilo.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
-    <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: #f3f4f6;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            margin: 0;
-        }
+<?php
+header('Content-Type: application/json');
+require_once '../conexion.php';
+require_once '../vendor/autoload.php';
+use PHPMailer\PHPMailer\PHPMailer;
 
-        .confirmacion-container {
-            background-color: white;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            max-width: 500px;
-        }
+$dni = $_POST['dni'] ?? '';
+$fecha = $_POST['fecha'] ?? '';
+$hora = $_POST['hora'] ?? '';
+$medico = $_POST['medico'] ?? '';
+$motivo = $_POST['motivo'] ?? '';
 
-        .confirmacion-container i {
-            font-size: 60px;
-            color: #38c172;
-            margin-bottom: 20px;
-        }
-
-        .confirmacion-container h2 {
-            margin-bottom: 10px;
-            font-size: 28px;
-            color: #2d3748;
-        }
-
-        .confirmacion-container p {
-            font-size: 18px;
-            color: #4a5568;
-            margin-bottom: 30px;
-        }
-
-        .btn-volver {
-            padding: 10px 25px;
-            background-color: #042947;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            text-decoration: none;
-            transition: background-color 0.3s ease;
-        }
-
-        .btn-volver:hover {
-            background-color: #064170;
-        }
-
-    </style>
-</head>
-<body>
-
-    <div class="confirmacion-container">
-        <i class="fas fa-check-circle"></i>
-        <h2>¡Cita Confirmada!</h2>
-        <p>Tu cita ha sido registrada con éxito. Pronto recibirás un correo con los detalles.</p>
-        <a href="index.php" class="btn-volver"><i class="fas fa-arrow-left"></i> Volver al Inicio</a>
-    </div>
-        <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-        <script>
-    window.onload = function() {
-        confetti({
-            particleCount: 150,
-            spread: 70,
-            origin: { y: 0.6 }
-        });
-    };
-</script>
-</body>
-</html>
+try {
+    // Obtener email del paciente
+    $stmt = $conn->prepare("SELECT email FROM Pacientes WHERE dni = ?");
+    $stmt->execute([$dni]);
+    $paciente = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if(!$paciente || empty($paciente['email'])) {
+        throw new Exception("No se encontró el email del paciente");
+    }
+    
+    $email_paciente = $paciente['email'];
+    
+    // Configurar PHPMailer
+    $mail = new PHPMailer(true);
+    
+    // Configuración SMTP (ajustar según tu servidor)
+    $mail->isSMTP();
+    $mail->Host = 'smtp.tudominio.com';
+    $mail->SMTPAuth = true;
+    $mail->Username = 'tucorreo@tudominio.com';
+    $mail->Password = 'tucontraseña';
+    $mail->SMTPSecure = 'tls';
+    $mail->Port = 587;
+    
+    $mail->setFrom('no-reply@tudominio.com', 'MediCitas');
+    $mail->addAddress($email_paciente);
+    $mail->isHTML(true);
+    $mail->Subject = 'Confirmación de cita médica';
+    
+    $mail->Body = "
+        <h1>Confirmación de Cita Médica</h1>
+        <p>Estimado paciente,</p>
+        <p>Su cita ha sido registrada con los siguientes detalles:</p>
+        <ul>
+            <li><strong>Fecha:</strong> $fecha</li>
+            <li><strong>Hora:</strong> $hora</li>
+            <li><strong>Médico:</strong> $medico</li>
+            <li><strong>Motivo:</strong> $motivo</li>
+        </ul>
+        <p>Por favor llegue 15 minutos antes de su cita.</p>
+        <p>Atentamente,<br>El equipo de MediCitas</p>
+    ";
+    
+    $mail->AltBody = "Confirmación de cita:\nFecha: $fecha\nHora: $hora\nMédico: $medico\nMotivo: $motivo";
+    
+    if(!$mail->send()) {
+        throw new Exception("Error al enviar el correo: " . $mail->ErrorInfo);
+    }
+    
+    echo json_encode(['estado' => 'exito', 'mensaje' => 'Correo enviado correctamente']);
+    
+} catch(Exception $e) {
+    error_log("Error al enviar correo: " . $e->getMessage());
+    echo json_encode(['estado' => 'error', 'mensaje' => $e->getMessage()]);
+}

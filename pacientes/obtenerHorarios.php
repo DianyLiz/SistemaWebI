@@ -19,7 +19,7 @@ if (isset($_POST['fecha']) && isset($_POST['especialidad'])) {
             throw new Exception("Formato de fecha inválido");
         }
 
-        // Consulta SQL para obtener horarios
+        // Consulta SQL para obtener horarios disponibles
         $sqlHorarios = "SELECT 
                 h.idHorario,
                 h.idMedico,
@@ -64,7 +64,7 @@ if (isset($_POST['fecha']) && isset($_POST['especialidad'])) {
             exit;
         }
 
-        // Consulta para obtener citas existentes
+        // Consulta para obtener citas ya reservadas en esos horarios
         $sqlCitas = "SELECT 
                 c.idHorario,
                 FORMAT(c.hora, 'HH:mm') AS hora_cita,
@@ -81,9 +81,9 @@ if (isset($_POST['fecha']) && isset($_POST['especialidad'])) {
             throw new Exception("Error al obtener citas: " . implode(" ", $stmtCitas->errorInfo()));
         }
 
-        $citasOcupadas = $stmtCitas->fetchAll(PDO::FETCH_GROUP|PDO::FETCH_UNIQUE);
+        $citasOcupadas = $stmtCitas->fetchAll(PDO::FETCH_GROUP | PDO::FETCH_UNIQUE);
 
-        // Procesar cada bloque horario
+        // Procesar cada bloque de horario
         foreach ($bloquesHorarios as $bloque) {
             $horaInicio = DateTime::createFromFormat('H:i:s', $bloque['horaInicio']);
             $horaFin = DateTime::createFromFormat('H:i:s', $bloque['horaFin']);
@@ -98,7 +98,10 @@ if (isset($_POST['fecha']) && isset($_POST['especialidad'])) {
 
             $horaActual = clone $horaInicio;
             $idHorario = $bloque['idHorario'];
-            
+
+            // Duración fija de 60 minutos
+            $duracion = new DateInterval('PT60M');
+
             while ($horaActual < $horaFin) {
                 $horaFormato = $horaActual->format('H:i');
                 
@@ -126,14 +129,14 @@ if (isset($_POST['fecha']) && isset($_POST['especialidad'])) {
                             data-hora-inicio='".$horaFormato."'
                             data-cupos='".htmlspecialchars($bloque['cupos'], ENT_QUOTES, 'UTF-8')."'
                             data-disponible='".($ocupado ? 'false' : 'true')."'
-                            ".($ocupado ? 'disabled style="opacity:0.5; cursor:not-allowed;"' : '').">
+                            ".($ocupado ? 'disabled style=\"opacity:0.5; cursor:not-allowed;\"' : '').">
                           Reservar
                         </button>";
                 }
                 
                 echo "</td></tr>";
 
-                $horaActual->add(new DateInterval('PT60M'));
+                $horaActual->add($duracion);
             }
         }
         
