@@ -8,91 +8,121 @@ $id_medico = $_POST['id_medico'] ?? '';
 $id_horario = $_POST['id_horario'] ?? '';
 
 try {
-    // 1. Verificar que el horario sigue disponible
+    // Validar que los parámetros no estén vacíos
+    if (empty($fecha) || empty($hora_inicio) || empty($id_medico) || empty($id_horario)) {
+        throw new Exception('Parámetros requeridos faltantes.');
+    }
+
+    // Validar formato de fecha
+    if (!DateTime::createFromFormat('Y-m-d', $fecha)) {
+        throw new Exception('Formato de fecha inválido.');
+    }
+
+    // Obtener día de la semana
+    $diaSemanaNumero = date('N', strtotime($fecha));
+    $diasSemana = [
+        1 => 'Lunes',
+        2 => 'Martes',
+        3 => 'Miércoles',
+        4 => 'Jueves',
+        5 => 'Viernes',
+        6 => 'Sábado',
+        7 => 'Domingo'
+    ];
+    $diaSemanaNombre = $diasSemana[$diaSemanaNumero];
+
+    // Iniciar transacción para evitar condiciones de carrera
+    $conn->beginTransaction();
+
+    // 1. Verificar que el horario sigue activo para el médico (CORREGIDO)
     $stmt = $conn->prepare("
-        SELECT COUNT(*) as disponible 
+        SELECT cupos 
         FROM HorariosMedicos 
-        WHERE idHorario = :id_horario 
-        AND idMedico = :id_medico
-        AND fecha = :fecha
-        AND horaInicio = :hora_inicio
-    ");
-    $stmt->execute([
-        ':id_horario' => $id_horario,
-        ':id_medico' => $id_medico,
-        ':fecha' => $fecha,
-        ':hora_inicio' => $hora_inicio
-    ]);
-    $result = $stmt->fetch(PDO::FETCH_ASSOC);
-    
-    if($result['disponible'] == 0) {
-        echo json_encode([
-            'disponible' => false, 
-            'mensaje' => 'El horario ya no está disponible en la programación del médico'
-        ]);
-        exit;
-    }
-
-    // 2. Verificar que no exista cita en ese horario
-    $stmt = $conn->prepare("
-        SELECT COUNT(*) as existe 
-        FROM Citas 
-        WHERE fecha = :fecha 
-        AND hora = :hora_inicio 
-        AND idMedico = :id_medico 
-        AND estado != 'cancelada'
-    ");
-    $stmt->execute([
-        ':fecha' => $fecha,
-        ':hora_inicio' => $hora_inicio,
-        ':id_medico' => $id_medico
-    ]);
-    $result = $stmt->fetch(PDO::FETCH_ASSOC);
-    
-    if($result['existe'] > 0) {
-        echo json_encode([
-            'disponible' => false, 
-            'mensaje' => 'Ya existe una cita registrada para este horario'
-        ]);
-        exit;
-    }
-
-    // 3. Verificar solapamiento (considerando duración de 60 minutos)
-    $hora_fin = date('H:i:s', strtotime("$hora_inicio + 60 minutes"));
-    
-    $stmt = $conn->prepare("
-        SELECT COUNT(*) as solapadas 
-        FROM Citas 
-        WHERE fecha = :fecha 
-        AND idMedico = :id_medico 
-        AND estado != 'cancelada'
+        WHERE idHorario = ? 
+        AND idMedico = ?
         AND (
-            (hora <= :hora_inicio AND DATEADD(MINUTE, duracion, hora) > :hora_inicio)
-            OR (hora < :hora_fin AND DATEADD(MINUTE, duracion, hora) >= :hora_fin)
-            OR (hora >= :hora_inicio AND DATEADD(MINUTE, duracion, hora) <= :hora_fin)
+            fecha = ? 
+            OR (fecha IS NULL AND diaSemana = ?)
         )
+        FOR UPDATE
     ");
-    $stmt->execute([
-        ':fecha' => $fecha,
-        ':id_medico' => $id_medico,
-        ':hora_inicio' => $hora_inicio,
-        ':hora_fin' => $hora_fin
-    ]);
-    $result = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    if($result['solapadas'] > 0) {
-        echo json_encode([
-            'disponible' => false, 
-            'mensaje' => 'El horario se solapa con otra cita existente'
-        ]);
-        exit;
+    $stmt->execute([$id_horario, $id_medico, $fecha, $diaSemanaNombre]);
+    $horario = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if (!$horario) {
+        $conn->rollBack();
+        throw new Exception('El horario ya no está disponible en la programación del médico.');
     }
 
-    echo json_encode(['disponible' => true]);
+    // Verificar cupos disponibles (LÓGICA CORREGIDA)
+    if ($horario['cupos'] !== null) {
+        if ($horario['cupos'] <= 0) {
+            $conn->rollBack();
+            throw new Exception('No hay cupos disponibles para este horario.');
+        }
+        
+        // 2. Verificar citas existentes solo si hay límite de cupos
+        $stmt = $conn->prepare("
+            SELECT COUNT(*) as existe 
+            FROM Citas 
+            WHERE fecha = ? 
+            AND hora = ? 
+            AND idMedico = ? 
+            AND idHorario = ?
+            AND estado NOT IN ('Cancelada', 'Rechazada')
+        ");
+        
+        $stmt->execute([$fecha, $hora_inicio, $id_medico, $id_horario]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($result['existe'] >= $horario['cupos']) {
+            $conn->rollBack();
+            throw new Exception('Ya se alcanzó el límite de cupos para este horario.');
+        }
+    } else {
+        // Para horarios sin límite de cupos, solo verificar que no haya una cita exactamente a la misma hora
+        $stmt = $conn->prepare("
+            SELECT COUNT(*) as existe 
+            FROM Citas 
+            WHERE fecha = ? 
+            AND hora = ? 
+            AND idMedico = ? 
+            AND idHorario = ?
+            AND estado NOT IN ('Cancelada', 'Rechazada')
+        ");
+        
+        $stmt->execute([$fecha, $hora_inicio, $id_medico, $id_horario]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($result['existe'] > 0) {
+            $conn->rollBack();
+            throw new Exception('Ya existe una cita registrada para este horario exacto.');
+        }
+    }
+
+    $conn->commit();
     
-} catch(PDOException $e) {
+    echo json_encode([
+        'disponible' => true,
+        'mensaje' => 'Horario disponible'
+    ]);
+    
+} catch (PDOException $e) {
+    if ($conn->inTransaction()) {
+        $conn->rollBack();
+    }
     echo json_encode([
         'disponible' => false, 
         'mensaje' => 'Error al verificar disponibilidad: ' . $e->getMessage()
     ]);
+} catch (Exception $e) {
+    if ($conn->inTransaction()) {
+        $conn->rollBack();
+    }
+    echo json_encode([
+        'disponible' => false, 
+        'mensaje' => $e->getMessage()
+    ]);
 }
+?>

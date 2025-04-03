@@ -34,6 +34,51 @@ EOT;
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        .detalles-horario {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .detalles-horario p {
+            margin: 5px 0;
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0,0,0,.1);
+            border-radius: 50%;
+            border-top-color: #007bff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .error {
+            color: #dc3545;
+            text-align: center;
+            padding: 20px;
+        }
+        .btn-reservar.selected {
+            background-color: #28a745;
+            color: white;
+        }
+        .no-horarios {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+        }
+        .btn-ocupado {
+            background-color: #dc3545;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: not-allowed;
+        }
+    </style>
 </head>
 <body>
     <?php include 'header.php'; include 'menu.php'; echo $alertScript; ?>
@@ -221,6 +266,7 @@ EOT;
             $.ajax({
                 url: 'verificarDisponibilidad.php',
                 type: 'POST',
+                dataType: 'json',
                 data: {
                     fecha: fechaSeleccionada,
                     hora_inicio: botonSeleccionado.data('hora-inicio'),
@@ -235,7 +281,9 @@ EOT;
                             icon: 'error',
                             title: 'Horario no disponible',
                             text: response.mensaje || 'El horario seleccionado ya fue reservado',
-                            willClose: () => { cargarHorariosDisponibles(); }
+                            willClose: () => { 
+                                cargarHorariosDisponibles();
+                            }
                         });
                         return;
                     }
@@ -243,8 +291,8 @@ EOT;
                     // Confirmar reserva
                     confirmarReserva();
                 },
-                error: function() {
-                    Swal.fire('Error', 'No se pudo verificar la disponibilidad', 'error');
+                error: function(xhr, status, error) {
+                    Swal.fire('Error', 'No se pudo verificar la disponibilidad: ' + error, 'error');
                 }
             });
         });
@@ -273,6 +321,7 @@ EOT;
                         $.ajax({
                             url: 'InsertarCitas.php',
                             type: 'POST',
+                            dataType: 'json',
                             data: {
                                 dni: dni,
                                 motivo: motivo,
@@ -297,12 +346,13 @@ EOT;
                                     Swal.showValidationMessage(response.mensaje || 'Error al confirmar la cita');
                                 }
                             },
-                            error: function() {
-                                Swal.showValidationMessage('Error al conectar con el servidor');
+                            error: function(xhr, status, error) {
+                                Swal.showValidationMessage('Error al conectar con el servidor: ' + error);
                             }
                         });
                     });
-                }
+                },
+                allowOutsideClick: () => !Swal.isLoading()
             }).then((result) => {
                 if (result.isConfirmed) {
                     Swal.fire({
@@ -321,8 +371,9 @@ EOT;
         function enviarCorreoConfirmacion(dni, fecha, hora, medico, motivo) {
             return new Promise((resolve, reject) => {
                 $.ajax({
-                    url: 'confirmación.php',
+                    url: 'enviarCorreoConfirmacion.php',
                     type: 'POST',
+                    dataType: 'json',
                     data: {
                         dni: dni,
                         fecha: fecha,
@@ -334,11 +385,11 @@ EOT;
                         if(response.estado === 'exito') {
                             resolve();
                         } else {
-                            reject();
+                            reject(response.mensaje || 'Error al enviar correo');
                         }
                     },
-                    error: function() {
-                        reject();
+                    error: function(xhr, status, error) {
+                        reject('Error de conexión: ' + error);
                     }
                 });
             });
