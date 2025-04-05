@@ -215,13 +215,11 @@ if (isset($_GET['export_word'])) {
                 <h2>TABLA DE PACIENTES</h2>
                 <div class="export-buttons">
                     <a href="?export_pdf" class="btn-pdf">Exportar a PDF</a>
-                    <a href="?export_excel" class="btn-excel">Exportar a Excel</a>
-                </div>
                 <div class="table-responsive">
                     <table>
                         <thead>
                             <tr>
-                                <th>ID</th>
+                                <th>#</th> <!-- Cambiar "ID" a "#" para el número de paciente -->
                                 <th>DNI</th>
                                 <th>NOMBRE</th>
                                 <th>APELLIDO</th>
@@ -234,9 +232,10 @@ if (isset($_GET['export_word'])) {
                         <tbody id="pacientesTable">
                             <?php
                             if (count($pacientes) > 0) {
+                                $contador = 1; // Inicializar el contador
                                 foreach ($pacientes as $fila) {
                                     echo "<tr>
-                                <td>{$fila['idPaciente']}</td>
+                                <td>{$contador}</td> <!-- Mostrar el número de paciente -->
                                 <td>{$fila['dni']}</td>
                                 <td>{$fila['nombre']}</td>
                                 <td>{$fila['apellido']}</td>
@@ -245,9 +244,10 @@ if (isset($_GET['export_word'])) {
                                 <td>{$fila['telefono']}</td>
                                 <td>{$fila['direccion']}</td>
                               </tr>";
+                                    $contador++; // Incrementar el contador
                                 }
                             } else {
-                                echo "<tr><td colspan='5'>No hay usuarios registrados</td></tr>";
+                                echo "<tr><td colspan='8'>No hay pacientes registrados</td></tr>";
                             }
                             ?>
                         </tbody>

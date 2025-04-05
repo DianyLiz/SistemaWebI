@@ -199,6 +199,10 @@ try {
                         <h3>Citas Médicas</h3>
                         <p><?php echo htmlspecialchars($total_citas); ?></p>
                     </div>
+                    <div class="estadistica">
+                        <h3>Historias Clínicas</h3>
+                        <p>320</p>
+                    </div>
                 </div>
             </main>
         </div>

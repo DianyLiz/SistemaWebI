@@ -5,12 +5,46 @@
         display: none;
         margin-top: 15px;
     }
+
+    .autocomplete-container {
+        position: relative;
+    }
+
+    .suggestions {
+        position: absolute;
+        width: 100%;
+        border: 1px solid #ccc;
+        border-top: none;
+        background: white;
+        max-height: 150px;
+        overflow-y: auto;
+        display: none;
+    }
+
+    .suggestions div {
+        padding: 8px;
+        cursor: pointer;
+    }
+
+    .suggestions div:hover {
+        background-color: #f0f0f0;
+    }
 </style>
 <div id="modalAgregarUsuario" class="modalAgregarUsuario">
     <div class="modal-content">
         <span class="close">&times;</span>
         <form action="php/add-user.php" method="POST">
-            <div class="title">Nuevo Usuario</div>
+            <div class="title">Nuevo <?php 
+            if($paginaActual == 'usuarios') {
+                echo 'Usuario';
+            } else if($paginaActual == 'medicos') {
+                echo 'Médico';
+            } else if($paginaActual == 'pacientes') {
+                echo 'Paciente';
+            } else {
+                echo 'Usuario';
+            }
+            ?></div>
             <div class="form-group">
                 <label for="add-dni">DNI</label>
                 <input id="add-dni" type="text" name="dni" autocomplete="off" value="<?php echo isset($_SESSION['form_data']['dni']) ? $_SESSION['form_data']['dni'] : ''; ?>">
@@ -24,12 +58,17 @@
                 <div id="camposNino">
                     <label for="es-nino">¿Es un paciente niño?</label>
                     <select id="es-nino" name="esNino">
-                        <option value="no">No</option>
-                        <option value="si">Sí</option>
+                        <option value="no" <?= (isset($_SESSION['form_data']['esNino']) && $_SESSION['form_data']['esNino'] == 'no') ? 'selected' : '' ?>>No</option>
+                        <option value="si" <?= (isset($_SESSION['form_data']['esNino']) && $_SESSION['form_data']['esNino'] == 'si') ? 'selected' : '' ?>>Sí</option>
                     </select>
                 </div>
 
-                <div id="camposUsuario">
+                <div id="camposUsuario" style="<?php
+                                                if (isset($_SESSION['form_data']['esNino']) && $_SESSION['form_data']['esNino'] == 'si') {
+                                                    echo 'display: none;';
+                                                } else {
+                                                    echo 'display: contents;';
+                                                } ?>">
                     <label for="add-correo">Correo</label>
                     <input id="add-correo" type="email" name="correo" autocomplete="off" value="<?php echo isset($_SESSION['form_data']['correo']) ? $_SESSION['form_data']['correo'] : ''; ?>">
 
@@ -92,12 +131,23 @@
                     <option value="Femenino" <?= (isset($_SESSION['form_data']['sexo']) && $_SESSION['form_data']['sexo'] == 'Femenino') ? 'selected' : '' ?>>Femenino</option>
                 </select>
 
-                <div id="camposTutor" style="display: none;">
-                    <label for="add-dniTutor">DNI del Tutor</label>
-                    <input id="add-dniTutor" type="text" name="dniTutor" autocomplete="off" value="<?php echo isset($_SESSION['form_data']['dniTutor']) ? $_SESSION['form_data']['dniTutor'] : ''; ?>">
-
+                <div id="camposTutor" style="<?php
+                                                if (isset($_SESSION['form_data']['esNino']) && $_SESSION['form_data']['esNino'] == 'si') {
+                                                    echo 'display: contents;';
+                                                } else {
+                                                    echo 'display: none;';
+                                                } ?>">
                     <label for="add-nombreTutor">Nombre del Tutor</label>
-                    <input id="add-nombreTutor" type="text" name="nombreTutor" autocomplete="off" value="<?php echo isset($_SESSION['form_data']['nombreTutor']) ? $_SESSION['form_data']['nombreTutor'] : ''; ?>">
+                    <div class="autocomplete-container">
+                        <input id="add-nombreTutor" type="text" name="nombreTutor" placeholder="Buscar tutor..." autocomplete="off" value="<?php echo isset($_SESSION['form_data']['nombreTutor']) ? $_SESSION['form_data']['nombreTutor'] : ''; ?>">
+                        <div id="suggestionAgregar" class="suggestions"></div>
+                    </div>
+
+                    <label for="add-idTutor" hidden>ID del Tutor</label>
+                    <input id="add-idTutor" hidden type="text" name="idTutor" autocomplete="off" value="<?php echo isset($_SESSION['form_data']['idTutor']) ? $_SESSION['form_data']['idTutor'] : ''; ?>" readonly="true">
+
+                    <label for="add-dniTutor">DNI del Tutor</label>
+                    <input id="add-dniTutor" type="text" name="dniTutor" autocomplete="off" value="<?php echo isset($_SESSION['form_data']['dniTutor']) ? $_SESSION['form_data']['dniTutor'] : ''; ?>" readonly="true">
                 </div>
 
                 <label for="add-telefono">Teléfono</label>
@@ -106,7 +156,17 @@
                 <label for="add-direccion">Dirección (opcional)</label>
                 <input id="add-direccion" type="text" name="direccion" autocomplete="off" value="<?php echo isset($_SESSION['form_data']['direccion']) ? $_SESSION['form_data']['direccion'] : ''; ?>">
             </div>
-            <button type="submit" class="modificar">Registrar Usuario</button>
+            <button type="submit" class="modificar">Registrar <?php 
+            if($paginaActual == 'usuarios') {
+                echo 'Usuario';
+            } else if($paginaActual == 'medicos') {
+                echo 'Médico';
+            } else if($paginaActual == 'pacientes') {
+                echo 'Paciente';
+            } else {
+                echo 'Usuario';
+            }
+            ?></button>
         </form>
         <script>
             document.addEventListener("DOMContentLoaded", function() {
@@ -174,6 +234,72 @@
                 } else {
                     document.querySelector(".form-paciente").style.display = esNino ? "grid" : "none";
                 }
+            });
+
+            // Limpiar campos de tutor si está vacío
+            document.getElementById("add-nombreTutor").addEventListener("input", function() {
+                const tutor = this.value;
+
+                if (!tutor) {
+                    document.getElementById("add-dniTutor").value = "";
+                    document.getElementById("add-telefono").value = "";
+                    document.getElementById("add-idTutor").value = "";
+                }
+            });
+
+            // Lista dinamica de tutores
+            document.addEventListener("DOMContentLoaded", function() {
+                const inputAgregar = document.getElementById("add-nombreTutor");
+                const suggestionsAgregar = document.getElementById("suggestionAgregar");
+
+                inputAgregar.addEventListener("input", function() {
+                    let query = this.value.trim();
+                    suggestionsAgregar.innerHTML = "";
+
+                    if (query.length === 0) {
+                        suggestionsAgregar.style.display = "none";
+                        return;
+                    }
+
+                    fetch("php/buscar-tutor.php", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/x-www-form-urlencoded"
+                            },
+                            body: "query=" + encodeURIComponent(query)
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            suggestionsAgregar.innerHTML = "";
+                            if (data.length > 0) {
+                                suggestionsAgregar.style.display = "block";
+                                data.forEach(tutor => {
+                                    let div = document.createElement("div");
+                                    div.textContent = tutor.Tutor;
+                                    div.dataset.dni = tutor.dni;
+                                    div.dataset.id = tutor.idResponsable;
+                                    div.dataset.telefono = tutor.telefono;
+                                    div.addEventListener("click", function() {
+                                        inputAgregar.value = this.textContent;
+                                        document.getElementById("add-dniTutor").value = this.dataset.dni;
+                                        document.getElementById("add-telefono").value = this.dataset.telefono;
+                                        document.getElementById("add-idTutor").value = this.dataset.id;
+                                        suggestionsAgregar.style.display = "none";
+                                    });
+                                    suggestionsAgregar.appendChild(div);
+                                });
+                            } else {
+                                suggestionsAgregar.style.display = "none";
+                            }
+                        })
+                        .catch(error => console.error("Error:", error));
+                });
+
+                document.addEventListener("click", function(e) {
+                    if (!document.querySelector(".autocomplete-container").contains(e.target)) {
+                        suggestionsAgregar.style.display = "none";
+                    }
+                });
             });
         </script>
     </div>

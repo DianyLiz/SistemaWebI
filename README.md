@@ -97,6 +97,9 @@ Herramientas:
 
   Modificaciones 31-03-2025:
     Solucionando errores al momento de querer reservar una cita desde el modulo de pacientes.
+
+  Modificaciones 04-04-2025:
+    Modificacion en el modulo de medicos
     
 
 

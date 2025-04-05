@@ -26,7 +26,7 @@ EOT;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediCitas - Citas Médicas</title>
+    <title>MediCitas - Reserva de Citas</title>
     <link rel="stylesheet" href="../css/estilo.css">
     <link rel="stylesheet" href="../css/estilo-admin.css">
     <link rel="stylesheet" href="../css/tabla.css">
@@ -41,9 +41,6 @@ EOT;
             border-radius: 5px;
             margin-bottom: 20px;
         }
-        .detalles-horario p {
-            margin: 5px 0;
-        }
         .loading-spinner {
             display: inline-block;
             width: 20px;
@@ -57,19 +54,9 @@ EOT;
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-        .error {
-            color: #dc3545;
-            text-align: center;
-            padding: 20px;
-        }
         .btn-reservar.selected {
             background-color: #28a745;
             color: white;
-        }
-        .no-horarios {
-            text-align: center;
-            padding: 20px;
-            color: #6c757d;
         }
         .btn-ocupado {
             background-color: #dc3545;
@@ -85,7 +72,7 @@ EOT;
 
     <main class="contenido">
         <div class="table-container">
-            <h2>Selecciona una Especialidad Para Tu Cita</h2>
+            <h2>Selecciona una Especialidad</h2>
             <table>
                 <thead>
                     <tr>
@@ -114,7 +101,7 @@ EOT;
 
         <div id="cita-container" style="display:none;">
             <button id="btn-regresar" class="btn-cancelar">Regresar</button>
-            <h3>Selecciona una Fecha Para Tu Cita</h3>
+            <h3>Selecciona una Fecha</h3>
             <input type="text" id="fecha-cita" placeholder="Selecciona una fecha">
 
             <div id="horarios-disponibles" style="display:none; margin-top:20px;">
@@ -138,18 +125,16 @@ EOT;
                 <h3>Motivo de la Cita</h3>
                 <div class="form-group">
                     <label for="dni">DNI:</label>
-                    <input type="text" id="dni" value="<?= htmlspecialchars($_SESSION['usuario']['dni'] ?? '') ?>" placeholder="Ingresa tu número de DNI">
+                    <input type="text" id="dni" value="<?= htmlspecialchars($_SESSION['usuario']['dni'] ?? '') ?>" placeholder="Ingresa tu DNI">
                 </div>
                 <div class="form-group">
                     <label for="motivo">Motivo:</label>
                     <textarea id="motivo" placeholder="Describe el motivo de tu cita" required></textarea>
                 </div>
-                <h3>Detalles del Horario</h3>
                 <div id="horario-seleccionado" class="detalles-horario">
                     <p><strong>Fecha:</strong> <span id="fecha-seleccionada"></span></p>
                     <p><strong>Hora:</strong> <span id="hora-seleccionada"></span></p>
                     <p><strong>Médico:</strong> <span id="medico-seleccionado"></span></p>
-                    <p><strong>Duración:</strong> <span id="duracion-cita">60</span> minutos</p>
                 </div>
                 <button id="btn-confirmar" class="btn-aceptar">Confirmar Cita</button>
             </div>
@@ -166,6 +151,7 @@ EOT;
         let especialidadSeleccionada = null;
         let fechaSeleccionada = null;
 
+        // Seleccionar especialidad
         $('.btn-seleccionar').click(function() {
             especialidadSeleccionada = $(this).data('especialidad');
             $('.table-container').fadeOut(300, function() {
@@ -173,6 +159,7 @@ EOT;
             });
         });
 
+        // Configurar selector de fecha
         flatpickr('#fecha-cita', {
             dateFormat: 'Y-m-d',
             minDate: 'today',
@@ -188,6 +175,7 @@ EOT;
             }
         });
 
+        // Cargar horarios disponibles
         function cargarHorariosDisponibles() {
             $('#horarios-list').html('<tr><td colspan="4"><div class="loading-spinner"></div> Cargando horarios...</td></tr>');
             $('#horarios-disponibles').show();
@@ -208,6 +196,7 @@ EOT;
             });
         }
 
+        // Seleccionar horario
         $(document).on('click', '.btn-reservar:not([disabled])', function() {
             $('.btn-reservar').removeClass('selected');
             $(this).addClass('selected');
@@ -222,6 +211,7 @@ EOT;
             $('#motivo-cita').fadeIn();
         });
 
+        // Regresar a selección de especialidad
         $('#btn-regresar').click(function() {
             $('#cita-container').fadeOut(300, function() {
                 $('.table-container').fadeIn(300);
@@ -235,6 +225,7 @@ EOT;
             fechaSeleccionada = null;
         });
 
+        // Confirmar cita
         $('#btn-confirmar').click(function() {
             const botonSeleccionado = $('.btn-reservar.selected');
             const motivo = $('#motivo').val().trim();
@@ -245,13 +236,13 @@ EOT;
                 return;
             }
 
-            if(!dni || !/^\d{13}$/.test(dni)) {
-                Swal.fire('Error', 'Por favor ingresa un DNI válido de 13 dígitos', 'error');
+            if(!dni || !/^\d{8,13}$/.test(dni)) {
+                Swal.fire('Error', 'Por favor ingresa un DNI válido (8-13 dígitos)', 'error');
                 return;
             }
             
-            if(!motivo) {
-                Swal.fire('Error', 'Por favor describe el motivo de tu cita', 'error');
+            if(!motivo || motivo.length < 10) {
+                Swal.fire('Error', 'Por favor describe el motivo de tu cita (mínimo 10 caracteres)', 'error');
                 return;
             }
 
@@ -259,20 +250,21 @@ EOT;
                 title: 'Verificando disponibilidad',
                 html: 'Por favor espera...',
                 allowOutsideClick: false,
-                didOpen: () => { Swal.showLoading(); }
+                didOpen: () => Swal.showLoading()
             });
 
-            // Verificación de disponibilidad
+            // Verificar disponibilidad
             $.ajax({
                 url: 'verificarDisponibilidad.php',
                 type: 'POST',
+                contentType: 'application/json',
                 dataType: 'json',
-                data: {
+                data: JSON.stringify({
                     fecha: fechaSeleccionada,
                     hora_inicio: botonSeleccionado.data('hora-inicio'),
                     id_medico: botonSeleccionado.data('id-medico'),
                     id_horario: botonSeleccionado.data('id-horario')
-                },
+                }),
                 success: function(response) {
                     Swal.close();
                     
@@ -280,10 +272,8 @@ EOT;
                         Swal.fire({
                             icon: 'error',
                             title: 'Horario no disponible',
-                            text: response.mensaje || 'El horario seleccionado ya fue reservado',
-                            willClose: () => { 
-                                cargarHorariosDisponibles();
-                            }
+                            text: response.mensaje,
+                            willClose: () => cargarHorariosDisponibles()
                         });
                         return;
                     }
@@ -291,12 +281,17 @@ EOT;
                     // Confirmar reserva
                     confirmarReserva();
                 },
-                error: function(xhr, status, error) {
-                    Swal.fire('Error', 'No se pudo verificar la disponibilidad: ' + error, 'error');
+                error: function(xhr) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: xhr.responseJSON?.error || 'No se pudo verificar la disponibilidad'
+                    });
                 }
             });
         });
 
+        // Función para confirmar reserva
         function confirmarReserva() {
             const botonSeleccionado = $('.btn-reservar.selected');
             const motivo = $('#motivo').val().trim();
@@ -321,8 +316,9 @@ EOT;
                         $.ajax({
                             url: 'InsertarCitas.php',
                             type: 'POST',
+                            contentType: 'application/json',
                             dataType: 'json',
-                            data: {
+                            data: JSON.stringify({
                                 dni: dni,
                                 motivo: motivo,
                                 id_medico: botonSeleccionado.data('id-medico'),
@@ -330,24 +326,16 @@ EOT;
                                 hora_inicio: botonSeleccionado.data('hora-inicio'),
                                 fecha: fechaSeleccionada,
                                 duracion: 60
-                            },
+                            }),
                             success: function(response) {
                                 if(response.estado === 'exito') {
-                                    // Enviar correo de confirmación
-                                    enviarCorreoConfirmacion(dni, fechaSeleccionada, 
-                                        botonSeleccionado.data('hora-inicio'), 
-                                        $('#medico-seleccionado').text(), motivo)
-                                    .then(() => resolve())
-                                    .catch(() => {
-                                        Swal.showValidationMessage('Cita confirmada pero error al enviar correo');
-                                        resolve(); // Resolver igual para no bloquear
-                                    });
+                                    resolve();
                                 } else {
-                                    Swal.showValidationMessage(response.mensaje || 'Error al confirmar la cita');
+                                    Swal.showValidationMessage(response.mensaje);
                                 }
                             },
-                            error: function(xhr, status, error) {
-                                Swal.showValidationMessage('Error al conectar con el servidor: ' + error);
+                            error: function(xhr) {
+                                Swal.showValidationMessage(xhr.responseJSON?.error || 'Error al registrar la cita');
                             }
                         });
                     });
@@ -358,40 +346,10 @@ EOT;
                     Swal.fire({
                         icon: 'success',
                         title: '¡Cita confirmada!',
-                        html: 'Tu cita ha sido registrada exitosamente.<br>' + 
-                              (result.value === 'mail_error' ? 
-                               '<span style="color:orange;">Nota: Hubo un problema al enviar el correo de confirmación.</span>' : 
-                               'Se ha enviado un correo de confirmación.'),
-                        willClose: () => { location.reload(); }
+                        text: 'Tu cita ha sido registrada exitosamente.',
+                        willClose: () => location.reload()
                     });
                 }
-            });
-        }
-
-        function enviarCorreoConfirmacion(dni, fecha, hora, medico, motivo) {
-            return new Promise((resolve, reject) => {
-                $.ajax({
-                    url: 'enviarCorreoConfirmacion.php',
-                    type: 'POST',
-                    dataType: 'json',
-                    data: {
-                        dni: dni,
-                        fecha: fecha,
-                        hora: hora,
-                        medico: medico,
-                        motivo: motivo
-                    },
-                    success: function(response) {
-                        if(response.estado === 'exito') {
-                            resolve();
-                        } else {
-                            reject(response.mensaje || 'Error al enviar correo');
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        reject('Error de conexión: ' + error);
-                    }
-                });
             });
         }
     });

@@ -4,7 +4,10 @@ $paginaActual = 'usuarios';
 $dni_filter = $_GET['dni'] ?? '';
 $nombre_apellido_filter = $_GET['nombre_apellido'] ?? '';
 $rol_filter = $_GET['rol'] ?? '';
-$sql = "SELECT idusuario, dni, nombre, apellido, usuario, correo, rol FROM usuarios WHERE 1=1";
+$sql = "SELECT idusuario, dni, nombre, apellido, 
+        ISNULL(usuario,'-') AS usuario, 
+        ISNULL(correo,'-') AS correo, 
+        rol FROM usuarios WHERE 1=1";
 
 if ($dni_filter) {
     $sql .= " AND dni LIKE '%$dni_filter%'";

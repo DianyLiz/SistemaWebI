@@ -1,31 +1,40 @@
 <?php
 header('Content-Type: application/json');
 require_once '../conexion.php';
-require_once '../vendor/autoload.php';
-use PHPMailer\PHPMailer\PHPMailer;
-
-$dni = $_POST['dni'] ?? '';
-$fecha = $_POST['fecha'] ?? '';
-$hora = $_POST['hora'] ?? '';
-$medico = $_POST['medico'] ?? '';
-$motivo = $_POST['motivo'] ?? '';
 
 try {
-    // Obtener email del paciente
-    $stmt = $conn->prepare("SELECT email FROM Pacientes WHERE dni = ?");
+    // Recibir datos
+    $dni = trim($_POST['dni'] ?? '');
+    $fecha = trim($_POST['fecha'] ?? '');
+    $hora = trim($_POST['hora'] ?? '');
+    $medico = trim($_POST['medico'] ?? '');
+    $motivo = trim($_POST['motivo'] ?? '');
+
+    // Validar datos
+    if (empty($dni) || empty($fecha) || empty($hora) || empty($medico)) {
+        throw new Exception("Datos incompletos para enviar el correo");
+    }
+
+    // Obtener información del paciente
+    $stmt = $conn->prepare("
+        SELECT p.idPaciente, u.nombre, u.apellido, u.correo 
+        FROM Pacientes p
+        JOIN Usuarios u ON p.idUsuario = u.idUsuario
+        WHERE p.dni = ?
+    ");
     $stmt->execute([$dni]);
     $paciente = $stmt->fetch(PDO::FETCH_ASSOC);
-    
-    if(!$paciente || empty($paciente['email'])) {
-        throw new Exception("No se encontró el email del paciente");
+
+    if (!$paciente) {
+        throw new Exception("No se encontró información del paciente");
     }
+
+    // Configurar y enviar el correo (ejemplo con PHPMailer)
+    require_once '../vendor/autoload.php'; // Si usas Composer
     
-    $email_paciente = $paciente['email'];
+    $mail = new PHPMailer\PHPMailer\PHPMailer();
     
-    // Configurar PHPMailer
-    $mail = new PHPMailer(true);
-    
-    // Configuración SMTP (ajustar según tu servidor)
+    // Configuración del servidor SMTP
     $mail->isSMTP();
     $mail->Host = 'smtp.tudominio.com';
     $mail->SMTPAuth = true;
@@ -34,34 +43,46 @@ try {
     $mail->SMTPSecure = 'tls';
     $mail->Port = 587;
     
-    $mail->setFrom('no-reply@tudominio.com', 'MediCitas');
-    $mail->addAddress($email_paciente);
+    // Configuración del correo
+    $mail->setFrom('no-reply@medicitas.com', 'Sistema MediCitas');
+    $mail->addAddress($paciente['correo'], $paciente['nombre'] . ' ' . $paciente['apellido']);
     $mail->isHTML(true);
-    $mail->Subject = 'Confirmación de cita médica';
+    
+    $mail->Subject = 'Confirmación de Cita Médica';
     
     $mail->Body = "
         <h1>Confirmación de Cita Médica</h1>
-        <p>Estimado paciente,</p>
-        <p>Su cita ha sido registrada con los siguientes detalles:</p>
-        <ul>
-            <li><strong>Fecha:</strong> $fecha</li>
-            <li><strong>Hora:</strong> $hora</li>
-            <li><strong>Médico:</strong> $medico</li>
-            <li><strong>Motivo:</strong> $motivo</li>
-        </ul>
+        <p>Estimado/a {$paciente['nombre']}:</p>
+        <p>Su cita ha sido registrada exitosamente con los siguientes detalles:</p>
+        
+        <table border='1' cellpadding='5' cellspacing='0'>
+            <tr><th>Fecha:</th><td>$fecha</td></tr>
+            <tr><th>Hora:</th><td>$hora</td></tr>
+            <tr><th>Médico:</th><td>$medico</td></tr>
+            <tr><th>Motivo:</th><td>$motivo</td></tr>
+        </table>
+        
         <p>Por favor llegue 15 minutos antes de su cita.</p>
+        <p>Si necesita cancelar o reprogramar, contáctenos con anticipación.</p>
         <p>Atentamente,<br>El equipo de MediCitas</p>
     ";
     
-    $mail->AltBody = "Confirmación de cita:\nFecha: $fecha\nHora: $hora\nMédico: $medico\nMotivo: $motivo";
+    $mail->AltBody = "Confirmación de Cita:\nFecha: $fecha\nHora: $hora\nMédico: $medico\nMotivo: $motivo";
     
-    if(!$mail->send()) {
+    if (!$mail->send()) {
         throw new Exception("Error al enviar el correo: " . $mail->ErrorInfo);
     }
     
-    echo json_encode(['estado' => 'exito', 'mensaje' => 'Correo enviado correctamente']);
+    echo json_encode([
+        'estado' => 'exito',
+        'mensaje' => 'Correo de confirmación enviado'
+    ]);
     
-} catch(Exception $e) {
-    error_log("Error al enviar correo: " . $e->getMessage());
-    echo json_encode(['estado' => 'error', 'mensaje' => $e->getMessage()]);
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode([
+        'estado' => 'error',
+        'mensaje' => $e->getMessage()
+    ]);
 }
+?>

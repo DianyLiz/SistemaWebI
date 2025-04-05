@@ -54,8 +54,9 @@ if (isset($_GET['export_pdf'])) {
     $html .= "<table border='1' cellpadding='10' cellspacing='0'>";
     $html .= "<thead>
                 <tr>
+                    <th>#</th> <!-- Número de documento -->
+                    <th>Fecha Cita</th>
                     <th>Paciente</th>
-                    <th>Cita</th>
                     <th>Médico</th>
                     <th>Tipo</th>
                     <th>Descripción</th>
@@ -63,15 +64,18 @@ if (isset($_GET['export_pdf'])) {
                 </tr>
               </thead><tbody>";
 
+    $contador = 1; // Inicializar el contador
     foreach ($documentos as $fila) {
         $html .= "<tr>
+                    <td>{$contador}</td> <!-- Mostrar el número de documento -->
+                    <td>{$fila['FechaCita']}</td>
                     <td>{$fila['paciente']}</td>
-                    <td>{$fila['fechaCita']} {$fila['horaCita']}</td>
-                    <td>{$fila['Medico']}</td>
+                    <td>{$fila['medico']}</td>
                     <td>{$fila['tipoDocumento']}</td>
                     <td>{$fila['descripcion']}</td>
                     <td>{$fila['fechaSubida']}</td>
                   </tr>";
+        $contador++;
     }
     $html .= "</tbody></table>";
 
@@ -100,8 +104,8 @@ if (isset($_GET['export_excel'])) {
     $row = 2;
     foreach ($documentos as $fila) {
         $sheet->setCellValue("A$row", $fila['paciente']);
-        $sheet->setCellValue("B$row", $fila['fechaCita'] . ' ' . $fila['horaCita']);
-        $sheet->setCellValue("C$row", $fila['Medico']);
+        $sheet->setCellValue("B$row", $fila['FechaCita']);
+        $sheet->setCellValue("C$row", $fila['medico']);
         $sheet->setCellValue("D$row", $fila['tipoDocumento']);
         $sheet->setCellValue("E$row", $fila['descripcion']);
         $sheet->setCellValue("F$row", $fila['fechaSubida']);
@@ -110,8 +114,12 @@ if (isset($_GET['export_excel'])) {
 
     $writer = new Xlsx($spreadsheet);
     $filename = 'documentos_medicos.xlsx';
+
+    // Encabezados para la descarga
     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     header("Content-Disposition: attachment;filename=\"$filename\"");
+    header('Cache-Control: max-age=0');
+
     $writer->save('php://output');
     exit;
 }
@@ -135,22 +143,25 @@ if (isset($_GET['export_word'])) {
         foreach ($documentos as $fila) {
             $table->addRow();
             $table->addCell(2000)->addText($fila['paciente']);
-            $table->addCell(2000)->addText($fila['fechaCita'] . ' ' . $fila['horaCita']);
-            $table->addCell(2000)->addText($fila['Medico']);
+            $table->addCell(2000)->addText($fila['FechaCita']);
+            $table->addCell(2000)->addText($fila['medico']);
             $table->addCell(2000)->addText($fila['tipoDocumento']);
             $table->addCell(2000)->addText($fila['descripcion']);
             $table->addCell(2000)->addText($fila['fechaSubida']);
         }
 
+        $filename = 'documentos_medicos.docx';
+
+        // Encabezados para la descarga
         header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-        header("Content-Disposition: attachment;filename=\"documentos_medicos.docx\"");
+        header("Content-Disposition: attachment;filename=\"$filename\"");
         header('Cache-Control: max-age=0');
 
         $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
         $objWriter->save('php://output');
         exit;
     } catch (Exception $e) {
-        echo 'Error al generar el documento Word: ',  $e->getMessage();
+        echo 'Error al generar el documento Word: ', $e->getMessage();
     }
 }
 $documentos = [];
@@ -231,14 +242,12 @@ $documentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <div class="export-buttons">
                     <a href="#" class="add-btn">Agregar Documento</a>
                     <a href="?export_pdf" class="btn-pdf">Exportar a PDF</a>
-                    <a href="?export_excel" class="btn-excel">Exportar a Excel</a>
                 </div>
                 <div class="table-responsive">
                     <table>
                         <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>ID Cita</th>
+                                <th>#</th> <!-- Cambiar "ID" a "#" para el número de documento -->
                                 <th>Fecha Cita</th>
                                 <th>Paciente</th>
                                 <th>Médico</th>
@@ -249,11 +258,12 @@ $documentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             </tr>
                         </thead>
                         <tbody id="documentosTable">
-                            <?php if ($documentos) {
+                            <?php
+                            if (count($documentos) > 0) {
+                                $contador = 1; // Inicializar el contador
                                 foreach ($documentos as $fila) {
                                     echo "<tr>
-                                        <td>{$fila['idDocumento']}</td>
-                                        <td>{$fila['idCita']}</td>
+                                        <td>{$contador}</td> <!-- Mostrar el número de documento -->
                                         <td>{$fila['FechaCita']}</td>
                                         <td>{$fila['paciente']}</td>
                                         <td>{$fila['medico']}</td>
@@ -275,12 +285,11 @@ $documentos = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                             <a href='#' class='pdf-btn' data-id='{$fila['idDocumento']}'></a>
                                             <a href='#' class='delete-btn' data-id='{$fila['idDocumento']}'></a>
                                         </td>
-                                    </tr>";
+                                      </tr>";
+                                    $contador++; // Incrementar el contador
                                 }
-                            }
-
-                            if (empty($documentos)) {
-                                echo "<tr><td colspan='7'>No hay documentos medicos registrados</td></tr>";
+                            } else {
+                                echo "<tr><td colspan='8'>No hay documentos médicos registrados</td></tr>";
                             }
                             ?>
                         </tbody>

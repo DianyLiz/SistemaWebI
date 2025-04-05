@@ -218,13 +218,12 @@ if (isset($_GET['export_word'])) {
                 <div class="export-buttons">
                     <a href="#" class="add-btn">Agregar Expediente</a>
                     <a href="?export_pdf" class="btn-pdf">Exportar a PDF</a>
-                    <a href="?export_excel" class="btn-excel">Exportar a Excel</a>
                 </div>
                 <div class="table-responsive">
                     <table>
                         <thead>
                             <tr>
-                                <th>ID</th>
+                                <th>#</th> <!-- Cambiar "ID" a "#" para el número de expediente -->
                                 <th>Paciente</th>
                                 <th>Fecha Creación</th>
                                 <th>Antecedentes</th>
@@ -237,46 +236,47 @@ if (isset($_GET['export_word'])) {
                             </tr>
                         </thead>
                         <tbody>
-                            <?php if ($documentos) {
-                                foreach ($documentos as $fila) {
-                                    echo "<tr>
-                                        <td>{$fila['IdExpediente']}</td>
-                                        <td>{$fila['paciente']}</td>
-                                        <td>{$fila['FechaCreacion']}</td>
-                                        <td>{$fila['Antecedentes']}</td>
-                                        <td>{$fila['Alergias']}</td>
-                                        <td>{$fila['MedicamentosActuales']}</td>
-                                        <td>{$fila['EnfermedadesCronicas']}</td>
-                                        <td>{$fila['Descripcion']}</td>
-                                        <td>{$fila['FechaActualizacion']}</td>
-                                        <td>
-                                            <a href='#' class='edit-btn' 
-                                                data-id='{$fila['IdExpediente']}'
-                                                data-idpaciente='{$fila['idPaciente']}'
-                                                data-paciente='{$fila['paciente']}'
-                                                data-fechacreacion='{$fila['FechaCreacion']}'
-                                                data-antecedentes='{$fila['Antecedentes']}'
-                                                data-alergias='{$fila['Alergias']}'
-                                                data-medicamentos='{$fila['MedicamentosActuales']}'
-                                                data-enfermedades='{$fila['EnfermedadesCronicas']}'
-                                                data-descripcion='{$fila['Descripcion']}'
-                                                data-fechaactualizacion='{$fila['FechaActualizacion']}'
-                                            >
-                                            <img src='../img/edit.png' width='35' height='35'>
-                                            </a>
-                                            <a href='#' class='delete-btn' data-id='{$fila['IdExpediente']}'>
-                                                <img src='../img/delete.png' width='35' height='35'>
-                                            </a>
-                                        </td>
-                                    </tr>";
-                                }
-                            }
-
-                            if (empty($documentos)) {
-                                echo "<tr><td colspan='10'>No hay expedientes médicos registrados</td></tr>";
-                            }
-                            ?>
-                        </tbody>
+    <?php
+    if (count($documentos) > 0) {
+        $contador = 1; // Inicializar el contador
+        foreach ($documentos as $fila) {
+            echo "<tr>
+                <td>{$contador}</td> <!-- Mostrar el número de expediente -->
+                <td>{$fila['paciente']}</td>
+                <td>{$fila['FechaCreacion']}</td>
+                <td>{$fila['Antecedentes']}</td>
+                <td>{$fila['Alergias']}</td>
+                <td>{$fila['MedicamentosActuales']}</td>
+                <td>{$fila['EnfermedadesCronicas']}</td>
+                <td>{$fila['Descripcion']}</td>
+                <td>{$fila['FechaActualizacion']}</td>
+                <td>
+                    <a href='#' class='edit-btn' 
+                        data-id='{$fila['IdExpediente']}'
+                        data-idpaciente='{$fila['idPaciente']}'
+                        data-paciente='{$fila['paciente']}'
+                        data-fechacreacion='{$fila['FechaCreacion']}'
+                        data-antecedentes='{$fila['Antecedentes']}'
+                        data-alergias='{$fila['Alergias']}'
+                        data-medicamentos='{$fila['MedicamentosActuales']}'
+                        data-enfermedades='{$fila['EnfermedadesCronicas']}'
+                        data-descripcion='{$fila['Descripcion']}'
+                        data-fechaactualizacion='{$fila['FechaActualizacion']}'
+                    >
+                    <img src='../img/edit.png' width='35' height='35'>
+                    </a>
+                    <a href='#' class='delete-btn' data-id='{$fila['IdExpediente']}'>
+                        <img src='../img/delete.png' width='35' height='35'>
+                    </a>
+                </td>
+              </tr>";
+            $contador++; // Incrementar el contador
+        }
+    } else {
+        echo "<tr><td colspan='10'>No hay expedientes médicos registrados</td></tr>";
+    }
+    ?>
+</tbody>
                     </table>
                 </div>
             </div>
