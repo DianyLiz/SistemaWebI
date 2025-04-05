@@ -1,4 +1,9 @@
 <?php
+require '../php/vendor/autoload.php';
+
+use Dompdf\Dompdf;
+use Dompdf\Options;
+
 include '../conexion.php';
 $medico_filter = $_GET['medico'] ?? '';
 $paciente_filter = $_GET['paciente'] ?? '';
@@ -40,6 +45,61 @@ if (isset($_GET['ajax'])) {
     echo json_encode($pagos);
     exit;
 }
+
+if (isset($_GET['export_pdf'])) {
+    
+
+    // Crear el contenido HTML para el PDF
+    $html = "<h1>Lista de Financiamientos</h1>";
+    $html .= "<table border='1' cellpadding='10' cellspacing='0'>";
+    $html .= "<thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nº Cita</th>
+                    <th>Fecha de Cita</th>
+                    <th>Paciente</th>
+                    <th>Médico</th>
+                    <th>Monto</th>
+                    <th>Método de Pago</th>
+                    <th>Fecha de Pago</th>
+                </tr>
+              </thead><tbody>";
+
+    $contador = 1; // Inicializar el contador
+    foreach ($pagos as $fila) {
+        $html .= "<tr>
+                    <td>{$contador}</td>
+                    <td>{$fila['idCita']}</td>
+                    <td>{$fila['fecha']}</td>
+                    <td>{$fila['Paciente']}</td>
+                    <td>{$fila['Medico']}</td>
+                    <td>L. {$fila['monto']}</td>
+                    <td>{$fila['metodoPago']}</td>
+                    <td>{$fila['fechaPago']}</td>
+                  </tr>";
+        $contador++;
+    }
+    $html .= "</tbody></table>";
+
+    // Configurar Dompdf
+    $options = new Options();
+    $options->set('isHtml5ParserEnabled', true);
+    $options->set('isPhpEnabled', true);
+    $dompdf = new Dompdf($options);
+
+    // Cargar el contenido HTML
+    $dompdf->loadHtml($html);
+
+    // Configurar el tamaño y la orientación del papel
+    $dompdf->setPaper('A4', 'landscape');
+
+    // Renderizar el PDF
+    $dompdf->render();
+
+    // Enviar el PDF al navegador para su descarga
+    $dompdf->stream("financiamientos.pdf", ["Attachment" => true]);
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -50,6 +110,55 @@ if (isset($_GET['ajax'])) {
     <title>Document</title>
     <link rel="stylesheet" href="../css/tabla.css">
     <link rel="stylesheet" href="../css/filter.css">
+    <style>
+        .btn-pdf {
+            display: inline-block;
+            background-color: #d9534f;
+            color: white;
+            margin-right: 10px;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .btn-pdf:hover {
+            background-color: #c9302c;
+        }
+
+        .encabezado {
+            display: flex;
+            justify-content: flex-start; /* Alinear los botones a la izquierda */
+            gap: 10px; /* Espacio uniforme entre los botones */
+            margin-bottom: 20px; /* Espacio debajo del contenedor */
+        }
+
+        .btn-pdf,
+        .add-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+            color: white;
+        }
+
+        .btn-pdf {
+            background-color: #d9534f;
+        }
+
+        .btn-pdf:hover {
+            background-color: #c9302c;
+        }
+
+        .add-btn {
+            background-color: #5cb85c;
+        }
+
+        .add-btn:hover {
+            background-color: #4cae4c;
+        }
+    </style>
 </head>
 
 <body>
@@ -71,52 +180,54 @@ if (isset($_GET['ajax'])) {
                 <h2>TABLA DE PAGOS POR CITA</h2>
                 <div class="encabezado">
                     <a href="#" class="add-btn">Agregar Pago</a>
+                    <a href="?export_pdf" class="btn-pdf">Exportar a PDF</a>
                 </div>
                 <div class="table-responsive">
                     <table>
                         <thead>
                             <tr>
-                                <th>ID</th>
+                                <th>#</th> <!-- Cambiar "ID" a "#" para el número de financiamiento -->
                                 <th>Nº CITA</th>
                                 <th>FECHA DE CITA</th>
                                 <th>PACIENTE</th>
                                 <th>MÉDICO</th>
                                 <th>MONTO</th>
-                                <th>METODO DE PAGO</th>
+                                <th>MÉTODO DE PAGO</th>
                                 <th>FECHA DE PAGO</th>
-                                <th>ACCION</th>
+                                <th>ACCIÓN</th>
                             </tr>
                         </thead>
                         <tbody id="pagosTable">
                             <?php
                             if (count($pagos) > 0) {
+                                $contador = 1; // Inicializar el contador
                                 foreach ($pagos as $fila) {
                                     echo "<tr>
-                                <td>{$fila['idPago']}</td>
-                                <td>{$fila['idCita']}</td>
-                                <td>{$fila['fecha']}</td>
-                                <td>{$fila['Paciente']}</td>
-                                <td>{$fila['Medico']}</td>
-                                <td>L. {$fila['monto']}</td>
-                                <td>{$fila['metodoPago']}</td>
-                                <td>{$fila['fechaPago']}</td>
-                                <td>
-                                    <a href='#' class='edit-btn' 
-                                        data-idpago='{$fila['idPago']}'
-                                        data-idcita='{$fila['idCita']}'
-                                        data-fecha='{$fila['fecha']}' 
-                                        data-paciente='{$fila['Paciente']}' 
-                                        data-dnipaciente='{$fila['dniPaciente']}'
-                                        data-medico='{$fila['Medico']}' 
-                                        data-monto='{$fila['monto']}'
-                                        data-metodoPago='{$fila['metodoPago']}'
-                                        data-fechaPago='{$fila['fechaPago']}'></a>
-                                    <a href='#' class='delete-btn' data-idpago='{$fila['idPago']}'></a>
-                                </td>
-                              </tr>";
+                                        <td>{$contador}</td> <!-- Mostrar el número de financiamiento -->
+                                        <td>{$fila['idCita']}</td>
+                                        <td>{$fila['fecha']}</td>
+                                        <td>{$fila['Paciente']}</td>
+                                        <td>{$fila['Medico']}</td>
+                                        <td>L. {$fila['monto']}</td>
+                                        <td>{$fila['metodoPago']}</td>
+                                        <td>{$fila['fechaPago']}</td>
+                                        <td>
+                                            <a href='#' class='edit-btn' 
+                                                data-idcita='{$fila['idCita']}'
+                                                data-fecha='{$fila['fecha']}' 
+                                                data-paciente='{$fila['Paciente']}' 
+                                                data-dnipaciente='{$fila['dniPaciente']}'
+                                                data-medico='{$fila['Medico']}' 
+                                                data-monto='{$fila['monto']}'
+                                                data-metodoPago='{$fila['metodoPago']}'
+                                                data-fechaPago='{$fila['fechaPago']}'></a>
+                                            <a href='#' class='delete-btn' data-idpago='{$fila['idPago']}'></a>
+                                        </td>
+                                      </tr>";
+                                    $contador++; // Incrementar el contador
                                 }
                             } else {
-                                echo "<tr><td colspan='5'>No hay financiamientos registrados</td></tr>";
+                                echo "<tr><td colspan='9'>No hay financiamientos registrados</td></tr>";
                             }
                             ?>
                         </tbody>
@@ -151,39 +262,37 @@ if (isset($_GET['ajax'])) {
                 .then(data => {
                     pagosTable.innerHTML = "";
                     if (data.length > 0) {
-                        data.forEach(pagos => {
+                        let contador = 1; // Inicializar el contador
+                        data.forEach(pago => {
                             const row = `
-                    <tr>
-                        <td>${pagos.idPago}</td>
-                        <td>${pagos.idCita}</td>
-                        <td>${pagos.fecha}</td>
-                        <td>${pagos.Paciente}</td>
-                        <td>${pagos.Medico}</td>
-                        <td>${pagos.monto}</td>
-                        <td>${pagos.metodoPago}</td>
-                        <td>${pagos.fechaPago}</td>
-                        <td>
-                            <a href="#" class="edit-btn" 
-                                data-idpago="${pagos.idPago}"
-                                data-idcita="${pagos.idCita}"
-                                data-fecha="${pagos.fecha}"
-                                data-paciente="${pagos.Paciente}"
-                                data-dnipaciente="${pagos.dniPaciente}"
-                                data-monto="${pagos.monto}"
-                                data-metodoPago="${pagos.metodoPago}"
-                                data-fechaPago="${pagos.fechaPago}"></a>
-                            <a href="#" class="delete-btn" data-idpago="${pagos.idPago}"></a>
-                        </td>
-                    </tr>
-                `;
+                            <tr>
+                                <td>${contador}</td> <!-- Mostrar el número de financiamiento -->
+                                <td>${pago.idCita}</td>
+                                <td>${pago.fecha}</td>
+                                <td>${pago.Paciente}</td>
+                                <td>${pago.Medico}</td>
+                                <td>L. ${pago.monto}</td>
+                                <td>${pago.metodoPago}</td>
+                                <td>${pago.fechaPago}</td>
+                                <td>
+                                    <a href="#" class="edit-btn" 
+                                        data-idcita="${pago.idCita}"
+                                        data-fecha="${pago.fecha}"
+                                        data-paciente="${pago.Paciente}"
+                                        data-dnipaciente="${pago.dniPaciente}"
+                                        data-monto="${pago.monto}"
+                                        data-metodoPago="${pago.metodoPago}"
+                                        data-fechaPago="${pago.fechaPago}"></a>
+                                    <a href="#" class="delete-btn" data-idpago="${pago.idPago}"></a>
+                                </td>
+                            </tr>
+                            `;
                             pagosTable.innerHTML += row;
+                            contador++; // Incrementar el contador
                         });
                     } else {
-                        pagosTable.innerHTML = "<tr><td colspan='8'>No hay usuarios registrados</td></tr>";
+                        pagosTable.innerHTML = "<tr><td colspan='9'>No hay financiamientos registrados</td></tr>";
                     }
-
-                    // Vuelve a asignar eventos a los botones después de actualizar la tabla
-                    asignarEventosBotones();
                 })
                 .catch(error => console.error("Error en la búsqueda:", error));
         }

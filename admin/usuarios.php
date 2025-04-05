@@ -1,4 +1,10 @@
 <?php
+
+require '../php/vendor/autoload.php';
+
+    use Dompdf\Dompdf;
+    use Dompdf\Options;
+    
 include '../conexion.php';
 $paginaActual = 'usuarios';
 $dni_filter = $_GET['dni'] ?? '';
@@ -31,6 +37,59 @@ if (isset($_GET['ajax'])) {
     echo json_encode($usuarios);
     exit;
 }
+
+if (isset($_GET['export_pdf'])) {
+
+
+    // Crear el contenido HTML para el PDF
+    $html = "<h1>Lista de Usuarios</h1>";
+    $html .= "<table border='1' cellpadding='10' cellspacing='0'>";
+    $html .= "<thead>
+                <tr>
+                    <th>#</th>
+                    <th>DNI</th>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Usuario</th>
+                    <th>Correo</th>
+                    <th>Permisos</th>
+                </tr>
+              </thead><tbody>";
+
+    $contador = 1; // Inicializar el contador
+    foreach ($usuarios as $fila) {
+        $html .= "<tr>
+                    <td>{$contador}</td>
+                    <td>{$fila['dni']}</td>
+                    <td>{$fila['nombre']}</td>
+                    <td>{$fila['apellido']}</td>
+                    <td>{$fila['usuario']}</td>
+                    <td>{$fila['correo']}</td>
+                    <td>{$fila['rol']}</td>
+                  </tr>";
+        $contador++;
+    }
+    $html .= "</tbody></table>";
+
+    // Configurar Dompdf
+    $options = new Options();
+    $options->set('isHtml5ParserEnabled', true);
+    $options->set('isPhpEnabled', true);
+    $dompdf = new Dompdf($options);
+
+    // Cargar el contenido HTML
+    $dompdf->loadHtml($html);
+
+    // Configurar el tamaño y la orientación del papel
+    $dompdf->setPaper('A4', 'portrait');
+
+    // Renderizar el PDF
+    $dompdf->render();
+
+    // Enviar el PDF al navegador para su descarga
+    $dompdf->stream("usuarios.pdf", ["Attachment" => true]);
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -41,6 +100,55 @@ if (isset($_GET['ajax'])) {
     <title>Document</title>
     <link rel="stylesheet" href="../css/tabla.css">
     <link rel="stylesheet" href="../css/filter.css">
+    <style>
+        .btn-pdf {
+            display: inline-block;
+            background-color: #d9534f;
+            color: white;
+            margin-right: 10px;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .btn-pdf:hover {
+            background-color: #c9302c;
+        }
+
+        .encabezado {
+            display: flex;
+            justify-content: flex-start; /* Alinear los botones a la izquierda */
+            gap: 10px; /* Espacio entre los botones */
+            margin-bottom: 20px; /* Espacio debajo del contenedor */
+        }
+
+        .btn-pdf,
+        .add-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+            color: white;
+        }
+
+        .btn-pdf {
+            background-color: #d9534f;
+        }
+
+        .btn-pdf:hover {
+            background-color: #c9302c;
+        }
+
+        .add-btn {
+            background-color: #5cb85c;
+        }
+
+        .add-btn:hover {
+            background-color: #4cae4c;
+        }
+    </style>
 </head>
 
 <body>
@@ -67,12 +175,13 @@ if (isset($_GET['ajax'])) {
                 <h2>TABLA DE USUARIOS</h2>
                 <div class="encabezado">
                     <a href="#" class="add-btn">Agregar Usuario</a>
+                    <a href="?export_pdf" class="btn-pdf">Exportar a PDF</a>
                 </div>
                 <div class="table-responsive">
                     <table>
                         <thead>
                             <tr>
-                                <th>ID</th>
+                                <th>#</th> <!-- Cambiar "ID" a "#" para el número de usuario -->
                                 <th>DNI</th>
                                 <th>NOMBRE</th>
                                 <th>APELLIDO</th>
@@ -85,9 +194,10 @@ if (isset($_GET['ajax'])) {
                         <tbody id="usuariosTable">
                             <?php
                             if (count($usuarios) > 0) {
+                                $contador = 1; // Inicializar el contador
                                 foreach ($usuarios as $fila) {
                                     echo "<tr>
-                                <td>{$fila['idusuario']}</td>
+                                <td>{$contador}</td> <!-- Mostrar el número de usuario -->
                                 <td>{$fila['dni']}</td>
                                 <td>{$fila['nombre']}</td>
                                 <td>{$fila['apellido']}</td>
@@ -105,9 +215,10 @@ if (isset($_GET['ajax'])) {
                                     <a href='#' class='delete-btn' data-idusuario='{$fila['idusuario']}'></a>
                                 </td>
                               </tr>";
+                                    $contador++; // Incrementar el contador
                                 }
                             } else {
-                                echo "<tr><td colspan='5'>No hay usuarios registrados</td></tr>";
+                                echo "<tr><td colspan='8'>No hay usuarios registrados</td></tr>";
                             }
                             ?>
                         </tbody>
@@ -141,29 +252,31 @@ if (isset($_GET['ajax'])) {
                     .then(data => {
                         usuariosTable.innerHTML = "";
                         if (data.length > 0) {
+                            let contador = 1; // Inicializar el contador
                             data.forEach(usuario => {
                                 const row = `
-                    <tr>
-                        <td>${usuario.idusuario}</td>
-                        <td>${usuario.dni}</td>
-                        <td>${usuario.nombre}</td>
-                        <td>${usuario.apellido}</td>
-                        <td>${usuario.usuario}</td>
-                        <td>${usuario.correo}</td>
-                        <td>${usuario.rol}</td>
-                        <td>
-                            <a href="#" class="edit-btn" 
-                                data-idusuario="${usuario.idusuario}"
-                                data-dni="${usuario.dni}"
-                                data-nombre="${usuario.nombre}"
-                                data-apellido="${usuario.apellido}"
-                                data-usuario="${usuario.usuario}"
-                                data-correo="${usuario.correo}"></a>
-                            <a href="#" class="delete-btn" data-idusuario="${usuario.idusuario}"></a>
-                        </td>
-                    </tr>
-                `;
+                                <tr>
+                                    <td>${contador}</td> <!-- Mostrar el número de usuario -->
+                                    <td>${usuario.dni}</td>
+                                    <td>${usuario.nombre}</td>
+                                    <td>${usuario.apellido}</td>
+                                    <td>${usuario.usuario}</td>
+                                    <td>${usuario.correo}</td>
+                                    <td>${usuario.rol}</td>
+                                    <td>
+                                        <a href="#" class="edit-btn" 
+                                            data-idusuario="${usuario.idusuario}"
+                                            data-dni="${usuario.dni}"
+                                            data-nombre="${usuario.nombre}"
+                                            data-apellido="${usuario.apellido}"
+                                            data-usuario="${usuario.usuario}"
+                                            data-correo="${usuario.correo}"></a>
+                                        <a href="#" class="delete-btn" data-idusuario="${usuario.idusuario}"></a>
+                                    </td>
+                                </tr>
+                                `;
                                 usuariosTable.innerHTML += row;
+                                contador++; // Incrementar el contador
                             });
                         } else {
                             usuariosTable.innerHTML = "<tr><td colspan='8'>No hay usuarios registrados</td></tr>";

@@ -1,4 +1,9 @@
 <?php
+
+require '../php/vendor/autoload.php';
+
+    use Dompdf\Dompdf;
+    use Dompdf\Options; 
 include '../conexion.php';
 $especialidad_filter = $_GET['especialidad'] ?? '';
 $sql = "SELECT idEspecialidad, nombreEspecialidad, descripcion FROM Especialidades WHERE 1=1";
@@ -19,6 +24,51 @@ if (isset($_GET['ajax'])) {
     echo json_encode($especialidades);
     exit;
 }
+
+if (isset($_GET['export_pdf'])) {
+    
+
+    // Crear el contenido HTML para el PDF
+    $html = "<h1>Lista de Especialidades</h1>";
+    $html .= "<table border='1' cellpadding='10' cellspacing='0'>";
+    $html .= "<thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nombre Especialidad</th>
+                    <th>Descripción</th>
+                </tr>
+              </thead><tbody>";
+
+    $contador = 1; // Inicializar el contador
+    foreach ($especialidades as $fila) {
+        $html .= "<tr>
+                    <td>{$contador}</td>
+                    <td>{$fila['nombreEspecialidad']}</td>
+                    <td>{$fila['descripcion']}</td>
+                  </tr>";
+        $contador++;
+    }
+    $html .= "</tbody></table>";
+
+    // Configurar Dompdf
+    $options = new Options();
+    $options->set('isHtml5ParserEnabled', true);
+    $options->set('isPhpEnabled', true);
+    $dompdf = new Dompdf($options);
+
+    // Cargar el contenido HTML
+    $dompdf->loadHtml($html);
+
+    // Configurar el tamaño y la orientación del papel
+    $dompdf->setPaper('A4', 'landscape');
+
+    // Renderizar el PDF
+    $dompdf->render();
+
+    // Enviar el PDF al navegador para su descarga
+    $dompdf->stream("especialidades.pdf", ["Attachment" => true]);
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -29,6 +79,55 @@ if (isset($_GET['ajax'])) {
     <link rel="stylesheet" href="../css/tabla.css">
     <link rel="stylesheet" href="../css/filter.css">
     <title>Document</title>
+    <style>
+        .btn-pdf {
+            display: inline-block;
+            background-color: #d9534f;
+            color: white;
+            margin-right: 10px;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .btn-pdf:hover {
+            background-color: #c9302c;
+        }
+
+        .encabezado {
+            display: flex;
+            justify-content: flex-start; /* Alinear los botones a la izquierda */
+            gap: 10px; /* Espacio uniforme entre los botones */
+            margin-bottom: 20px; /* Espacio debajo del contenedor */
+        }
+
+        .btn-pdf,
+        .add-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+            color: white;
+        }
+
+        .btn-pdf {
+            background-color: #d9534f;
+        }
+
+        .btn-pdf:hover {
+            background-color: #c9302c;
+        }
+
+        .add-btn {
+            background-color: #5cb85c;
+        }
+
+        .add-btn:hover {
+            background-color: #4cae4c;
+        }
+    </style>
 </head>
 
 <body>
@@ -48,36 +147,39 @@ if (isset($_GET['ajax'])) {
                 <h2>TABLA DE ESPECIALIDADES</h2>
                 <div class="encabezado">
                     <a href="#" class="add-btn">Agregar Especialidad</a>
+                    <a href="?export_pdf" class="btn-pdf">Exportar a PDF</a>
                 </div>
                 <div class="table-responsive">
                     <table>
                         <thead>
                             <tr>
-                                <th>ID</th>
+                                <th>#</th> <!-- Cambiar "ID" a "#" para el número de especialidad -->
                                 <th>NOMBRE ESPECIALIDAD</th>
                                 <th>DESCRIPCIÓN</th>
-                                <th>ACCION</th>
+                                <th>ACCIÓN</th>
                             </tr>
                         </thead>
                         <tbody id="especialidadesTable">
                             <?php
                             if (count($especialidades) > 0) {
+                                $contador = 1; // Inicializar el contador
                                 foreach ($especialidades as $fila) {
                                     echo "<tr>
-                                <td>{$fila['idEspecialidad']}</td>
-                                <td>{$fila['nombreEspecialidad']}</td>
-                                <td>{$fila['descripcion']}</td>
-                                <td>
-                                    <a href='#' class='edit-btn' 
-                                        data-idespecialidad='{$fila['idEspecialidad']}'
-                                        data-especialidad='{$fila['nombreEspecialidad']}'
-                                        data-descripcion='{$fila['descripcion']}'></a>
-                                    <a href='#' class='delete-btn' data-idespecialidad='{$fila['idEspecialidad']}'></a>
-                                </td>
-                              </tr>";
+                                        <td>{$contador}</td> <!-- Mostrar el número de especialidad -->
+                                        <td>{$fila['nombreEspecialidad']}</td>
+                                        <td>{$fila['descripcion']}</td>
+                                        <td>
+                                            <a href='#' class='edit-btn' 
+                                                data-idespecialidad='{$fila['idEspecialidad']}'
+                                                data-especialidad='{$fila['nombreEspecialidad']}'
+                                                data-descripcion='{$fila['descripcion']}'></a>
+                                            <a href='#' class='delete-btn' data-idespecialidad='{$fila['idEspecialidad']}'></a>
+                                        </td>
+                                      </tr>";
+                                    $contador++; // Incrementar el contador
                                 }
                             } else {
-                                echo "<tr><td colspan='5'>No hay usuarios registrados</td></tr>";
+                                echo "<tr><td colspan='4'>No hay especialidades registradas</td></tr>";
                             }
                             ?>
                         </tbody>
@@ -105,25 +207,27 @@ if (isset($_GET['ajax'])) {
                 .then(data => {
                     especialidadesTable.innerHTML = "";
                     if (data.length > 0) {
-                        data.forEach(especialidades => {
+                        let contador = 1; // Inicializar el contador
+                        data.forEach(especialidad => {
                             const row = `
-                    <tr>
-                        <td>${especialidades.idEspecialidad}</td>
-                        <td>${especialidades.nombreEspecialidad}</td>
-                        <td>${especialidades.descripcion}</td>
-                        <td>
-                            <a href="#" class="edit-btn" 
-                                data-idespecialidad="${especialidades.idEspecialidad}"
-                                data-especialidad="${especialidades.nombreEspecialidad}"
-                                data-descripcion="${especialidades.descripcion}"></a>
-                            <a href="#" class="delete-btn" data-idespecialidad="${especialidades.idespecialidad}"></a>
-                        </td>
-                    </tr>
-                `;
+                            <tr>
+                                <td>${contador}</td> <!-- Mostrar el número de especialidad -->
+                                <td>${especialidad.nombreEspecialidad}</td>
+                                <td>${especialidad.descripcion}</td>
+                                <td>
+                                    <a href="#" class="edit-btn" 
+                                        data-idespecialidad="${especialidad.idEspecialidad}"
+                                        data-especialidad="${especialidad.nombreEspecialidad}"
+                                        data-descripcion="${especialidad.descripcion}"></a>
+                                    <a href="#" class="delete-btn" data-idespecialidad="${especialidad.idEspecialidad}"></a>
+                                </td>
+                            </tr>
+                            `;
                             especialidadesTable.innerHTML += row;
+                            contador++; // Incrementar el contador
                         });
                     } else {
-                        especialidadesTable.innerHTML = "<tr><td colspan='8'>No hay usuarios registrados</td></tr>";
+                        especialidadesTable.innerHTML = "<tr><td colspan='4'>No hay especialidades registradas</td></tr>";
                     }
 
                     // Vuelve a asignar eventos a los botones después de actualizar la tabla

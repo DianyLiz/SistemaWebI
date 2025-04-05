@@ -67,6 +67,7 @@ if (isset($_GET['export_pdf'])) {
     $html .= "<table border='1' cellpadding='10' cellspacing='0'>";
     $html .= "<thead>
                 <tr>
+                    <th>#</th>
                     <th>Paciente</th>
                     <th>Médico</th>
                     <th>Fecha</th>
@@ -75,15 +76,18 @@ if (isset($_GET['export_pdf'])) {
                 </tr>
               </thead><tbody>";
 
+    $contador = 1; // Inicializar el contador
     foreach ($citas as $fila) {
         $hora_formateada = date("H:i", strtotime($fila['hora']));
         $html .= "<tr>
+                    <td>{$contador}</td>
                     <td>{$fila['paciente']}</td>
                     <td>{$fila['medico']}</td>
-                    <td>{$fila['fecha']}</td>
+                    <td>{$fila['FechaAtencion']}</td>
                     <td>{$hora_formateada}</td>
                     <td>{$fila['estado']}</td>
                   </tr>";
+        $contador++;
     }
     $html .= "</tbody></table>";
 
@@ -94,69 +98,11 @@ if (isset($_GET['export_pdf'])) {
     $dompdf->loadHtml($html);
     $dompdf->setPaper('A4', 'portrait');
     $dompdf->render();
-    $dompdf->stream("citas_medicas.pdf", array("Attachment" => false));
+    $dompdf->stream("citas_medicas.pdf", array("Attachment" => true));
     exit;
 }
 
-if (isset($_GET['export_excel'])) {
-    $spreadsheet = new Spreadsheet();
-    $sheet = $spreadsheet->getActiveSheet();
-    $sheet->setCellValue('A1', 'Paciente');
-    $sheet->setCellValue('B1', 'Médico');
-    $sheet->setCellValue('C1', 'Fecha');
-    $sheet->setCellValue('D1', 'Hora');
-    $sheet->setCellValue('E1', 'Motivo');
-    $sheet->setCellValue('F1', 'Estado');
-
-    $row = 2;
-    foreach ($citas as $fila) {
-        $sheet->setCellValue("A$row", $fila['paciente']);
-        $sheet->setCellValue("B$row", $fila['medico']);
-        $sheet->setCellValue("C$row", $fila['fecha']);
-        $sheet->setCellValue("D$row", $fila['hora']);
-        $sheet->setCellValue("E$row", $fila['motivo']);
-        $sheet->setCellValue("E$row", $fila['estado']);
-        $row++;
-    }
-
-    $writer = new Xlsx($spreadsheet);
-    $filename = 'citas_medicas.xlsx';
-    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    header("Content-Disposition: attachment;filename=\"$filename\"");
-    $writer->save('php://output');
-    exit;
-}
-
-if (isset($_GET['export_word'])) {
-    $phpWord = new PhpWord();
-    $section = $phpWord->addSection();
-
-    $section->addText("Lista de Citas Médicas", ['bold' => true, 'size' => 16]);
-    $table = $section->addTable();
-
-    $table->addRow();
-    $table->addCell(2000)->addText("Paciente");
-    $table->addCell(2000)->addText("Médico");
-    $table->addCell(2000)->addText("Fecha");
-    $table->addCell(2000)->addText("Hora");
-    $table->addCell(2000)->addText("Motivo");
-    $table->addCell(2000)->addText("Estado");
-
-    foreach ($citas as $fila) {
-        $table->addRow();
-        $table->addCell(2000)->addText($fila['paciente']);
-        $table->addCell(2000)->addText($fila['medico']);
-        $table->addCell(2000)->addText($fila['fecha']);
-        $table->addCell(2000)->addText($fila['hora']);
-        $table->addCell(2000)->addText($fila['motivo']);
-        $table->addCell(2000)->addText($fila['estado']);
-    }
-
-    header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-    header("Content-Disposition: attachment;filename=\"citas_medicas.docx\"");
-    $phpWord->save('php://output');
-    exit;
-}
+  
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -230,14 +176,12 @@ if (isset($_GET['export_word'])) {
                 <div class="export-buttons">
                     <a href="#" class="add-btn">Agregar Cita</a>
                     <a href="?export_pdf" class="btn-pdf">Exportar a PDF</a>
-                    <a href="?export_excel" class="btn-excel">Exportar a Excel</a>
-                    <a href="?export_word" class="btn-word">Exportar a Word</a>
                 </div>
                 <div class="table-responsive">
                     <table>
                         <thead>
                             <tr>
-                                <th>ID</th>
+                                <th>#</th> <!-- Cambiar "ID" a "#" para el número de cita -->
                                 <th>Paciente</th>
                                 <th>Médico</th>
                                 <th>Hora</th>
@@ -256,11 +200,12 @@ if (isset($_GET['export_word'])) {
                             ];
 
                             if (count($citas) > 0) {
+                                $contador = 1; // Inicializar el contador
                                 foreach ($citas as $fila) {
                                     $hora_formateada = date("H:i", strtotime($fila['hora']));
                                     $claseEstado = $estadoClases[$fila['estado']] ?? '';
                                     echo "<tr>
-                                        <td>{$fila['idCita']}</td>
+                                        <td>{$contador}</td> <!-- Mostrar el número de cita -->
                                         <td>{$fila['paciente']}</td>
                                         <td>{$fila['medico']}</td>
                                         <td>{$hora_formateada}</td>
@@ -285,9 +230,10 @@ if (isset($_GET['export_word'])) {
 
                                         </td>
                                       </tr>";
+                                    $contador++; // Incrementar el contador
                                 }
                             } else {
-                                echo "<tr><td colspan='7'>No hay citas registradas</td></tr>";
+                                echo "<tr><td colspan='8'>No hay citas registradas</td></tr>";
                             }
                             ?>
                         </tbody>

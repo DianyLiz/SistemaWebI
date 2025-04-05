@@ -1,4 +1,9 @@
 <?php
+require '../php/vendor/autoload.php';
+
+use Dompdf\Dompdf;
+use Dompdf\Options;
+
 include '../conexion.php';
 $paginaActual = 'pacientes';
 $dni_filter = $_GET['dni'] ?? '';
@@ -36,6 +41,60 @@ if (isset($_GET['ajax'])) {
     echo json_encode($pacientes);
     exit;
 }
+
+if (isset($_GET['export_pdf'])) {
+    
+    // Crear el contenido HTML para el PDF
+    $html = "<h1>Lista de Pacientes</h1>";
+    $html .= "<table border='1' cellpadding='10' cellspacing='0'>";
+    $html .= "<thead>
+                <tr>
+                    <th>#</th>
+                    <th>DNI</th>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Sexo</th>
+                    <th>Fecha de Nacimiento</th>
+                    <th>Teléfono</th>
+                    <th>Dirección</th>
+                </tr>
+              </thead><tbody>";
+
+    $contador = 1; // Inicializar el contador
+    foreach ($pacientes as $fila) {
+        $html .= "<tr>
+                    <td>{$contador}</td>
+                    <td>{$fila['dni']}</td>
+                    <td>{$fila['nombre']}</td>
+                    <td>{$fila['apellido']}</td>
+                    <td>{$fila['sexo']}</td>
+                    <td>{$fila['FechaNacimiento']}</td>
+                    <td>{$fila['telefono']}</td>
+                    <td>{$fila['direccion']}</td>
+                  </tr>";
+        $contador++;
+    }
+    $html .= "</tbody></table>";
+
+    // Configurar Dompdf
+    $options = new Options();
+    $options->set('isHtml5ParserEnabled', true);
+    $options->set('isPhpEnabled', true);
+    $dompdf = new Dompdf($options);
+
+    // Cargar el contenido HTML
+    $dompdf->loadHtml($html);
+
+    // Configurar el tamaño y la orientación del papel
+    $dompdf->setPaper('A4', 'landscape');
+
+    // Renderizar el PDF
+    $dompdf->render();
+
+    // Enviar el PDF al navegador para su descarga
+    $dompdf->stream("pacientes.pdf", ["Attachment" => true]);
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -46,6 +105,55 @@ if (isset($_GET['ajax'])) {
     <title>Document</title>
     <link rel="stylesheet" href="../css/tabla.css">
     <link rel="stylesheet" href="../css/filter.css">
+    <style>
+        .btn-pdf {
+            display: inline-block;
+            background-color: #d9534f;
+            color: white;
+            margin-right: 10px;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .btn-pdf:hover {
+            background-color: #c9302c;
+        }
+
+        .encabezado {
+            display: flex;
+            justify-content: flex-start; /* Alinear los botones a la izquierda */
+            gap: 10px; /* Espacio entre los botones */
+            margin-bottom: 20px; /* Espacio debajo del contenedor */
+        }
+
+        .btn-pdf,
+        .add-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+            color: white;
+        }
+
+        .btn-pdf {
+            background-color: #d9534f;
+        }
+
+        .btn-pdf:hover {
+            background-color: #c9302c;
+        }
+
+        .add-btn {
+            background-color: #5cb85c;
+        }
+
+        .add-btn:hover {
+            background-color: #4cae4c;
+        }
+    </style>
 </head>
 
 <body>
@@ -71,12 +179,13 @@ if (isset($_GET['ajax'])) {
                 <h2>TABLA DE PACIENTES</h2>
                 <div class="encabezado">
                     <a href="#" class="add-btn">Agregar Paciente</a>
+                    <a href="?export_pdf" class="btn-pdf">Exportar a PDF</a>
                 </div>
                 <div class="table-responsive">
                     <table>
                         <thead>
                             <tr>
-                                <th>ID</th>
+                                <th>#</th> <!-- Cambiar "ID" a "#" para el número de paciente -->
                                 <th>DNI</th>
                                 <th>NOMBRE</th>
                                 <th>APELLIDO</th>
@@ -90,33 +199,35 @@ if (isset($_GET['ajax'])) {
                         <tbody id="pacientesTable">
                             <?php
                             if (count($pacientes) > 0) {
+                                $contador = 1; // Inicializar el contador
                                 foreach ($pacientes as $fila) {
                                     echo "<tr>
-                                <td>{$fila['idPaciente']}</td>
-                                <td>{$fila['dni']}</td>
-                                <td>{$fila['nombre']}</td>
-                                <td>{$fila['apellido']}</td>
-                                <td>{$fila['sexo']}</td>
-                                <td>{$fila['FechaNacimiento']}</td>
-                                <td>{$fila['telefono']}</td>
-                                <td>{$fila['direccion']}</td>
-                                <td>
-                                    <a href='#' class='edit-btn'
-                                        data-idusuario='{$fila['idUsuario']}'
-                                        data-idpaciente='{$fila['idPaciente']}'
-                                        data-dni='{$fila['dni']}'
-                                        data-nombre='{$fila['nombre']}'
-                                        data-apellido='{$fila['apellido']}'
-                                        data-sexo='{$fila['sexo']}'
-                                        data-fechaNacimiento='{$fila['FechaNacimiento']}'
-                                        data-telefono='{$fila['telefono']}'
-                                        data-direccion='{$fila['direccion']}'></a>
-                                    <a href='#' class='delete-btn' data-idpaciente='{$fila['idPaciente']}' data-idusuario='{$fila['idUsuario']}'></a>
-                                </td>
-                              </tr>";
+                                        <td>{$contador}</td> <!-- Mostrar el número de paciente -->
+                                        <td>{$fila['dni']}</td>
+                                        <td>{$fila['nombre']}</td>
+                                        <td>{$fila['apellido']}</td>
+                                        <td>{$fila['sexo']}</td>
+                                        <td>{$fila['FechaNacimiento']}</td>
+                                        <td>{$fila['telefono']}</td>
+                                        <td>{$fila['direccion']}</td>
+                                        <td>
+                                            <a href='#' class='edit-btn'
+                                                data-idusuario='{$fila['idUsuario']}'
+                                                data-idpaciente='{$fila['idPaciente']}'
+                                                data-dni='{$fila['dni']}'
+                                                data-nombre='{$fila['nombre']}'
+                                                data-apellido='{$fila['apellido']}'
+                                                data-sexo='{$fila['sexo']}'
+                                                data-fechaNacimiento='{$fila['FechaNacimiento']}'
+                                                data-telefono='{$fila['telefono']}'
+                                                data-direccion='{$fila['direccion']}'></a>
+                                            <a href='#' class='delete-btn' data-idpaciente='{$fila['idPaciente']}' data-idusuario='{$fila['idUsuario']}'></a>
+                                        </td>
+                                      </tr>";
+                                    $contador++; // Incrementar el contador
                                 }
                             } else {
-                                echo "<tr><td colspan='5'>No hay usuarios registrados</td></tr>";
+                                echo "<tr><td colspan='9'>No hay pacientes registrados</td></tr>";
                             }
                             ?>
                         </tbody>
@@ -152,38 +263,39 @@ if (isset($_GET['ajax'])) {
                 .then(data => {
                     pacientesTable.innerHTML = "";
                     if (data.length > 0) {
-                        data.forEach(pacientes => {
+                        let contador = 1; // Inicializar el contador
+                        data.forEach(paciente => {
                             const row = `
-                    <tr>
-                        <td>${pacientes.idPaciente}</td>
-                        <td>${pacientes.dni}</td>
-                        <td>${pacientes.nombre}</td>
-                        <td>${pacientes.apellido}</td>
-                        <td>${pacientes.sexo}</td>
-                        <td>${pacientes.FechaNacimiento}</td>
-                        <td>${pacientes.telefono}</td>
-                        <td>${pacientes.direccion}</td>
-                        <td>
-                            <a href="#" class="edit-btn" 
-                                data-idusuario="${pacientes.idUsuario}"
-                                data-idpaciente="${pacientes.idPaciente}"
-                                data-dni="${pacientes.dni}"
-                                data-nombre="${pacientes.nombre}"
-                                data-apellido="${pacientes.apellido}"
-                                data-sexo="${pacientes.sexo}"
-                                data-fechaNacimiento="${pacientes.FechaNacimiento}"
-                                data-telefono="${pacientes.telefono}"
-                                data-direccion="${pacientes.direccion}"></a>
-                            <a href="#" class="delete-btn" data-idpaciente="${pacientes.idPaciente}" data-idusuario="${pacientes.idUsuario}"></a>
-                        </td>
-                    </tr>
-                `;
+                            <tr>
+                                <td>${contador}</td> <!-- Mostrar el número de paciente -->
+                                <td>${paciente.dni}</td>
+                                <td>${paciente.nombre}</td>
+                                <td>${paciente.apellido}</td>
+                                <td>${paciente.sexo}</td>
+                                <td>${paciente.FechaNacimiento}</td>
+                                <td>${paciente.telefono}</td>
+                                <td>${paciente.direccion}</td>
+                                <td>
+                                    <a href="#" class="edit-btn" 
+                                        data-idusuario="${paciente.idUsuario}"
+                                        data-idpaciente="${paciente.idPaciente}"
+                                        data-dni="${paciente.dni}"
+                                        data-nombre="${paciente.nombre}"
+                                        data-apellido="${paciente.apellido}"
+                                        data-sexo="${paciente.sexo}"
+                                        data-fechaNacimiento="${paciente.FechaNacimiento}"
+                                        data-telefono="${paciente.telefono}"
+                                        data-direccion="${paciente.direccion}"></a>
+                                    <a href="#" class="delete-btn" data-idpaciente="${paciente.idPaciente}" data-idusuario="${paciente.idUsuario}"></a>
+                                </td>
+                            </tr>
+                            `;
                             pacientesTable.innerHTML += row;
+                            contador++; // Incrementar el contador
                         });
                     } else {
-                        pacientesTable.innerHTML = "<tr><td colspan='8'>No hay usuarios registrados</td></tr>";
+                        pacientesTable.innerHTML = "<tr><td colspan='9'>No hay pacientes registrados</td></tr>";
                     }
-
                     // Vuelve a asignar eventos a los botones después de actualizar la tabla
                     asignarEventosBotones();
                 })

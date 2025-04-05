@@ -1,4 +1,10 @@
 <?php
+
+require '../php/vendor/autoload.php';
+
+    use Dompdf\Dompdf;
+    use Dompdf\Options;
+    
 include '../conexion.php';
 $paginaActual = 'medicos';
 $dni_filter = $_GET['dni'] ?? '';
@@ -33,6 +39,61 @@ if (isset($_GET['ajax'])) {
     echo json_encode($medicos);
     exit;
 }
+
+if (isset($_GET['export_pdf'])) {
+    
+
+    // Crear el contenido HTML para el PDF
+    $html = "<h1>Lista de Médicos</h1>";
+    $html .= "<table border='1' cellpadding='10' cellspacing='0'>";
+    $html .= "<thead>
+                <tr>
+                    <th>#</th>
+                    <th>DNI</th>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Especialidad</th>
+                    <th>Licencia Médica</th>
+                    <th>Experiencia</th>
+                    <th>Teléfono</th>
+                </tr>
+              </thead><tbody>";
+
+    $contador = 1; // Inicializar el contador
+    foreach ($medicos as $fila) {
+        $html .= "<tr>
+                    <td>{$contador}</td>
+                    <td>{$fila['dni']}</td>
+                    <td>{$fila['nombre']}</td>
+                    <td>{$fila['apellido']}</td>
+                    <td>{$fila['nombreEspecialidad']}</td>
+                    <td>{$fila['numeroLicenciaMedica']}</td>
+                    <td>{$fila['anosExperiencia']} años</td>
+                    <td>{$fila['telefonoMedico']}</td>
+                  </tr>";
+        $contador++;
+    }
+    $html .= "</tbody></table>";
+
+    // Configurar Dompdf
+    $options = new Options();
+    $options->set('isHtml5ParserEnabled', true);
+    $options->set('isPhpEnabled', true);
+    $dompdf = new Dompdf($options);
+
+    // Cargar el contenido HTML
+    $dompdf->loadHtml($html);
+
+    // Configurar el tamaño y la orientación del papel
+    $dompdf->setPaper('A4', 'landscape');
+
+    // Renderizar el PDF
+    $dompdf->render();
+
+    // Enviar el PDF al navegador para su descarga
+    $dompdf->stream("medicos.pdf", ["Attachment" => true]);
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -43,6 +104,55 @@ if (isset($_GET['ajax'])) {
     <title>Document</title>
     <link rel="stylesheet" href="../css/tabla.css">
     <link rel="stylesheet" href="../css/filter.css">
+    <style>
+        .btn-pdf {
+            display: inline-block;
+            background-color: #d9534f;
+            color: white;
+            margin-right: 10px;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .btn-pdf:hover {
+            background-color: #c9302c;
+        }
+
+        .encabezado {
+            display: flex;
+            justify-content: flex-start; /* Alinear los botones a la izquierda */
+            gap: 10px; /* Espacio entre los botones */
+            margin-bottom: 20px; /* Espacio debajo del contenedor */
+        }
+
+        .btn-pdf,
+        .add-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+            color: white;
+        }
+
+        .btn-pdf {
+            background-color: #d9534f;
+        }
+
+        .btn-pdf:hover {
+            background-color: #c9302c;
+        }
+
+        .add-btn {
+            background-color: #5cb85c;
+        }
+
+        .add-btn:hover {
+            background-color: #4cae4c;
+        }
+    </style>
 </head>
 
 <body>
@@ -77,12 +187,13 @@ if (isset($_GET['ajax'])) {
                 <h2>TABLA DE MÉDICOS</h2>
                 <div class="encabezado">
                     <a href="#" class="add-btn">Agregar Usuario</a>
+                    <a href="?export_pdf" class="btn-pdf">Exportar a PDF</a>
                 </div>
                 <div class="table-responsive">
                     <table>
                         <thead>
                             <tr>
-                                <th>ID</th>
+                                <th>#</th> <!-- Cambiar "ID" a "#" para el número de médico -->
                                 <th>DNI</th>
                                 <th>NOMBRE</th>
                                 <th>APELLIDO</th>
@@ -96,33 +207,35 @@ if (isset($_GET['ajax'])) {
                         <tbody id="medicosTable">
                             <?php
                             if (count($medicos) > 0) {
+                                $contador = 1; // Inicializar el contador
                                 foreach ($medicos as $fila) {
                                     echo "<tr>
-                                <td>{$fila['idMedico']}</td>
-                                <td>{$fila['dni']}</td>
-                                <td>{$fila['nombre']}</td>
-                                <td>{$fila['apellido']}</td>
-                                <td>{$fila['nombreEspecialidad']}</td>
-                                <td>{$fila['numeroLicenciaMedica']}</td>
-                                <td>{$fila['anosExperiencia']} años</td>
-                                <td>{$fila['telefonoMedico']}</td>
-                                <td>
-                                    <a href='#' class='edit-btn'
-                                        data-idusuario='{$fila['idUsuario']}'
-                                        data-idmedico='{$fila['idMedico']}'
-                                        data-dni='{$fila['dni']}'
-                                        data-nombre='{$fila['nombre']}'
-                                        data-apellido='{$fila['apellido']}'
-                                        data-especialidad='{$fila['idEspecialidad']}'
-                                        data-licencia='{$fila['numeroLicenciaMedica']}'
-                                        data-experiencia='{$fila['anosExperiencia']}'
-                                        data-telefonomedico='{$fila['telefonoMedico']}'></a>
-                                    <a href='#' class='delete-btn' data-idmedico='{$fila['idMedico']}' data-idusuario='{$fila['idUsuario']}'></a>
-                                </td>
-                              </tr>";
+                                        <td>{$contador}</td> <!-- Mostrar el número de médico -->
+                                        <td>{$fila['dni']}</td>
+                                        <td>{$fila['nombre']}</td>
+                                        <td>{$fila['apellido']}</td>
+                                        <td>{$fila['nombreEspecialidad']}</td>
+                                        <td>{$fila['numeroLicenciaMedica']}</td>
+                                        <td>{$fila['anosExperiencia']} años</td>
+                                        <td>{$fila['telefonoMedico']}</td>
+                                        <td>
+                                            <a href='#' class='edit-btn'
+                                                data-idusuario='{$fila['idUsuario']}'
+                                                data-idmedico='{$fila['idMedico']}'
+                                                data-dni='{$fila['dni']}'
+                                                data-nombre='{$fila['nombre']}'
+                                                data-apellido='{$fila['apellido']}'
+                                                data-especialidad='{$fila['idEspecialidad']}'
+                                                data-licencia='{$fila['numeroLicenciaMedica']}'
+                                                data-experiencia='{$fila['anosExperiencia']}'
+                                                data-telefonomedico='{$fila['telefonoMedico']}'></a>
+                                            <a href='#' class='delete-btn' data-idmedico='{$fila['idMedico']}' data-idusuario='{$fila['idUsuario']}'></a>
+                                        </td>
+                                      </tr>";
+                                    $contador++; // Incrementar el contador
                                 }
                             } else {
-                                echo "<tr><td colspan='5'>No hay usuarios registrados</td></tr>";
+                                echo "<tr><td colspan='9'>No hay médicos registrados</td></tr>";
                             }
                             ?>
                         </tbody>
@@ -157,40 +270,39 @@ if (isset($_GET['ajax'])) {
                 .then(data => {
                     medicosTable.innerHTML = "";
                     if (data.length > 0) {
-                        data.forEach(medicos => {
+                        let contador = 1; // Inicializar el contador
+                        data.forEach(medico => {
                             const row = `
-                    <tr>
-                        <td>${medicos.idMedico}</td>
-                        <td>${medicos.dni}</td>
-                        <td>${medicos.nombre}</td>
-                        <td>${medicos.apellido}</td>
-                        <td>${medicos.nombreEspecialidad}</td>
-                        <td>${medicos.numeroLicenciaMedica}</td>
-                        <td>${medicos.anosExperiencia} años</td>
-                        <td>${medicos.telefonoMedico}</td>
-                        <td>
-                            <a href="#" class="edit-btn" 
-                                data-idusuario="${medicos.idUsuario}"
-                                data-idmedico="${medicos.idMedico}"
-                                data-dni="${medicos.dni}"
-                                data-nombre="${medicos.nombre}"
-                                data-apellido="${medicos.apellido}"
-                                data-especialidad="${medicos.idEspecialidad}"
-                                data-licencia="${medicos.numeroLicenciaMedica}"
-                                data-experiencia="${medicos.anosExperiencia}"
-                                data-telefonomedico="${medicos.telefonoMedico}"></a>
-                            <a href="#" class="delete-btn" data-idmedico="${medicos.idmedico}" data-idusuario="${medicos.idusuario}"></a>
-                        </td>
-                    </tr>
-                `;
+                            <tr>
+                                <td>${contador}</td> <!-- Mostrar el número de médico -->
+                                <td>${medico.dni}</td>
+                                <td>${medico.nombre}</td>
+                                <td>${medico.apellido}</td>
+                                <td>${medico.nombreEspecialidad}</td>
+                                <td>${medico.numeroLicenciaMedica}</td>
+                                <td>${medico.anosExperiencia} años</td>
+                                <td>${medico.telefonoMedico}</td>
+                                <td>
+                                    <a href="#" class="edit-btn" 
+                                        data-idusuario="${medico.idUsuario}"
+                                        data-idmedico="${medico.idMedico}"
+                                        data-dni="${medico.dni}"
+                                        data-nombre="${medico.nombre}"
+                                        data-apellido="${medico.apellido}"
+                                        data-especialidad="${medico.idEspecialidad}"
+                                        data-licencia="${medico.numeroLicenciaMedica}"
+                                        data-experiencia="${medico.anosExperiencia}"
+                                        data-telefonomedico="${medico.telefonoMedico}"></a>
+                                    <a href="#" class="delete-btn" data-idmedico="${medico.idMedico}" data-idusuario="${medico.idUsuario}"></a>
+                                </td>
+                            </tr>
+                            `;
                             medicosTable.innerHTML += row;
+                            contador++; // Incrementar el contador
                         });
                     } else {
-                        medicosTable.innerHTML = "<tr><td colspan='8'>No hay usuarios registrados</td></tr>";
+                        medicosTable.innerHTML = "<tr><td colspan='9'>No hay médicos registrados</td></tr>";
                     }
-
-                    // Vuelve a asignar eventos a los botones después de actualizar la tabla
-                    asignarEventosBotones();
                 })
                 .catch(error => console.error("Error en la búsqueda:", error));
         }

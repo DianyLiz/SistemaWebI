@@ -100,6 +100,9 @@ Herramientas:
 
   Modificaciones 04-04-2025:
     Modificacion en el modulo de medicos
+
+  Modificaciones 05-04-2025:
+    Modificacion en el modulo de administrador
     
 
 
