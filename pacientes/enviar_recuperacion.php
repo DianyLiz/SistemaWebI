@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if ($usuario) {
         $token = bin2hex(random_bytes(16));
-        $url = "http://localhost/SistemaCitaMedica/Pacientes/restablecer_contrasena.php?token=$token";
+        $url = "http://localhost/CitasMedicas/Pacientes/restablecer_contrasena.php?token=$token";
 
         $data = [
             'email' => $email,

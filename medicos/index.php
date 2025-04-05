@@ -13,7 +13,32 @@ try {
     $stmt_citas->execute();
     $row_citas = $stmt_citas->fetch(PDO::FETCH_ASSOC);
     $total_citas = $row_citas ? $row_citas['total'] : 0;
-    
+
+    $sql_documentos = "SELECT COUNT(*) AS total FROM DocumentosMedicos";
+    $stmt_documentos = $conn->prepare($sql_documentos);
+    $stmt_documentos->execute();
+    $row_documentos = $stmt_documentos->fetch(PDO::FETCH_ASSOC);
+    $total_documentos = $row_documentos ? $row_documentos['total'] : 0;
+
+    $sql_expedientes = "SELECT COUNT(*) AS total FROM ExpedienteMedico";
+    $stmt_expedientes = $conn->prepare($sql_expedientes);
+    $stmt_expedientes->execute();
+    $row_expedientes = $stmt_expedientes->fetch(PDO::FETCH_ASSOC);
+    $total_expedientes = $row_expedientes ? $row_expedientes['total'] : 0;
+
+    // Citas confirmadas
+    $sql_citas_confirmadas = "SELECT COUNT(*) AS total FROM citas WHERE estado = 'confirmada'";
+    $stmt_citas_confirmadas = $conn->prepare($sql_citas_confirmadas);
+    $stmt_citas_confirmadas->execute();
+    $row_citas_confirmadas = $stmt_citas_confirmadas->fetch(PDO::FETCH_ASSOC);
+    $total_citas_confirmadas = $row_citas_confirmadas ? $row_citas_confirmadas['total'] : 0;
+
+    // Citas pendientes
+    $sql_citas_pendientes = "SELECT COUNT(*) AS total FROM citas WHERE estado = 'pendiente'";
+    $stmt_citas_pendientes = $conn->prepare($sql_citas_pendientes);
+    $stmt_citas_pendientes->execute();
+    $row_citas_pendientes = $stmt_citas_pendientes->fetch(PDO::FETCH_ASSOC);
+    $total_citas_pendientes = $row_citas_pendientes ? $row_citas_pendientes['total'] : 0;
 } catch (PDOException $e) {
     die("Error en la consulta: " . $e->getMessage());
 }
@@ -121,7 +146,7 @@ try {
             background-color: white;
             border-radius: 10px;
             padding: 2rem;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             margin-bottom: 2rem;
             text-align: center;
         }
@@ -141,6 +166,7 @@ try {
             cursor: pointer;
             margin-top: 1rem;
             transition: background 0.3s;
+            text-decoration: none;
         }
 
         .btn-accion:hover {
@@ -157,7 +183,7 @@ try {
             background-color: white;
             padding: 1.5rem;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
 
@@ -182,26 +208,44 @@ try {
             <?php include '../medicos/menu.php'; ?>
 
             <main class="contenido">
-                <h1>Bienvenido al Panel Médico</h1>
+                <h1>Bienvenido, Dr. <?php echo $_SESSION['usuario']['nombre'] . " " . $_SESSION['usuario']['apellido']; ?></h1>
 
                 <div class="bienvenida">
                     <h2>Portal Médico</h2>
                     <p>Este es su panel de control principal donde podrá acceder a todas las funcionalidades del módulo de médico.</p>
-                    <button class="btn-accion">Ver citas del día</button>
                 </div>
 
                 <div class="estadisticas">
                     <div class="estadistica">
-                        <h3>Pacientes</h3>
+                        <h3>Citas confirmadas</h3>
+                        <p><?php echo htmlspecialchars($total_citas_confirmadas); ?></p>
+                    </div>
+                    <div class="estadistica">
+                        <h3>Documentos Médicos</h3>
+                        <p><?php echo htmlspecialchars($total_documentos); ?></p>
+                        <a href="documentosmedicos.php" class="btn-accion">Abrir</a>
+                    </div>
+                    <div class="estadistica">
+                        <h3>Expedientes Médicos</h3>
+                        <p><?php echo htmlspecialchars($total_expedientes); ?></p>
+                        <a href="expedientesmedicos.php" class="btn-accion">Abrir</a>
+                    </div>
+                </div>
+                <br>
+                <div class="estadisticas">
+                    <div class="estadistica">
+                        <h3>Citas pendientes</h3>
+                        <p><?php echo htmlspecialchars($total_citas_pendientes); ?></p>
+                    </div>
+                    <div class="estadistica">
+                        <h3>Total Pacientes</h3>
                         <p><?php echo htmlspecialchars($total_pacientes); ?></p>
+                        <a href="pacientes.php" class="btn-accion">Abrir</a>
                     </div>
                     <div class="estadistica">
                         <h3>Citas Médicas</h3>
                         <p><?php echo htmlspecialchars($total_citas); ?></p>
-                    </div>
-                    <div class="estadistica">
-                        <h3>Historias Clínicas</h3>
-                        <p>320</p>
+                        <a href="ListadeCitas.php" class="btn-accion">Abrir</a>
                     </div>
                 </div>
             </main>
@@ -209,4 +253,5 @@ try {
     </div>
 
 </body>
+
 </html>

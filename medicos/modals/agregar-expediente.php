@@ -1,4 +1,9 @@
-<link rel="stylesheet" href="../css/modal-expedientes.css">
+<style>
+    .form-group textarea {
+        resize: none;
+    }
+</style>
+<link rel="stylesheet" href="../css/modal-usuario.css">
 <div id="modalAgregarExpediente" class="modalAgregarExpediente">
     <div class="modal-content">
         <span class="close">&times;</span>
@@ -47,26 +52,6 @@
         </form>
     </div>
 </div>
-
-<script>
-    var modal = document.getElementById("modalAgregarExpediente");
-    var btn = document.getElementById("abrirModal");
-    var span = document.getElementsByClassName("close")[0];
-
-    btn.onclick = function() {
-        modal.style.display = "block";
-    }
-
-    span.onclick = function() {
-        modal.style.display = "none";
-    }
-
-    window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
-    }
-</script>
 <?php
 $conn = null;
 ?>

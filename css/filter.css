@@ -1,6 +1,5 @@
 .encabezado {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
 }
@@ -15,6 +14,7 @@
     font-size: 14px;
     transition: background-color 0.3s ease;
     text-decoration: none;
+    margin-right: 10px;
 }
 
 .encabezado a:hover {

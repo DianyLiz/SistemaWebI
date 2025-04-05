@@ -9,6 +9,7 @@
         <li><a href="horarios.php"><i class="fa-solid fa-calendar"></i>Horarios</a></li>
         <li><a href="ListadeCitas.php"><i class="fa-solid fa-stethoscope"></i>Citas</a></li>
         <li><a href="financiamientos.php"><i class="fa-solid fa-wallet"></i>Financiamientos</a></li>
+        <li><a href="Auditoria.php"><i class="fa-solid fa-magnifying-glass-chart"></i>Auditoria</a></li>
     </ul>
 </aside>
 <script>

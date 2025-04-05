@@ -23,10 +23,11 @@ EOT;
 ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediCitas - Reserva de Citas</title>
+    <title>MediCitas - Citas Médicas</title>
     <link rel="stylesheet" href="../css/estilo.css">
     <link rel="stylesheet" href="../css/estilo-admin.css">
     <link rel="stylesheet" href="../css/tabla.css">
@@ -41,23 +42,45 @@ EOT;
             border-radius: 5px;
             margin-bottom: 20px;
         }
+
+        .detalles-horario p {
+            margin: 5px 0;
+        }
+
         .loading-spinner {
             display: inline-block;
             width: 20px;
             height: 20px;
-            border: 3px solid rgba(0,0,0,.1);
+            border: 3px solid rgba(0, 0, 0, .1);
             border-radius: 50%;
             border-top-color: #007bff;
             animation: spin 1s ease-in-out infinite;
             margin-right: 10px;
         }
+
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
+
+        .error {
+            color: #dc3545;
+            text-align: center;
+            padding: 20px;
+        }
+
         .btn-reservar.selected {
             background-color: #28a745;
             color: white;
         }
+
+        .no-horarios {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+        }
+
         .btn-ocupado {
             background-color: #dc3545;
             color: white;
@@ -67,12 +90,15 @@ EOT;
         }
     </style>
 </head>
+
 <body>
-    <?php include 'header.php'; include 'menu.php'; echo $alertScript; ?>
+    <?php include 'header.php';
+    include 'menu.php';
+    echo $alertScript; ?>
 
     <main class="contenido">
         <div class="table-container">
-            <h2>Selecciona una Especialidad</h2>
+            <h2>Selecciona una Especialidad Para Tu Cita</h2>
             <table>
                 <thead>
                     <tr>
@@ -89,9 +115,9 @@ EOT;
                     $consulta->execute();
                     while ($row = $consulta->fetch(PDO::FETCH_ASSOC)) {
                         echo '<tr>
-                            <td>'.htmlspecialchars($row["nombreEspecialidad"]).'</td>
-                            <td>'.htmlspecialchars($row["descripcion"]).'</td>
-                            <td><button class="btn-seleccionar" data-especialidad="'.htmlspecialchars($row["nombreEspecialidad"]).'">Seleccionar</button></td>
+                            <td>' . htmlspecialchars($row["nombreEspecialidad"]) . '</td>
+                            <td>' . htmlspecialchars($row["descripcion"]) . '</td>
+                            <td><button class="btn-seleccionar" data-especialidad="' . htmlspecialchars($row["nombreEspecialidad"]) . '">Seleccionar</button></td>
                         </tr>';
                     }
                     ?>
@@ -101,7 +127,7 @@ EOT;
 
         <div id="cita-container" style="display:none;">
             <button id="btn-regresar" class="btn-cancelar">Regresar</button>
-            <h3>Selecciona una Fecha</h3>
+            <h3>Selecciona una Fecha Para Tu Cita</h3>
             <input type="text" id="fecha-cita" placeholder="Selecciona una fecha">
 
             <div id="horarios-disponibles" style="display:none; margin-top:20px;">
@@ -110,9 +136,9 @@ EOT;
                     <table>
                         <thead>
                             <tr>
-                                <th>Hora Inicio</th>
-                                <th>Médico</th>
+                                <th>Horario de Atención</th>
                                 <th>Duración</th>
+                                <th>Médico</th>
                                 <th>Acción</th>
                             </tr>
                         </thead>
@@ -122,19 +148,42 @@ EOT;
             </div>
 
             <div id="motivo-cita" style="display:none; margin-top:20px;">
-                <h3>Motivo de la Cita</h3>
+                <h3>DETALLES DE LA CITA</h3>
                 <div class="form-group">
-                    <label for="dni">DNI:</label>
-                    <input type="text" id="dni" value="<?= htmlspecialchars($_SESSION['usuario']['dni'] ?? '') ?>" placeholder="Ingresa tu DNI">
-                </div>
-                <div class="form-group">
+                    <label for="paciente">Paciente:</label>
+                    <input type="text" id="paciente" value="<?= htmlspecialchars($_SESSION['usuario']['nombre'] ?? '') ?> <?= htmlspecialchars($_SESSION['usuario']['apellido'] ?? '') ?>" readonly>
+
+                    <label for="idpaciente">ID Paciente:</label>
+                    <input type="text" id="idpaciente" value="<?= htmlspecialchars($_SESSION['usuario']['idPaciente'] ?? '') ?>" readonly>
+
+                    <label for="dni">DNI Paciente:</label>
+                    <input type="text" id="dni" name="dni" value="<?= htmlspecialchars($_SESSION['usuario']['dni'] ?? '') ?>" placeholder="Ingresa tu número de DNI">
+
                     <label for="motivo">Motivo:</label>
-                    <textarea id="motivo" placeholder="Describe el motivo de tu cita" required></textarea>
-                </div>
-                <div id="horario-seleccionado" class="detalles-horario">
-                    <p><strong>Fecha:</strong> <span id="fecha-seleccionada"></span></p>
-                    <p><strong>Hora:</strong> <span id="hora-seleccionada"></span></p>
-                    <p><strong>Médico:</strong> <span id="medico-seleccionado"></span></p>
+                    <textarea id="motivo" name="motivo" rows="10" cols="50" style="resize: none;" placeholder="Describe el motivo de tu cita" required></textarea>
+
+                    <label for="idmedico">ID Médico:</label>
+                    <input type="text" id="idmedico" name="idmedico" readonly>
+
+                    <label for="medico">Médico:</label>
+                    <input type="text" id="medico" readonly>
+
+                    <label for="fecha">Fecha:</label>
+                    <input type="text" id="fecha" name="fecha" readonly>
+
+                    <label for="idhorario">ID Horario:</label>
+                    <input type="text" id="idhorario" name="idhorario" readonly>
+
+                    <label for="hora-atencion">Hora de atención:</label>
+                    <input type="text" id="hora-atencion" name="hora-atencion" readonly>
+
+                    <label for="hora-llegada">Hora de llegada:</label>
+                    <input type="time" id="hora-llegada" name="hora-llegada">
+
+                    <label for="duracion">Duración:</label>
+                    <input type="text" id="duracion" name="duracion" value="60 minutos" readonly>
+
+
                 </div>
                 <button id="btn-confirmar" class="btn-aceptar">Confirmar Cita</button>
             </div>
@@ -147,212 +196,248 @@ EOT;
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-    $(document).ready(function() {
-        let especialidadSeleccionada = null;
-        let fechaSeleccionada = null;
+        $(document).ready(function() {
+            let especialidadSeleccionada = null;
+            let fechaSeleccionada = null;
 
-        // Seleccionar especialidad
-        $('.btn-seleccionar').click(function() {
-            especialidadSeleccionada = $(this).data('especialidad');
-            $('.table-container').fadeOut(300, function() {
-                $('#cita-container').fadeIn(300);
+            $('.btn-seleccionar').click(function() {
+                especialidadSeleccionada = $(this).data('especialidad');
+                $('.table-container').fadeOut(300, function() {
+                    $('#cita-container').fadeIn(300);
+                });
             });
-        });
 
-        // Configurar selector de fecha
-        flatpickr('#fecha-cita', {
-            dateFormat: 'Y-m-d',
-            minDate: 'today',
-            locale: 'es',
-            onChange: function(selectedDates, dateStr) {
-                fechaSeleccionada = dateStr;
+            flatpickr('#fecha-cita', {
+                dateFormat: 'Y-m-d',
+                minDate: 'today',
+                locale: 'es',
+                onChange: function(selectedDates, dateStr) {
+                    fechaSeleccionada = dateStr;
+                    $('#horarios-disponibles').hide();
+                    $('#motivo-cita').hide();
+
+                    if (especialidadSeleccionada && fechaSeleccionada) {
+                        cargarHorariosDisponibles();
+                    }
+                }
+            });
+
+            function cargarHorariosDisponibles() {
+                $('#horarios-list').html('<tr><td colspan="4"><div class="loading-spinner"></div> Cargando horarios...</td></tr>');
+                $('#horarios-disponibles').show();
+
+                $.ajax({
+                    url: 'obtenerHorarios.php',
+                    type: 'POST',
+                    data: {
+                        fecha: fechaSeleccionada,
+                        especialidad: especialidadSeleccionada
+                    },
+                    success: function(response) {
+                        $('#horarios-list').html(response);
+                    },
+                    error: function() {
+                        $('#horarios-list').html('<tr><td colspan="4" class="error">Error al cargar horarios</td></tr>');
+                    }
+                });
+            }
+
+            $(document).on('click', '.btn-reservar:not([disabled])', function() {
+                $('.btn-reservar').removeClass('selected');
+                $(this).addClass('selected');
+
+                const horaAtencion = $(this).closest('tr').find('td:nth-child(1)').text();
+                const medico = $(this).closest('tr').find('td:nth-child(3)').text();
+
+                document.getElementById('idhorario').value = $(this).data('idhorario');
+                document.getElementById('idmedico').value = $(this).data('idmedico');
+                document.getElementById('hora-atencion').value = horaAtencion;
+                document.getElementById('medico').value = medico;
+                document.getElementById('fecha').value = fechaSeleccionada;
+                document.getElementById('dni').value = <?= json_encode($_SESSION['usuario']['dni'] ?? '') ?>;
+
+                $('#motivo-cita').fadeIn();
+            });
+
+            $('#btn-regresar').click(function() {
+                $('#cita-container').fadeOut(300, function() {
+                    $('.table-container').fadeIn(300);
+                });
+                $('#fecha-cita').val('');
+                $('#horarios-list').empty();
                 $('#horarios-disponibles').hide();
                 $('#motivo-cita').hide();
-                
-                if(especialidadSeleccionada && fechaSeleccionada) {
-                    cargarHorariosDisponibles();
+                $('.btn-reservar').removeClass('selected');
+                especialidadSeleccionada = null;
+                fechaSeleccionada = null;
+            });
+
+            $('#btn-confirmar').click(function() {
+                const botonSeleccionado = $('.btn-reservar.selected');
+                const motivo = $('#motivo').val().trim();
+                const dni = $('#dni').val().trim();
+                const horallegada = $('#hora-llegada').val().trim();
+
+                if (!botonSeleccionado.length) {
+                    Swal.fire('Error', 'Por favor selecciona un horario disponible', 'error');
+                    return;
                 }
-            }
-        });
 
-        // Cargar horarios disponibles
-        function cargarHorariosDisponibles() {
-            $('#horarios-list').html('<tr><td colspan="4"><div class="loading-spinner"></div> Cargando horarios...</td></tr>');
-            $('#horarios-disponibles').show();
-
-            $.ajax({
-                url: 'obtenerHorarios.php',
-                type: 'POST',
-                data: {
-                    fecha: fechaSeleccionada,
-                    especialidad: especialidadSeleccionada
-                },
-                success: function(response) {
-                    $('#horarios-list').html(response);
-                },
-                error: function() {
-                    $('#horarios-list').html('<tr><td colspan="4" class="error">Error al cargar horarios</td></tr>');
+                if (!dni || !/^\d{13}$/.test(dni)) {
+                    Swal.fire('Error', 'Por favor ingresa un DNI válido de 13 dígitos', 'error');
+                    return;
                 }
-            });
-        }
 
-        // Seleccionar horario
-        $(document).on('click', '.btn-reservar:not([disabled])', function() {
-            $('.btn-reservar').removeClass('selected');
-            $(this).addClass('selected');
-            
-            const horaInicio = $(this).data('hora-inicio');
-            const medico = $(this).closest('tr').find('td:nth-child(2)').text();
-            
-            $('#hora-seleccionada').text(horaInicio);
-            $('#medico-seleccionado').text(medico);
-            $('#fecha-seleccionada').text(fechaSeleccionada);
-            
-            $('#motivo-cita').fadeIn();
-        });
+                if (!motivo) {
+                    Swal.fire('Error', 'Por favor describe el motivo de tu cita', 'error');
+                    return;
+                }
 
-        // Regresar a selección de especialidad
-        $('#btn-regresar').click(function() {
-            $('#cita-container').fadeOut(300, function() {
-                $('.table-container').fadeIn(300);
-            });
-            $('#fecha-cita').val('');
-            $('#horarios-list').empty();
-            $('#horarios-disponibles').hide();
-            $('#motivo-cita').hide();
-            $('.btn-reservar').removeClass('selected');
-            especialidadSeleccionada = null;
-            fechaSeleccionada = null;
-        });
+                if (!horallegada) {
+                    Swal.fire('Error', 'Por favor selecciona una hora de llegada', 'error');
+                    return;
+                }
 
-        // Confirmar cita
-        $('#btn-confirmar').click(function() {
-            const botonSeleccionado = $('.btn-reservar.selected');
-            const motivo = $('#motivo').val().trim();
-            const dni = $('#dni').val().trim();
-            
-            if(!botonSeleccionado.length) {
-                Swal.fire('Error', 'Por favor selecciona un horario disponible', 'error');
-                return;
-            }
-
-            if(!dni || !/^\d{8,13}$/.test(dni)) {
-                Swal.fire('Error', 'Por favor ingresa un DNI válido (8-13 dígitos)', 'error');
-                return;
-            }
-            
-            if(!motivo || motivo.length < 10) {
-                Swal.fire('Error', 'Por favor describe el motivo de tu cita (mínimo 10 caracteres)', 'error');
-                return;
-            }
-
-            Swal.fire({
-                title: 'Verificando disponibilidad',
-                html: 'Por favor espera...',
-                allowOutsideClick: false,
-                didOpen: () => Swal.showLoading()
-            });
-
-            // Verificar disponibilidad
-            $.ajax({
-                url: 'verificarDisponibilidad.php',
-                type: 'POST',
-                contentType: 'application/json',
-                dataType: 'json',
-                data: JSON.stringify({
-                    fecha: fechaSeleccionada,
-                    hora_inicio: botonSeleccionado.data('hora-inicio'),
-                    id_medico: botonSeleccionado.data('id-medico'),
-                    id_horario: botonSeleccionado.data('id-horario')
-                }),
-                success: function(response) {
-                    Swal.close();
-                    
-                    if(!response.disponible) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Horario no disponible',
-                            text: response.mensaje,
-                            willClose: () => cargarHorariosDisponibles()
-                        });
-                        return;
+                Swal.fire({
+                    title: 'Verificando disponibilidad',
+                    html: 'Por favor espera...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
                     }
+                });
 
-                    // Confirmar reserva
-                    confirmarReserva();
-                },
-                error: function(xhr) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: xhr.responseJSON?.error || 'No se pudo verificar la disponibilidad'
-                    });
-                }
+                // Verificación de disponibilidad
+                $.ajax({
+                    url: 'verificarDisponibilidad.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        fecha: fechaSeleccionada,
+                        hora_llegada: horallegada,
+                        id_medico: botonSeleccionado.data('idmedico'),
+                        id_horario: botonSeleccionado.data('idhorario')
+                    },
+                    success: function(response) {
+                        console.log('Respuesta AJAX:', response);
+
+                        Swal.close();
+                        if (!response.disponible) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Horario no disponible',
+                                text: response.mensaje || 'El horario seleccionado ya fue reservado',
+                                willClose: () => {
+                                    cargarHorariosDisponibles();
+                                }
+                            });
+                            return;
+                        }
+
+                        // Confirmar reserva
+                        confirmarReserva();
+
+                    },
+                    error: function(xhr, status, error) {
+                        Swal.fire('Error', 'No se pudo verificar la disponibilidad: ' + error, 'error');
+                    }
+                });
             });
-        });
 
-        // Función para confirmar reserva
-        function confirmarReserva() {
-            const botonSeleccionado = $('.btn-reservar.selected');
-            const motivo = $('#motivo').val().trim();
-            const dni = $('#dni').val().trim();
+            function confirmarReserva() {
+                const botonSeleccionado = $('.btn-reservar.selected');
+                const motivo = $('#motivo').val().trim();
+                const horaLlegada = $('#hora-llegada').val().trim();
+                const dni = $('#dni').val().trim();
 
-            Swal.fire({
-                title: 'Confirmar Cita',
-                html: `<div style="text-align:left;">
+                Swal.fire({
+                    title: 'Confirmar Cita',
+                    html: `<div style="text-align:left;">
                     <p><strong>Fecha:</strong> ${fechaSeleccionada}</p>
-                    <p><strong>Hora:</strong> ${botonSeleccionado.data('hora-inicio')}</p>
-                    <p><strong>Médico:</strong> ${$('#medico-seleccionado').text()}</p>
+                    <p><strong>Hora:</strong> ${horaLlegada}</p>
+                    <p><strong>Médico:</strong> ${botonSeleccionado.data('nombremedico')}</p>
                     <p><strong>DNI:</strong> ${dni}</p>
                     <p><strong>Motivo:</strong> ${motivo}</p>
                 </div>`,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Confirmar',
-                cancelButtonText: 'Cancelar',
-                showLoaderOnConfirm: true,
-                preConfirm: () => {
-                    return new Promise((resolve) => {
-                        $.ajax({
-                            url: 'InsertarCitas.php',
-                            type: 'POST',
-                            contentType: 'application/json',
-                            dataType: 'json',
-                            data: JSON.stringify({
-                                dni: dni,
-                                motivo: motivo,
-                                id_medico: botonSeleccionado.data('id-medico'),
-                                id_horario: botonSeleccionado.data('id-horario'),
-                                hora_inicio: botonSeleccionado.data('hora-inicio'),
-                                fecha: fechaSeleccionada,
-                                duracion: 60
-                            }),
-                            success: function(response) {
-                                if(response.estado === 'exito') {
-                                    resolve();
-                                } else {
-                                    Swal.showValidationMessage(response.mensaje);
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Confirmar',
+                    cancelButtonText: 'Cancelar',
+                    showLoaderOnConfirm: true,
+                    preConfirm: () => {
+                        return new Promise((resolve) => {
+                            $.ajax({
+                                url: 'InsertarCitas.php',
+                                type: 'POST',
+                                dataType: 'json',
+                                data: {
+                                    dni: dni,
+                                    motivo: motivo,
+                                    id_medico: botonSeleccionado.data('idmedico'),
+                                    id_horario: botonSeleccionado.data('idhorario'),
+                                    hora_inicio: horaLlegada,
+                                    fecha: fechaSeleccionada,
+                                    duracion: 60
+                                },
+                                success: function(response) {
+                                    if (response.estado === 'exito') {
+                                        // Mensaje de confirmacion
+                                        Swal.fire({
+                                            icon: 'success',
+                                            title: '¡Cita enviada correctamente!',
+                                            html: 'Tu cita se encuentra pendiente de confirmación.',
+                                            willClose: () => {
+                                                location.reload();
+                                            }
+                                        });
+
+                                    } else {
+                                        Swal.showValidationMessage(response.mensaje || 'Error al confirmar la cita');
+                                    }
+                                },
+                                error: function(xhr, status, error) {
+                                    Swal.showValidationMessage('Error al conectar con el servidor: ' + error);
+                                    console.log(xhr, status, error);
                                 }
-                            },
-                            error: function(xhr) {
-                                Swal.showValidationMessage(xhr.responseJSON?.error || 'Error al registrar la cita');
-                            }
+                            });
                         });
+                    },
+                    allowOutsideClick: () => !Swal.isLoading()
+                }).then((result) => {
+                    if (result.isConfirmed) {
+
+                    }
+                });
+            }
+
+            function enviarCorreoConfirmacion(dni, fecha, hora, medico, motivo) {
+                return new Promise((resolve, reject) => {
+                    $.ajax({
+                        url: 'enviarCorreoConfirmacion.php',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: {
+                            dni: dni,
+                            fecha: fecha,
+                            hora: hora,
+                            medico: medico,
+                            motivo: motivo
+                        },
+                        success: function(response) {
+                            if (response.estado === 'exito') {
+                                resolve();
+                            } else {
+                                reject(response.mensaje || 'Error al enviar correo');
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            reject('Error de conexión: ' + error);
+                        }
                     });
-                },
-                allowOutsideClick: () => !Swal.isLoading()
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    Swal.fire({
-                        icon: 'success',
-                        title: '¡Cita confirmada!',
-                        text: 'Tu cita ha sido registrada exitosamente.',
-                        willClose: () => location.reload()
-                    });
-                }
-            });
-        }
-    });
+                });
+            }
+        });
     </script>
 </body>
+
 </html>

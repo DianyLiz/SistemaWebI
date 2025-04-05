@@ -31,12 +31,14 @@ $documento = $statement->fetch();
 use Dompdf\Dompdf;
 use Dompdf\Options;
 
-// Configurar opciones de Dompdf
+// Configuración de Dompdf
+$options = new Options();
+$options->set('defaultFont', 'Helvetica');
+$dompdf = new Dompdf($options);
+
 $options = new Options();
 $options->set('defaultFont', 'Helvetica');
 $options->set('isRemoteEnabled', true); // Habilita el uso de imágenes remotas
-
-// Crear instancia de Dompdf
 $dompdf = new Dompdf($options);
 
 // HTML de la receta

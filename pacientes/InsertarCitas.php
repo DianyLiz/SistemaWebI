@@ -2,147 +2,116 @@
 header('Content-Type: application/json');
 require_once '../conexion.php';
 
-// Configurar CORS
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type");
+// Recibir datos POST
+$dni = $_POST['dni'] ?? '';
+$motivo = $_POST['motivo'] ?? '';
+$id_medico = $_POST['id_medico'] ?? '';
+$id_horario = $_POST['id_horario'] ?? '';
+$horallegada = $_POST['hora_inicio'] ?? '';  // <-- Este nombre debe coincidir con JS
+$fecha = $_POST['fecha'] ?? '';
+$duracion = $_POST['duracion'] ?? 60;
 
-// Manejar solicitud OPTIONS
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit();
-}
+$transaccionIniciada = false;
 
 try {
-    // Leer datos JSON
-    $json = file_get_contents('php://input');
-    $data = json_decode($json, true);
-
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        throw new Exception("Formato de datos inválido", 400);
+    // Validar parámetros obligatorios
+    if (empty($dni) || empty($motivo) || empty($id_medico) || empty($id_horario) || empty($horallegada) || empty($fecha)) {
+        throw new Exception('Parámetros requeridos faltantes. INSERT');
     }
 
-    // Validar datos
-    $dni = trim($data['dni'] ?? '');
-    $motivo = trim($data['motivo'] ?? '');
-    $id_medico = (int)($data['id_medico'] ?? 0);
-    $id_horario = (int)($data['id_horario'] ?? 0);
-    $hora_inicio = trim($data['hora_inicio'] ?? '');
-    $fecha = trim($data['fecha'] ?? '');
-    $duracion = (int)($data['duracion'] ?? 60);
+    // Validar formato de DNI
+    if (!preg_match('/^\d{8,13}$/', $dni)) {
+        throw new Exception('DNI inválido. Debe contener entre 8 y 13 dígitos.');
+    }
 
-    // Validaciones
-    if (empty($dni) || !preg_match('/^\d{8,13}$/', $dni)) {
-        throw new Exception("DNI inválido (8-13 dígitos)", 400);
+    // Validar duración
+    $duracion = is_numeric($duracion) ? (int)$duracion : 60;
+    if ($duracion <= 0) {
+        throw new Exception('Duración inválida.');
     }
-    if (empty($motivo) || strlen($motivo) < 10) {
-        throw new Exception("El motivo debe tener al menos 10 caracteres", 400);
-    }
-    if ($id_medico <= 0 || $id_horario <= 0) {
-        throw new Exception("ID de médico u horario inválido", 400);
-    }
+
+    // Validar fecha
     if (!DateTime::createFromFormat('Y-m-d', $fecha)) {
-        throw new Exception("Formato de fecha inválido (YYYY-MM-DD)", 400);
-    }
-    if (!preg_match('/^\d{2}:\d{2}(:\d{2})?$/', $hora_inicio)) {
-        throw new Exception("Formato de hora inválido (HH:MM o HH:MM:SS)", 400);
+        throw new Exception('Formato de fecha inválido.');
     }
 
     // Iniciar transacción
     $conn->beginTransaction();
+    $transaccionIniciada = true;
 
-    // 1. Verificar paciente
-    $stmt = $conn->prepare("SELECT idPaciente FROM Pacientes WHERE dni = ?");
+    // Obtener ID del paciente
+    $stmt = $conn->prepare("SELECT T1.idPaciente 
+                            FROM Pacientes T1
+                            INNER JOIN Usuarios T2 ON T2.idUsuario = T1.idUsuario
+                            WHERE T2.dni = ?");
     $stmt->execute([$dni]);
     $paciente = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$paciente) {
-        throw new Exception("No existe paciente con DNI: $dni", 404);
+        throw new Exception("No se encontró el paciente con DNI proporcionado.");
     }
+
     $id_paciente = $paciente['idPaciente'];
 
-    // 2. Verificar horario
+    // Verificar disponibilidad nuevamente (evitar condiciones de carrera)
     $stmt = $conn->prepare("
-        SELECT idHorario, cupos 
-        FROM HorariosMedicos 
-        WHERE idHorario = ? 
-        AND idMedico = ?
-        FOR UPDATE
-    ");
-    $stmt->execute([$id_horario, $id_medico]);
-    $horario = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if (!$horario) {
-        throw new Exception("Horario no disponible", 404);
+            SELECT 1 FROM HorariosMedicos WITH (UPDLOCK, ROWLOCK)
+            WHERE idHorario = ? 
+            AND (cupos IS NULL OR cupos > 0)
+            ");
+    $stmt->execute([$id_horario]);
+    if (!$stmt->fetch()) {
+        throw new Exception("El horario seleccionado ya no está disponible.");
     }
 
-    // 3. Verificar disponibilidad
-    $hora_completa = $fecha . ' ' . substr($hora_inicio . ':00', 0, 8);
-    $stmt = $conn->prepare("
-        SELECT 1 
-        FROM Citas 
-        WHERE idHorario = ? 
-        AND CONVERT(DATE, hora) = ?
-        AND CONVERT(VARCHAR(8), hora, 108) LIKE ?
-        AND estado NOT IN ('Cancelada', 'Rechazada')
-    ");
-    $stmt->execute([$id_horario, $fecha, substr($hora_inicio, 0, 5) . '%']);
-
-    if ($stmt->fetch()) {
-        throw new Exception("Ya existe una cita en este horario", 409);
+    $stmt->execute([$id_horario]);
+    if (!$stmt->fetch()) {
+        throw new Exception("El horario seleccionado ya no está disponible.");
     }
 
-    // 4. Insertar cita
+    // Insertar cita
     $stmt = $conn->prepare("
-        INSERT INTO Citas 
-        (idPaciente, idMedico, hora, motivo, estado, idHorario, duracion, fecha_registro) 
-        VALUES (?, ?, ?, ?, 'pendiente', ?, ?, GETDATE())
+        INSERT INTO Citas (idPaciente, idMedico, hora, motivo, estado, idHorario, duracion)
+        VALUES (?, ?, ?, ?, 'Pendiente', ?, ?)
     ");
     $stmt->execute([
         $id_paciente,
         $id_medico,
-        $hora_completa,
+        $horallegada,
         $motivo,
         $id_horario,
         $duracion
     ]);
 
-    if ($stmt->rowCount() === 0) {
-        throw new Exception("Error al registrar la cita", 500);
-    }
-
-    // 5. Actualizar cupos si aplica
-    if ($horario['cupos'] !== null) {
-        $stmt = $conn->prepare("
-            UPDATE HorariosMedicos 
-            SET cupos = GREATEST(cupos - 1, 0) 
-            WHERE idHorario = ?
-        ");
-        $stmt->execute([$id_horario]);
-    }
+    // Actualizar cupos
+    $stmt = $conn->prepare("
+        UPDATE HorariosMedicos 
+        SET cupos = GREATEST(cupos - 1, 0) 
+        WHERE idHorario = ? AND (cupos IS NOT NULL)
+    ");
+    $stmt->execute([$id_horario]);
 
     $conn->commit();
 
     echo json_encode([
         'estado' => 'exito',
-        'mensaje' => 'Cita registrada correctamente',
-        'id_cita' => $conn->lastInsertId()
+        'mensaje' => 'Cita registrada correctamente.'
     ]);
-
 } catch (PDOException $e) {
-    $conn->rollBack();
-    http_response_code(500);
+    if ($transaccionIniciada) {
+        $conn->rollBack();
+    }
+    error_log('Error al registrar cita (PDO): ' . $e->getMessage());
     echo json_encode([
         'estado' => 'error',
-        'mensaje' => 'Error en la base de datos',
-        'error' => $e->getMessage()
+        'mensaje' => 'Error al registrar cita: ' . $e->getMessage()
     ]);
 } catch (Exception $e) {
-    if ($conn->inTransaction()) $conn->rollBack();
-    http_response_code($e->getCode() ?: 400);
+    if ($transaccionIniciada) {
+        $conn->rollBack();
+    }
     echo json_encode([
         'estado' => 'error',
         'mensaje' => $e->getMessage()
     ]);
 }
-?>
